@@ -1,11 +1,25 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import ProductCard from './ProductCard';
 import QuickView from './QuickView';
-import { useWishlist } from '../hooks/useWishlist';
+import { selectIsAuthenticated } from '../store/authSlice';
+import { selectWishlistIds, toggleWishlistItem } from '../store/wishlistSlice';
 
 export default function ProductGrid({ products, columns = 'sm:grid-cols-2 lg:grid-cols-4' }) {
-  const wishlist = useWishlist();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const isAuthed = useSelector(selectIsAuthenticated);
+  const wishlistIds = useSelector(selectWishlistIds);
   const [quick, setQuick] = useState(null);
+
+  const onWishlist = (id) => {
+    if (!isAuthed) {
+      navigate('/login', { state: { from: { pathname: '/products' } } });
+      return;
+    }
+    dispatch(toggleWishlistItem(id));
+  };
 
   return (
     <>
@@ -14,8 +28,8 @@ export default function ProductGrid({ products, columns = 'sm:grid-cols-2 lg:gri
           <ProductCard
             key={p._id}
             product={p}
-            wishlisted={wishlist.has(p._id)}
-            onWishlist={wishlist.toggle}
+            wishlisted={wishlistIds.includes(String(p._id))}
+            onWishlist={onWishlist}
             onQuickView={setQuick}
           />
         ))}

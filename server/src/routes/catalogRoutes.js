@@ -8,12 +8,14 @@ import {
   getProductBySlug,
   getRelatedProducts,
 } from '../controllers/public/catalogController.js';
+import { listProductReviews } from '../controllers/reviewController.js';
 
 const router = Router();
 
 router.get('/categories', listCategories);
 router.get('/products', listProducts);
 router.get('/products/:slug/related', getRelatedProducts);
+router.get('/products/:slug/reviews', listProductReviews);
 router.get('/products/:slug', getProductBySlug);
 
 export default router;

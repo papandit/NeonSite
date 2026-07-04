@@ -24,6 +24,11 @@ const SettingsSchema = new Schema(
     },
 
     invoicePrefix: { type: String, default: 'OWM' },
+
+    // Single-HSN store (plan §15). Per-category HSN is a later data change.
+    hsnCode: { type: String, default: '8306' }, // decorative base-metal articles
+    gstin: { type: String, default: '' },
+    storeAddress: { type: String, default: 'Onewebmart, Ahmedabad, Gujarat' },
   },
   { timestamps: true }
 );

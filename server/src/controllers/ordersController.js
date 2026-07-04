@@ -4,6 +4,8 @@ import asyncHandler from '../utils/asyncHandler.js';
 import { sendSuccess } from '../utils/apiResponse.js';
 import ApiError from '../utils/ApiError.js';
 import Order from '../models/Order.js';
+import { getSettings } from '../models/Settings.js';
+import { generateInvoiceBuffer } from '../services/invoice/generateInvoice.js';
 
 // GET /api/orders  (own, summaries)
 export const listMyOrders = asyncHandler(async (req, res) => {
@@ -25,4 +27,15 @@ export const getMyOrder = asyncHandler(async (req, res) => {
   const order = await Order.findOne({ _id: req.params.id, user: req.user.id }).lean({ virtuals: true });
   if (!order) throw ApiError.notFound('Order not found');
   return sendSuccess(res, order);
+});
+
+// GET /api/orders/:id/invoice  (own) -> streams a PDF
+export const getMyInvoice = asyncHandler(async (req, res) => {
+  const order = await Order.findOne({ _id: req.params.id, user: req.user.id }).lean({ virtuals: true });
+  if (!order) throw ApiError.notFound('Order not found');
+  const settings = await getSettings();
+  const buffer = await generateInvoiceBuffer(order, settings);
+  res.set('Content-Type', 'application/pdf');
+  res.set('Content-Disposition', `attachment; filename="${order.orderNumber}.pdf"`);
+  return res.send(buffer);
 });

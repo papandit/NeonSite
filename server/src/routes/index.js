@@ -8,6 +8,7 @@ import pricingRoutes from './pricingRoutes.js';
 import renderRoutes from './renderRoutes.js';
 import cartRoutes from './cartRoutes.js';
 import commerceRoutes from './commerceRoutes.js';
+import engagementRoutes from './engagementRoutes.js';
 
 const router = Router();
 
@@ -19,6 +20,9 @@ router.use('/render', renderRoutes);
 // Commerce (Phase 4, auth): cart, coupons, checkout, payments, orders
 router.use('/cart', cartRoutes);
 router.use('/', commerceRoutes);
+
+// Engagement (Phase 6, auth): reviews, wishlist
+router.use('/', engagementRoutes);
 
 // Public catalog read (Phase 2): /api/categories, /api/products, /api/products/:slug
 router.use('/', catalogRoutes);

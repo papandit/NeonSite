@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getCategories, getProducts } from '../services/catalog';
 import ProductGrid from '../components/ProductGrid';
+import Seo from '../components/Seo';
 
 const SORT_OPTIONS = [
   ['newest', 'Newest'],
@@ -59,6 +60,11 @@ export default function ProductsPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
+      <Seo
+        title={activeCategory ? activeCategory.name : 'Shop custom name plates'}
+        description="Browse and customize personalized name plates — wood, acrylic, brass and more."
+        path="/products"
+      />
       <div className="mb-6">
         <h1 className="text-2xl font-bold">
           {activeCategory ? activeCategory.name : 'All products'}

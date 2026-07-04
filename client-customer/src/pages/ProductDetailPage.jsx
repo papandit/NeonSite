@@ -4,6 +4,8 @@ import { getProductBySlug, getRelatedProducts } from '../services/catalog';
 import { formatPaise } from '../utils/money';
 import Rating from '../components/Rating';
 import ProductGrid from '../components/ProductGrid';
+import Reviews from '../components/Reviews';
+import Seo from '../components/Seo';
 
 // Lazy-load the editor (and Fabric.js) so it only ships on the product page.
 const Configurator = lazy(() => import('../configurator/Configurator'));
@@ -44,6 +46,12 @@ export default function ProductDetailPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
+      <Seo
+        title={product.name}
+        description={product.description || `Design a custom ${product.name} — material, size, font, colour and icons.`}
+        image={product.images?.[0]}
+        path={`/products/${product.slug}`}
+      />
       {/* Breadcrumb */}
       <nav className="mb-6 text-sm text-gray-500">
         <Link to="/" className="hover:text-gray-900">Home</Link>
@@ -103,13 +111,9 @@ export default function ProductDetailPage() {
         </Suspense>
       </section>
 
-      {/* Reviews (full reviews in Phase 6) */}
+      {/* Reviews */}
       <section className="mt-16">
-        <h2 className="text-xl font-bold">Reviews</h2>
-        <div className="mt-4 rounded-xl border border-gray-200 bg-white p-6 text-sm text-gray-500">
-          Customer reviews will appear here once this product has been purchased and reviewed.
-          (Reviews system lands in Phase 6.)
-        </div>
+        <Reviews productId={product._id} slug={product.slug} />
       </section>
 
       {/* Related */}

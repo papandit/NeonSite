@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import authReducer, { logout } from './authSlice';
 import designReducer from './designSlice';
 import cartReducer, { resetCart } from './cartSlice';
+import wishlistReducer, { resetWishlist } from './wishlistSlice';
 import { setUnauthorizedHandler } from '../services/api';
 
 export const store = configureStore({
@@ -9,6 +10,7 @@ export const store = configureStore({
     auth: authReducer,
     design: designReducer,
     cart: cartReducer,
+    wishlist: wishlistReducer,
   },
 });
 
@@ -17,4 +19,5 @@ export const store = configureStore({
 setUnauthorizedHandler(() => {
   store.dispatch(logout());
   store.dispatch(resetCart());
+  store.dispatch(resetWishlist());
 });

@@ -9,6 +9,7 @@ import ApiError from '../../utils/ApiError.js';
 import Order from '../../models/Order.js';
 import { checkTransition, nextStatuses } from '../../services/orders/stateMachine.js';
 import { renderProduction } from '../../services/render/renderProduction.js';
+import { sendStatusUpdate } from '../../services/mailer/mailer.js';
 
 // GET /api/admin/orders?status=&q=&page=&limit=
 export const listOrders = asyncHandler(async (req, res) => {
@@ -87,6 +88,10 @@ export const updateStatus = asyncHandler(async (req, res) => {
   await order.save();
 
   const fresh = await Order.findById(order._id).populate('user', 'name email').lean({ virtuals: true });
+
+  // Best-effort status email (design_review uses the approval-request template).
+  sendStatusUpdate(fresh, status, note || '').catch(() => {});
+
   return sendSuccess(res, { ...fresh, nextStatuses: nextStatuses(status) });
 });
 

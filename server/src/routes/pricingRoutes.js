@@ -3,9 +3,10 @@
 
 import { Router } from 'express';
 import { quote } from '../controllers/pricingController.js';
+import { quoteLimiter } from '../middleware/rateLimit.js';
 
 const router = Router();
 
-router.post('/quote', quote);
+router.post('/quote', quoteLimiter, quote);
 
 export default router;

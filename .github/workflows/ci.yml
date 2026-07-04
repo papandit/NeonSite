@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Native libraries for node-canvas (render service).
+      - name: Install canvas system deps
+        run: sudo apt-get update && sudo apt-get install -y libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+
+      - name: Server — install + unit tests (pricing + state machine)
+        working-directory: server
+        run: |
+          npm ci
+          npm test
+
+      - name: Customer client — install + lint + build
+        working-directory: client-customer
+        run: |
+          npm ci
+          npm run lint
+          npm run build
+
+      - name: Admin client — install + lint + build
+        working-directory: client-admin
+        run: |
+          npm ci
+          npm run lint
+          npm run build

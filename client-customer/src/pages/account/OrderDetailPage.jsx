@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { ordersApi } from '../../services/commerce';
+import { api } from '../../services/api';
 import { formatPaise } from '../../utils/money';
 
 const PIPELINE = ['confirmed', 'design_review', 'approved', 'manufacturing', 'packed', 'shipped', 'delivered'];
@@ -46,10 +47,28 @@ export default function OrderDetailPage() {
   const isNew = params.get('new') === '1';
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     ordersApi.get(id).then(setOrder).catch(() => setOrder(null)).finally(() => setLoading(false));
   }, [id]);
+
+  const downloadInvoice = async () => {
+    setDownloading(true);
+    try {
+      const res = await api.get(`/orders/${id}/invoice`, { responseType: 'blob' });
+      const url = URL.createObjectURL(res.data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${order.orderNumber}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   if (loading) return <p className="text-gray-400">Loading…</p>;
   if (!order) return <p className="text-gray-500">Order not found. <Link to="/account/orders" className="text-indigo-600 hover:underline">Back to orders</Link></p>;
@@ -108,8 +127,8 @@ export default function OrderDetailPage() {
             <div className="flex justify-between"><dt className="text-gray-600">Shipping</dt><dd>{order.shippingPaise === 0 ? 'Free' : formatPaise(order.shippingPaise)}</dd></div>
             <div className="flex justify-between border-t border-gray-100 pt-1.5 font-semibold"><dt>Total</dt><dd>{formatPaise(order.totalPaise)}</dd></div>
           </dl>
-          <button disabled className="mt-4 w-full cursor-not-allowed rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-400">
-            Download invoice (Phase 6)
+          <button onClick={downloadInvoice} disabled={downloading} className="mt-4 w-full rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60">
+            {downloading ? 'Preparing…' : '⬇ Download invoice (PDF)'}
           </button>
         </div>
 

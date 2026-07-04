@@ -6,6 +6,7 @@ import Order from '../../models/Order.js';
 import Coupon from '../../models/Coupon.js';
 import { getSettings } from '../../models/Settings.js';
 import { getNextSequence } from '../../models/Counter.js';
+import { sendOrderConfirmation } from '../mailer/mailer.js';
 
 export async function createOrderFromQuote({ userId, cart, totals, coupon, address, giftWrap, payment }) {
   const settings = await getSettings();
@@ -52,6 +53,9 @@ export async function createOrderFromQuote({ userId, cart, totals, coupon, addre
   // Clear the cart.
   cart.items = [];
   await cart.save();
+
+  // Best-effort confirmation email (never blocks order creation).
+  sendOrderConfirmation(order).catch(() => {});
 
   return order;
 }

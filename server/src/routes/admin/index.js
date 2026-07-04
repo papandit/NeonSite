@@ -17,9 +17,10 @@ import productController from '../../controllers/admin/productController.js';
 import uploadRoutes from './uploadRoutes.js';
 import { sendSuccess } from '../../utils/apiResponse.js';
 import { isCloudinaryConfigured } from '../../services/cloudinary/index.js';
-import { dashboard } from '../../controllers/admin/dashboardController.js';
+import { dashboard, analytics } from '../../controllers/admin/dashboardController.js';
 import { listOrders, getOrder, updateStatus, productionRender } from '../../controllers/admin/adminOrderController.js';
 import { getStoreSettings, updateStoreSettings } from '../../controllers/admin/settingsController.js';
+import { adminListReviews, moderateReview } from '../../controllers/reviewController.js';
 
 const router = Router();
 
@@ -79,8 +80,9 @@ const bannerController = createCrudController(Banner, {
 router.use('/coupons', crudRouter(couponController));
 router.use('/banners', crudRouter(bannerController));
 
-// Dashboard metrics
+// Dashboard metrics + analytics
 router.get('/dashboard', dashboard);
+router.get('/analytics', analytics);
 
 // Order management
 router.get('/orders', listOrders);
@@ -91,6 +93,10 @@ router.get('/orders/:id/production-render/:itemId', productionRender);
 // Store settings
 router.get('/settings', getStoreSettings);
 router.put('/settings', updateStoreSettings);
+
+// Reviews moderation
+router.get('/reviews', adminListReviews);
+router.patch('/reviews/:id/moderate', moderateReview);
 
 export default router;
 

@@ -42,6 +42,8 @@ export default function AdminLayout() {
 
           <NavGroup title="Operations">
             <NavLink to="/orders" className={linkClass}>Orders</NavLink>
+            <NavLink to="/reviews" className={linkClass}>Reviews</NavLink>
+            <NavLink to="/analytics" className={linkClass}>Analytics</NavLink>
           </NavGroup>
 
           <NavGroup title="Catalog">

@@ -4,6 +4,7 @@ import { selectUser } from '../store/authSlice';
 
 const NAV = [
   ['/account/orders', 'Orders'],
+  ['/account/wishlist', 'Wishlist'],
   ['/account/addresses', 'Addresses'],
   ['/account/profile', 'Profile'],
 ];

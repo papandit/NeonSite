@@ -17,6 +17,8 @@ import OrderDetailPage from './pages/orders/OrderDetailPage';
 import CouponsPage from './pages/CouponsPage';
 import BannersPage from './pages/BannersPage';
 import SettingsPage from './pages/SettingsPage';
+import ReviewsPage from './pages/ReviewsPage';
+import AnalyticsPage from './pages/AnalyticsPage';
 import { loadProfile, selectIsAuthenticated } from './store/authSlice';
 
 export default function App() {
@@ -49,6 +51,8 @@ export default function App() {
 
           <Route path="orders" element={<OrdersPage />} />
           <Route path="orders/:id" element={<OrderDetailPage />} />
+          <Route path="reviews" element={<ReviewsPage />} />
+          <Route path="analytics" element={<AnalyticsPage />} />
 
           <Route path="coupons" element={<CouponsPage />} />
           <Route path="banners" element={<BannersPage />} />

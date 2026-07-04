@@ -69,6 +69,9 @@ const config = {
     ].filter(Boolean),
   },
 
+  // Public storefront URL (used for sitemap/canonical links).
+  siteUrl: optional('SITE_URL', optional('CLIENT_CUSTOMER_ORIGIN', 'http://localhost:5173')),
+
   seedAdmin: {
     name: optional('SEED_ADMIN_NAME', 'NameCraft Admin'),
     email: optional('SEED_ADMIN_EMAIL', 'admin@namecraft.local'),

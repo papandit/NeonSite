@@ -59,3 +59,47 @@ export const dashboard = asyncHandler(async (req, res) => {
     recentOrders,
   });
 });
+
+// GET /api/admin/analytics — sales by day (14d), top products, status mix
+export const analytics = asyncHandler(async (req, res) => {
+  const since = new Date();
+  since.setDate(since.getDate() - 13);
+  since.setHours(0, 0, 0, 0);
+
+  const [salesByDay, topProducts, statusDist] = await Promise.all([
+    Order.aggregate([
+      { $match: { createdAt: { $gte: since } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+          salesPaise: { $sum: '$totalPaise' },
+          orders: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]),
+    Order.aggregate([
+      { $unwind: '$items' },
+      {
+        $group: {
+          _id: '$items.productNameSnapshot',
+          qty: { $sum: '$items.quantity' },
+          revenuePaise: { $sum: '$items.lineTotalPaise' },
+        },
+      },
+      { $sort: { qty: -1 } },
+      { $limit: 5 },
+    ]),
+    Order.aggregate([
+      { $addFields: { currentStatus: { $arrayElemAt: ['$statusHistory.status', -1] } } },
+      { $group: { _id: '$currentStatus', count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+    ]),
+  ]);
+
+  return sendSuccess(res, {
+    salesByDay: salesByDay.map((d) => ({ date: d._id, salesPaise: d.salesPaise, orders: d.orders })),
+    topProducts: topProducts.map((p) => ({ name: p._id, qty: p.qty, revenuePaise: p.revenuePaise })),
+    statusDistribution: statusDist.map((s) => ({ status: s._id, count: s.count })),
+  });
+});

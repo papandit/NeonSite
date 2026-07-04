@@ -11,6 +11,7 @@ import notFound from './middleware/notFound.js';
 import errorHandler from './middleware/errorHandler.js';
 import apiRoutes from './routes/index.js';
 import { health } from './controllers/healthController.js';
+import { sitemap, robots } from './controllers/public/seoController.js';
 
 const app = express();
 
@@ -37,6 +38,10 @@ app.use(requestLogger);
 
 // Health check (outside /api so infra probes stay simple).
 app.get('/health', health);
+
+// SEO (Phase 6)
+app.get('/sitemap.xml', sitemap);
+app.get('/robots.txt', robots);
 
 // API
 app.use('/api', apiRoutes);

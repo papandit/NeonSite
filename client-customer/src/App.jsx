@@ -17,8 +17,10 @@ import OrdersPage from './pages/account/OrdersPage';
 import OrderDetailPage from './pages/account/OrderDetailPage';
 import AddressesPage from './pages/account/AddressesPage';
 import ProfilePage from './pages/account/ProfilePage';
+import WishlistPage from './pages/account/WishlistPage';
 import { loadProfile, selectIsAuthenticated } from './store/authSlice';
 import { addToCart, fetchCart } from './store/cartSlice';
+import { fetchWishlist } from './store/wishlistSlice';
 import { PENDING_KEY } from './configurator/Configurator';
 
 export default function App() {
@@ -30,7 +32,7 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // On auth: flush any design added before login, then load the cart.
+  // On auth: flush any design added before login, then load cart + wishlist.
   useEffect(() => {
     if (!isAuthed) return;
     const pending = localStorage.getItem(PENDING_KEY);
@@ -44,6 +46,7 @@ export default function App() {
     } else {
       dispatch(fetchCart());
     }
+    dispatch(fetchWishlist());
   }, [isAuthed, dispatch]);
 
   return (
@@ -62,6 +65,7 @@ export default function App() {
             <Route index element={<Navigate to="/account/orders" replace />} />
             <Route path="orders" element={<OrdersPage />} />
             <Route path="orders/:id" element={<OrderDetailPage />} />
+            <Route path="wishlist" element={<WishlistPage />} />
             <Route path="addresses" element={<AddressesPage />} />
             <Route path="profile" element={<ProfilePage />} />
           </Route>

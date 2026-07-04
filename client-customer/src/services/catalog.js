@@ -24,3 +24,11 @@ export function getProductBySlug(slug) {
 export function getRelatedProducts(slug) {
   return api.get(`/products/${slug}/related`).then((r) => r.data.data);
 }
+
+export function getProductReviews(slug) {
+  return api.get(`/products/${slug}/reviews`).then((r) => r.data.data);
+}
+
+export function createReview(payload) {
+  return api.post('/reviews', payload).then((r) => r.data.data);
+}

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getCategories, getProducts } from '../services/catalog';
 import ProductGrid from '../components/ProductGrid';
+import Seo from '../components/Seo';
 
 const HOW_IT_WORKS = [
   ['1', 'Pick a design', 'Choose a name plate and open the live customizer.'],
@@ -53,6 +54,7 @@ export default function HomePage() {
 
   return (
     <div>
+      <Seo description="Design your own custom name plate in a live editor — pick material, size, font, colour and icons. Crafted to order and delivered." path="/" />
       {/* Hero */}
       <section className="bg-linear-to-br from-indigo-50 to-white">
         <div className="mx-auto max-w-6xl px-4 py-20 text-center">
