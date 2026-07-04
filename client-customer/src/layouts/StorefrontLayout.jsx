@@ -33,6 +33,9 @@ export default function StorefrontLayout() {
             <NavLink to="/" end className={navLinkClass}>
               Home
             </NavLink>
+            <NavLink to="/products" className={navLinkClass}>
+              Shop
+            </NavLink>
             {isAuthed ? (
               <>
                 <NavLink to="/account" className={navLinkClass}>
