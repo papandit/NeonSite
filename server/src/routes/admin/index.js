@@ -10,11 +10,16 @@ import { crudRouter } from './crudRouter.js';
 
 import Category from '../../models/Category.js';
 import SubCategory from '../../models/SubCategory.js';
+import Coupon from '../../models/Coupon.js';
+import Banner from '../../models/Banner.js';
 import { OPTION_COLLECTIONS } from '../../models/options/registry.js';
 import productController from '../../controllers/admin/productController.js';
 import uploadRoutes from './uploadRoutes.js';
 import { sendSuccess } from '../../utils/apiResponse.js';
 import { isCloudinaryConfigured } from '../../services/cloudinary/index.js';
+import { dashboard } from '../../controllers/admin/dashboardController.js';
+import { listOrders, getOrder, updateStatus, productionRender } from '../../controllers/admin/adminOrderController.js';
+import { getStoreSettings, updateStoreSettings } from '../../controllers/admin/settingsController.js';
 
 const router = Router();
 
@@ -62,4 +67,30 @@ for (const c of OPTION_COLLECTIONS) {
 // Products (custom controller — validates option references)
 router.use('/products', crudRouter(productController));
 
+// Coupons + Banners (generic CRUD)
+const couponController = createCrudController(Coupon, {
+  searchFields: ['code'],
+  defaultSort: '-createdAt',
+});
+const bannerController = createCrudController(Banner, {
+  searchFields: ['title'],
+  defaultSort: 'sortOrder',
+});
+router.use('/coupons', crudRouter(couponController));
+router.use('/banners', crudRouter(bannerController));
+
+// Dashboard metrics
+router.get('/dashboard', dashboard);
+
+// Order management
+router.get('/orders', listOrders);
+router.get('/orders/:id', getOrder);
+router.patch('/orders/:id/status', updateStatus);
+router.get('/orders/:id/production-render/:itemId', productionRender);
+
+// Store settings
+router.get('/settings', getStoreSettings);
+router.put('/settings', updateStoreSettings);
+
 export default router;
+

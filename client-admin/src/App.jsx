@@ -12,6 +12,11 @@ import SubCategoriesPage from './pages/categories/SubCategoriesPage';
 import OptionCrudPage from './pages/options/OptionCrudPage';
 import ProductsPage from './pages/products/ProductsPage';
 import ProductBuilderPage from './pages/products/ProductBuilderPage';
+import OrdersPage from './pages/orders/OrdersPage';
+import OrderDetailPage from './pages/orders/OrderDetailPage';
+import CouponsPage from './pages/CouponsPage';
+import BannersPage from './pages/BannersPage';
+import SettingsPage from './pages/SettingsPage';
 import { loadProfile, selectIsAuthenticated } from './store/authSlice';
 
 export default function App() {
@@ -41,6 +46,13 @@ export default function App() {
           <Route path="products" element={<ProductsPage />} />
           <Route path="products/new" element={<ProductBuilderPage />} />
           <Route path="products/:id/edit" element={<ProductBuilderPage />} />
+
+          <Route path="orders" element={<OrdersPage />} />
+          <Route path="orders/:id" element={<OrderDetailPage />} />
+
+          <Route path="coupons" element={<CouponsPage />} />
+          <Route path="banners" element={<BannersPage />} />
+          <Route path="settings" element={<SettingsPage />} />
 
           <Route path="*" element={<NotFoundPage />} />
         </Route>

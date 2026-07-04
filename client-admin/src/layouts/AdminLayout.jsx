@@ -40,6 +40,10 @@ export default function AdminLayout() {
         <nav className="flex-1 overflow-y-auto p-3">
           <NavLink to="/dashboard" className={linkClass}>Dashboard</NavLink>
 
+          <NavGroup title="Operations">
+            <NavLink to="/orders" className={linkClass}>Orders</NavLink>
+          </NavGroup>
+
           <NavGroup title="Catalog">
             <NavLink to="/categories" className={linkClass}>Categories</NavLink>
             <NavLink to="/subcategories" className={linkClass}>Subcategories</NavLink>
@@ -52,6 +56,12 @@ export default function AdminLayout() {
                 {c.label}
               </NavLink>
             ))}
+          </NavGroup>
+
+          <NavGroup title="Store">
+            <NavLink to="/coupons" className={linkClass}>Coupons</NavLink>
+            <NavLink to="/banners" className={linkClass}>Banners</NavLink>
+            <NavLink to="/settings" className={linkClass}>Settings</NavLink>
           </NavGroup>
         </nav>
 
