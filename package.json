@@ -1,0 +1,24 @@
+{
+  "name": "namecraft-ecom",
+  "version": "1.0.0",
+  "private": true,
+  "description": "NameCraft — personalized name-plate customization e-commerce platform (MERN). Separate customer + admin frontends, one shared Express/Mongo backend.",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k -n server,customer,admin -c blue,green,magenta \"npm:dev:server\" \"npm:dev:customer\" \"npm:dev:admin\"",
+    "dev:server": "npm --prefix server run dev",
+    "dev:customer": "npm --prefix client-customer run dev",
+    "dev:admin": "npm --prefix client-admin run dev",
+    "build": "npm --prefix client-customer run build && npm --prefix client-admin run build",
+    "start": "npm --prefix server run start",
+    "seed:admin": "npm --prefix server run seed:admin",
+    "install:all": "npm install && npm --prefix server install && npm --prefix client-customer install && npm --prefix client-admin install",
+    "lint": "npm --prefix client-customer run lint && npm --prefix client-admin run lint"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
