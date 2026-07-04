@@ -5,20 +5,25 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import FabricCanvas from './FabricCanvas';
 import CustomizationPanels from './CustomizationPanels';
 import PriceBar from './PriceBar';
 import { useQuote } from './useQuote';
 import { initDesign, setPreview, selectDesignDocument, selectPricing } from '../store/designSlice';
 import { uploadPreview } from '../services/pricing';
+import { addToCart } from '../store/cartSlice';
+import { selectIsAuthenticated } from '../store/authSlice';
 import { apiErrorMessage } from '../services/api';
 
-const PENDING_KEY = 'nc_pending_cart_item';
+export const PENDING_KEY = 'nc_pending_cart_item';
 
 export default function Configurator({ product }) {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const design = useSelector(selectDesignDocument);
   const pricing = useSelector(selectPricing);
+  const isAuthed = useSelector(selectIsAuthenticated);
   const canvasRef = useRef(null);
 
   const [adding, setAdding] = useState(false);
@@ -37,6 +42,7 @@ export default function Configurator({ product }) {
     setAdding(true);
     setError(null);
     try {
+      // 1. Generate + server-upload the preview, store its URL on the design.
       const dataUrl = canvasRef.current?.toDataURL();
       let previewUrl = null;
       if (dataUrl) {
@@ -48,14 +54,18 @@ export default function Configurator({ product }) {
         ...design,
         render: { ...design.render, previewImageUrl: previewUrl },
       };
-      // Phase 4 will POST this to /api/cart. For now, stash it.
-      localStorage.setItem(
-        PENDING_KEY,
-        JSON.stringify({ productId: product._id, quantity: 1, designDocument: finalDesign })
-      );
-      setAdded(true);
+      const payload = { productId: product._id, quantity: 1, designDocument: finalDesign };
+
+      // 2. Add to cart if logged in; otherwise stash + send to login.
+      if (isAuthed) {
+        await dispatch(addToCart(payload)).unwrap();
+        navigate('/cart');
+      } else {
+        localStorage.setItem(PENDING_KEY, JSON.stringify(payload));
+        navigate('/login', { state: { from: { pathname: `/products/${product.slug}` } } });
+      }
     } catch (err) {
-      setError(apiErrorMessage(err, 'Could not prepare your design'));
+      setError(apiErrorMessage(err, 'Could not add to cart'));
     } finally {
       setAdding(false);
     }
@@ -70,22 +80,6 @@ export default function Configurator({ product }) {
           Live preview — drag text or icons to reposition. The final print file is regenerated
           server-side.
         </p>
-        {added && (
-          <div className="mt-4 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800">
-            <p className="font-medium">Design ready and preview saved! 🎉</p>
-            <p className="mt-1 text-green-700">
-              Your preview was uploaded and stored on the design. Cart &amp; checkout arrive in
-              Phase 4.
-            </p>
-            {design.render.previewImageUrl && (
-              <img
-                src={design.render.previewImageUrl}
-                alt="preview"
-                className="mt-3 max-h-32 rounded border border-green-200"
-              />
-            )}
-          </div>
-        )}
         {error && <div className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}
       </div>
 

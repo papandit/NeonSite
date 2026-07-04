@@ -1,6 +1,7 @@
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout, selectIsAuthenticated, selectUser } from '../store/authSlice';
+import { resetCart, selectCartCount } from '../store/cartSlice';
 
 const navLinkClass = ({ isActive }) =>
   `px-3 py-2 text-sm font-medium rounded-md transition ${
@@ -10,11 +11,13 @@ const navLinkClass = ({ isActive }) =>
 export default function StorefrontLayout() {
   const isAuthed = useSelector(selectIsAuthenticated);
   const user = useSelector(selectUser);
+  const cartCount = useSelector(selectCartCount);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const onLogout = () => {
     dispatch(logout());
+    dispatch(resetCart());
     navigate('/');
   };
 
@@ -35,6 +38,16 @@ export default function StorefrontLayout() {
             </NavLink>
             <NavLink to="/products" className={navLinkClass}>
               Shop
+            </NavLink>
+            <NavLink to="/cart" className={navLinkClass}>
+              <span className="relative inline-flex items-center">
+                Cart
+                {cartCount > 0 && (
+                  <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-indigo-600 px-1 text-xs font-medium text-white">
+                    {cartCount}
+                  </span>
+                )}
+              </span>
             </NavLink>
             {isAuthed ? (
               <>

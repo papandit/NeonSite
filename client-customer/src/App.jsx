@@ -1,28 +1,50 @@
 import { useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import StorefrontLayout from './layouts/StorefrontLayout';
+import AccountLayout from './layouts/AccountLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import HomePage from './pages/HomePage';
 import ProductsPage from './pages/ProductsPage';
 import ProductDetailPage from './pages/ProductDetailPage';
+import CartPage from './pages/CartPage';
+import CheckoutPage from './pages/CheckoutPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import AccountPage from './pages/AccountPage';
 import NotFoundPage from './pages/NotFoundPage';
+import OrdersPage from './pages/account/OrdersPage';
+import OrderDetailPage from './pages/account/OrderDetailPage';
+import AddressesPage from './pages/account/AddressesPage';
+import ProfilePage from './pages/account/ProfilePage';
 import { loadProfile, selectIsAuthenticated } from './store/authSlice';
+import { addToCart, fetchCart } from './store/cartSlice';
+import { PENDING_KEY } from './configurator/Configurator';
 
 export default function App() {
   const dispatch = useDispatch();
   const isAuthed = useSelector(selectIsAuthenticated);
 
-  // If we have a persisted token, revalidate it against the API on load.
   useEffect(() => {
     if (isAuthed) dispatch(loadProfile());
-    // run once on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // On auth: flush any design added before login, then load the cart.
+  useEffect(() => {
+    if (!isAuthed) return;
+    const pending = localStorage.getItem(PENDING_KEY);
+    if (pending) {
+      try {
+        dispatch(addToCart(JSON.parse(pending)));
+      } catch {
+        /* ignore malformed pending item */
+      }
+      localStorage.removeItem(PENDING_KEY);
+    } else {
+      dispatch(fetchCart());
+    }
+  }, [isAuthed, dispatch]);
 
   return (
     <Routes>
@@ -32,9 +54,19 @@ export default function App() {
         <Route path="products/:slug" element={<ProductDetailPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
+
         <Route element={<ProtectedRoute />}>
-          <Route path="account" element={<AccountPage />} />
+          <Route path="cart" element={<CartPage />} />
+          <Route path="checkout" element={<CheckoutPage />} />
+          <Route path="account" element={<AccountLayout />}>
+            <Route index element={<Navigate to="/account/orders" replace />} />
+            <Route path="orders" element={<OrdersPage />} />
+            <Route path="orders/:id" element={<OrderDetailPage />} />
+            <Route path="addresses" element={<AddressesPage />} />
+            <Route path="profile" element={<ProfilePage />} />
+          </Route>
         </Route>
+
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

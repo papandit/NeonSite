@@ -8,6 +8,7 @@ import { connectDB, disconnectDB } from '../db/connect.js';
 import Category from '../models/Category.js';
 import SubCategory from '../models/SubCategory.js';
 import Product from '../models/Product.js';
+import Coupon from '../models/Coupon.js';
 import {
   Material,
   Size,
@@ -29,6 +30,7 @@ async function run() {
     Category.deleteMany({}),
     SubCategory.deleteMany({}),
     Product.deleteMany({}),
+    Coupon.deleteMany({}),
     Material.deleteMany({}),
     Size.deleteMany({}),
     Color.deleteMany({}),
@@ -129,7 +131,14 @@ async function run() {
     },
   });
 
+  // --- Coupons ---
+  await Coupon.create([
+    { code: 'WELCOME10', type: 'percentage', percent: 10, maxDiscountPaise: r(300), minSubtotalPaise: r(500), status: 'active' },
+    { code: 'FLAT200', type: 'flat', valuePaise: r(200), minSubtotalPaise: r(1500), status: 'active' },
+  ]);
+
   console.log('\n✅  Seed complete:');
+  console.log(`   Coupons:       WELCOME10 (10% off, cap ₹300), FLAT200 (₹200 off over ₹1500)`);
   console.log(`   Categories:    ${await Category.countDocuments()}`);
   console.log(`   SubCategories: ${await SubCategory.countDocuments()}`);
   console.log(
