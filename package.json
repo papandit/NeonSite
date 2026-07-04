@@ -12,6 +12,7 @@
     "build": "npm --prefix client-customer run build && npm --prefix client-admin run build",
     "start": "npm --prefix server run start",
     "seed:admin": "npm --prefix server run seed:admin",
+    "seed": "npm --prefix server run seed",
     "install:all": "npm install && npm --prefix server install && npm --prefix client-customer install && npm --prefix client-admin install",
     "lint": "npm --prefix client-customer run lint && npm --prefix client-admin run lint"
   },
