@@ -1,9 +1,24 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Modal from './Modal';
 import Rating from './Rating';
 import { formatPaise } from '../utils/money';
 
-export default function QuickView({ product, onClose }) {
+export default function QuickView({ product, onClose, onAddToCart }) {
+  const [addState, setAddState] = useState('idle');
+
+  const handleAdd = async () => {
+    if (!onAddToCart) return;
+    setAddState('adding');
+    try {
+      await onAddToCart(product);
+      setAddState('added');
+      setTimeout(() => setAddState('idle'), 1600);
+    } catch {
+      setAddState('idle');
+    }
+  };
+
   return (
     <Modal open={Boolean(product)} onClose={onClose} maxWidth="max-w-2xl">
       {product && (
@@ -23,14 +38,25 @@ export default function QuickView({ product, onClose }) {
             {product.description && (
               <p className="mt-3 line-clamp-4 text-sm text-gray-600">{product.description}</p>
             )}
-            <div className="mt-auto pt-6">
+            <div className="mt-auto flex gap-2 pt-6">
               <Link
                 to={`/products/${product.slug}`}
                 onClick={onClose}
-                className="block rounded-md bg-indigo-600 px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-indigo-700"
+                className="flex-1 rounded-full bg-indigo-600 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-indigo-700"
               >
-                Customize this plate
+                Customize
               </Link>
+              <button
+                onClick={handleAdd}
+                disabled={addState === 'adding'}
+                className={`flex-1 rounded-full border px-4 py-2.5 text-sm font-semibold transition ${
+                  addState === 'added'
+                    ? 'border-green-500 bg-green-50 text-green-700'
+                    : 'border-gray-300 text-gray-700 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700'
+                }`}
+              >
+                {addState === 'adding' ? 'Adding…' : addState === 'added' ? 'Added ✓' : 'Add to cart'}
+              </button>
             </div>
           </div>
         </div>

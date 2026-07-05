@@ -7,6 +7,8 @@ export const cartApi = {
   get: () => api.get('/cart').then((r) => r.data.data),
   add: (productId, designDocument, quantity = 1) =>
     api.post('/cart', { productId, designDocument, quantity }).then((r) => r.data.data),
+  quickAdd: (productId, quantity = 1) =>
+    api.post('/cart/quick', { productId, quantity }).then((r) => r.data.data),
   update: (itemId, patch) => api.patch(`/cart/${itemId}`, patch).then((r) => r.data.data),
   remove: (itemId) => api.delete(`/cart/${itemId}`).then((r) => r.data.data),
   clear: () => api.delete('/cart').then((r) => r.data.data),

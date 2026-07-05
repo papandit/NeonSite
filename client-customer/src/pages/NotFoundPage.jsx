@@ -10,7 +10,7 @@ export default function NotFoundPage() {
       </p>
       <Link
         to="/"
-        className="mt-6 inline-block rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+        className="mt-6 inline-block rounded-full bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
       >
         Back home
       </Link>

@@ -16,7 +16,7 @@ export default function WishlistPage() {
     return (
       <div className="rounded-xl border border-gray-200 bg-white p-10 text-center">
         <p className="text-gray-500">Your wishlist is empty.</p>
-        <Link to="/products" className="mt-4 inline-block rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">Browse products</Link>
+        <Link to="/products" className="mt-4 inline-block rounded-full bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">Browse products</Link>
       </div>
     );
   }

@@ -52,7 +52,7 @@ export default function CartPage() {
       <div className="mx-auto max-w-2xl px-4 py-24 text-center">
         <h1 className="text-2xl font-bold">Your cart is empty</h1>
         <p className="mt-2 text-gray-500">Design a name plate to get started.</p>
-        <Link to="/products" className="mt-6 inline-block rounded-md bg-indigo-600 px-5 py-3 text-sm font-medium text-white hover:bg-indigo-700">
+        <Link to="/products" className="mt-6 inline-block rounded-full bg-indigo-600 px-5 py-3 text-sm font-medium text-white hover:bg-indigo-700">
           Browse products
         </Link>
       </div>
@@ -117,7 +117,7 @@ export default function CartPage() {
                 placeholder="Code"
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm uppercase"
               />
-              <button onClick={onApplyCoupon} className="rounded-md bg-gray-800 px-3 py-2 text-sm font-medium text-white hover:bg-gray-900">Apply</button>
+              <button onClick={onApplyCoupon} className="rounded-full bg-gray-800 px-3 py-2 text-sm font-medium text-white hover:bg-gray-900">Apply</button>
             </div>
             {couponMsg && <p className="mt-1 text-xs text-green-600">{couponMsg}</p>}
             {couponErr && <p className="mt-1 text-xs text-red-600">{couponErr}</p>}
@@ -142,7 +142,7 @@ export default function CartPage() {
 
           <button
             onClick={() => navigate('/checkout')}
-            className="mt-5 w-full rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700"
+            className="mt-5 w-full rounded-full bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700"
           >
             Proceed to checkout
           </button>

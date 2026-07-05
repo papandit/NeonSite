@@ -5,6 +5,7 @@
 import ApiError from '../../utils/ApiError.js';
 import asyncHandler from '../../utils/asyncHandler.js';
 import { sendSuccess } from '../../utils/apiResponse.js';
+import { broadcast } from '../../services/events/bus.js';
 
 /**
  * @param {import('mongoose').Model} Model
@@ -76,6 +77,7 @@ export function createCrudController(Model, opts = {}) {
     const body = beforeWrite ? await beforeWrite(req.body, req) : req.body;
     const doc = await Model.create(body);
     const fresh = populate ? await applyPopulate(Model.findById(doc._id)) : doc;
+    broadcast('catalog:changed', { model: Model.modelName, action: 'create' });
     return sendSuccess(res, fresh, 201);
   });
 
@@ -86,12 +88,14 @@ export function createCrudController(Model, opts = {}) {
     Object.assign(doc, body);
     await doc.save(); // runs validators (incl. money guard)
     const fresh = populate ? await applyPopulate(Model.findById(doc._id)) : doc;
+    broadcast('catalog:changed', { model: Model.modelName, action: 'update' });
     return sendSuccess(res, fresh);
   });
 
   const remove = asyncHandler(async (req, res) => {
     const doc = await Model.findByIdAndDelete(req.params.id);
     if (!doc) throw ApiError.notFound(`${Model.modelName} not found`);
+    broadcast('catalog:changed', { model: Model.modelName, action: 'delete' });
     return sendSuccess(res, { id: req.params.id, deleted: true });
   });
 
@@ -101,6 +105,7 @@ export function createCrudController(Model, opts = {}) {
     doc.status = doc.status === statusOn ? statusOff : statusOn;
     await doc.save();
     const fresh = populate ? await applyPopulate(Model.findById(doc._id)) : doc;
+    broadcast('catalog:changed', { model: Model.modelName, action: 'toggle' });
     return sendSuccess(res, fresh);
   });
 

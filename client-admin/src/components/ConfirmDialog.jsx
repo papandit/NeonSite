@@ -23,7 +23,7 @@ export default function ConfirmDialog({
         <button
           onClick={onConfirm}
           disabled={busy}
-          className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60"
+          className="rounded-full bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60"
         >
           {busy ? 'Working…' : confirmLabel}
         </button>

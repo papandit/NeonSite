@@ -79,7 +79,7 @@ export default function Reviews({ productId, slug }) {
             </div>
             <input value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} placeholder="Title (optional)" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" />
             <textarea value={form.comment} onChange={(e) => setForm((f) => ({ ...f, comment: e.target.value }))} placeholder="Your experience…" rows={3} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" />
-            <button type="submit" disabled={submitting} className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60">
+            <button type="submit" disabled={submitting} className="rounded-full bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60">
               {submitting ? 'Submitting…' : 'Submit review'}
             </button>
           </form>

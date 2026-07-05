@@ -9,6 +9,7 @@ import ApiError from '../../utils/ApiError.js';
 import Category from '../../models/Category.js';
 import SubCategory from '../../models/SubCategory.js';
 import Product from '../../models/Product.js';
+import Banner from '../../models/Banner.js';
 
 // Config panels that reference an option collection.
 const CONFIG_PANELS = [
@@ -33,6 +34,14 @@ async function resolveId(Model, value) {
   const doc = await Model.findOne({ slug: value, status: 'active' }).select('_id');
   return doc ? doc._id : NON_MATCHING_ID;
 }
+
+// GET /api/banners?placement=home_hero — active banners (managed in admin)
+export const listBanners = asyncHandler(async (req, res) => {
+  const filter = { status: 'active' };
+  if (req.query.placement) filter.placement = req.query.placement;
+  const banners = await Banner.find(filter).sort('sortOrder').lean();
+  return sendSuccess(res, banners);
+});
 
 // GET /api/categories  — active categories (+ their active subcategories)
 export const listCategories = asyncHandler(async (req, res) => {
@@ -109,23 +118,51 @@ export const getProductBySlug = asyncHandler(async (req, res) => {
   return sendSuccess(res, product);
 });
 
-// GET /api/products/:slug/related — same category, excludes the product
+// GET /api/products/:slug/related — "Similar products": same category first,
+// topped up with other active products so the row is never empty.
 export const getRelatedProducts = asyncHandler(async (req, res) => {
   const product = await Product.findOne({ slug: req.params.slug, status: 'active' })
     .select('_id category')
     .lean();
   if (!product) throw ApiError.notFound('Product not found');
 
-  const related = await Product.find({
-    status: 'active',
-    _id: { $ne: product._id },
-    ...(product.category ? { category: product.category } : {}),
-  })
+  const limit = 8;
+  const proj = '-customizationConfig';
+
+  let items = product.category
+    ? await Product.find({ status: 'active', _id: { $ne: product._id }, category: product.category })
+        .select(proj).populate('category', 'name slug').sort('-rating -createdAt').limit(limit).lean()
+    : [];
+
+  // Top up with other active products if the category is thin.
+  if (items.length < limit) {
+    const have = new Set([String(product._id), ...items.map((p) => String(p._id))]);
+    const extra = await Product.find({ status: 'active', _id: { $nin: [...have] } })
+      .select(proj).populate('category', 'name slug').sort('-rating -createdAt').limit(limit - items.length).lean();
+    items = items.concat(extra);
+  }
+
+  return sendSuccess(res, items);
+});
+
+// GET /api/products/recommended?exclude=slug&limit= — "More products for you":
+// top-rated active products (a lightweight recommendation).
+export const getRecommendedProducts = asyncHandler(async (req, res) => {
+  const { exclude } = req.query;
+  const limit = Math.min(20, Math.max(1, parseInt(req.query.limit, 10) || 8));
+
+  const filter = { status: 'active' };
+  if (exclude) {
+    const ex = await Product.findOne({ slug: exclude }).select('_id').lean();
+    if (ex) filter._id = { $ne: ex._id };
+  }
+
+  const items = await Product.find(filter)
     .select('-customizationConfig')
     .populate('category', 'name slug')
-    .sort('-createdAt')
-    .limit(8)
+    .sort('-rating -createdAt')
+    .limit(limit)
     .lean();
 
-  return sendSuccess(res, related);
+  return sendSuccess(res, items);
 });

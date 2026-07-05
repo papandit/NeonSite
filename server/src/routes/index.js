@@ -9,6 +9,7 @@ import renderRoutes from './renderRoutes.js';
 import cartRoutes from './cartRoutes.js';
 import commerceRoutes from './commerceRoutes.js';
 import engagementRoutes from './engagementRoutes.js';
+import eventsRoutes from './eventsRoutes.js';
 
 const router = Router();
 
@@ -16,6 +17,7 @@ router.use('/auth', authRoutes);
 router.use('/admin', adminRoutes);
 router.use('/pricing', pricingRoutes);
 router.use('/render', renderRoutes);
+router.use('/events', eventsRoutes);
 
 // Commerce (Phase 4, auth): cart, coupons, checkout, payments, orders
 router.use('/cart', cartRoutes);

@@ -38,6 +38,15 @@ export const addToCart = createAsyncThunk('cart/add', async ({ productId, design
   }
 });
 
+// Buy as-is: add with a server-built default design.
+export const quickAddToCart = createAsyncThunk('cart/quickAdd', async ({ productId, quantity = 1 }, { rejectWithValue }) => {
+  try {
+    return await cartApi.quickAdd(productId, quantity);
+  } catch (e) {
+    return rejectWithValue(apiErrorMessage(e));
+  }
+});
+
 export const updateCartItem = createAsyncThunk('cart/update', async ({ itemId, patch }, { rejectWithValue }) => {
   try {
     return await cartApi.update(itemId, patch);
@@ -80,6 +89,7 @@ const cartSlice = createSlice({
     builder
       .addCase(fetchCart.fulfilled, setFromServer)
       .addCase(addToCart.fulfilled, setFromServer)
+      .addCase(quickAddToCart.fulfilled, setFromServer)
       .addCase(updateCartItem.fulfilled, setFromServer)
       .addCase(removeCartItem.fulfilled, setFromServer)
       .addCase(clearCart.fulfilled, (state, action) => {

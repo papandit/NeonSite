@@ -6,6 +6,10 @@ export function getCategories() {
   return api.get('/categories').then((r) => r.data.data);
 }
 
+export function getBanners(placement = 'home_hero') {
+  return api.get('/banners', { params: { placement } }).then((r) => r.data.data);
+}
+
 /**
  * @param {object} params { category, subcategory, q, sort, page, limit }
  * @returns {Promise<{ items: any[], meta: object }>}
@@ -23,6 +27,13 @@ export function getProductBySlug(slug) {
 
 export function getRelatedProducts(slug) {
   return api.get(`/products/${slug}/related`).then((r) => r.data.data);
+}
+
+// "More products for you" — top-rated recommendations (optionally excluding one).
+export function getRecommendedProducts({ exclude, limit = 8 } = {}) {
+  return api
+    .get('/products/recommended', { params: { exclude, limit } })
+    .then((r) => r.data.data);
 }
 
 export function getProductReviews(slug) {

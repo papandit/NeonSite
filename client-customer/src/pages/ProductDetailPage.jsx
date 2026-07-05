@@ -1,7 +1,10 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { getProductBySlug, getRelatedProducts } from '../services/catalog';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { getProductBySlug, getRelatedProducts, getRecommendedProducts } from '../services/catalog';
 import { formatPaise } from '../utils/money';
+import { quickAddToCart } from '../store/cartSlice';
+import { selectIsAuthenticated } from '../store/authSlice';
 import Rating from '../components/Rating';
 import ProductGrid from '../components/ProductGrid';
 import Reviews from '../components/Reviews';
@@ -12,11 +15,16 @@ const Configurator = lazy(() => import('../configurator/Configurator'));
 
 export default function ProductDetailPage() {
   const { slug } = useParams();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const isAuthed = useSelector(selectIsAuthenticated);
   const [product, setProduct] = useState(null);
   const [related, setRelated] = useState([]);
+  const [recommended, setRecommended] = useState([]);
   const [activeImage, setActiveImage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [addState, setAddState] = useState('idle');
 
   useEffect(() => {
     setLoading(true);
@@ -27,7 +35,22 @@ export default function ProductDetailPage() {
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
     getRelatedProducts(slug).then(setRelated).catch(() => setRelated([]));
+    getRecommendedProducts({ exclude: slug, limit: 4 }).then(setRecommended).catch(() => setRecommended([]));
   }, [slug]);
+
+  const handleQuickAdd = async () => {
+    if (!isAuthed) {
+      navigate('/login', { state: { from: { pathname: `/products/${slug}` } } });
+      return;
+    }
+    setAddState('adding');
+    try {
+      await dispatch(quickAddToCart({ productId: product._id, quantity: 1 })).unwrap();
+      navigate('/cart');
+    } catch {
+      setAddState('idle');
+    }
+  };
 
   if (loading) return <div className="mx-auto max-w-6xl px-4 py-20 text-center text-gray-400">Loading…</div>;
 
@@ -35,7 +58,7 @@ export default function ProductDetailPage() {
     return (
       <div className="mx-auto max-w-md px-4 py-24 text-center">
         <h1 className="text-xl font-semibold">Product not found</h1>
-        <Link to="/products" className="mt-4 inline-block rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
+        <Link to="/products" className="mt-4 inline-block rounded-full bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
           Browse products
         </Link>
       </div>
@@ -97,9 +120,28 @@ export default function ProductDetailPage() {
             <div className="text-3xl font-semibold text-gray-900">{formatPaise(product.basePricePaise)}</div>
           </div>
           {product.description && <p className="mt-4 text-gray-600">{product.description}</p>}
-          <a href="#customize" className="mt-6 inline-block rounded-md bg-indigo-600 px-5 py-3 text-sm font-medium text-white hover:bg-indigo-700">
-            Customize this plate ↓
-          </a>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <a href="#customize" className="rounded-full bg-indigo-600 px-5 py-3 text-sm font-semibold text-white hover:bg-indigo-700">
+              Customize this plate ↓
+            </a>
+            <button
+              onClick={handleQuickAdd}
+              disabled={addState === 'adding'}
+              className={`rounded-full border px-5 py-3 text-sm font-semibold transition disabled:opacity-60 ${
+                addState === 'added'
+                  ? 'border-green-500 bg-green-50 text-green-700'
+                  : 'border-gray-300 text-gray-700 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700'
+              }`}
+            >
+              {addState === 'adding' ? 'Adding…' : addState === 'added' ? 'Added to cart ✓' : 'Add to cart (as-is)'}
+            </button>
+            {addState === 'added' && (
+              <Link to="/cart" className="self-center text-sm font-medium text-indigo-600 hover:underline">
+                View cart →
+              </Link>
+            )}
+          </div>
+          <p className="mt-2 text-xs text-gray-400">Buy as-is with default options, or customize it your way.</p>
         </div>
       </div>
 
@@ -116,11 +158,19 @@ export default function ProductDetailPage() {
         <Reviews productId={product._id} slug={product.slug} />
       </section>
 
-      {/* Related */}
+      {/* Similar products */}
       {related.length > 0 && (
         <section className="mt-16">
-          <h2 className="mb-6 text-xl font-bold">Related products</h2>
+          <h2 className="mb-6 text-xl font-bold">Similar products</h2>
           <ProductGrid products={related} />
+        </section>
+      )}
+
+      {/* More products for you */}
+      {recommended.length > 0 && (
+        <section className="mt-16">
+          <h2 className="mb-6 text-xl font-bold">More products for you</h2>
+          <ProductGrid products={recommended} columns="sm:grid-cols-2 lg:grid-cols-4" />
         </section>
       )}
     </div>

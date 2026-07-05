@@ -99,7 +99,7 @@ export default function SettingsPage() {
           <p className="text-xs text-slate-400">Orders at or above the free-shipping threshold ship free; the GST rate is applied to the taxable amount at checkout.</p>
         </section>
 
-        <button type="submit" disabled={saving} className="rounded-md bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60">
+        <button type="submit" disabled={saving} className="rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60">
           {saving ? 'Saving…' : 'Save settings'}
         </button>
       </form>

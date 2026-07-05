@@ -131,7 +131,7 @@ export default function OptionCrudPage() {
         title={collection.label}
         subtitle="Prices are entered in rupees and stored as integer paise."
         action={
-          <button onClick={openCreate} className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
+          <button onClick={openCreate} className="rounded-full bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
             + New {collection.label.replace(/s$/, '').toLowerCase()}
           </button>
         }
@@ -220,7 +220,7 @@ export default function OptionCrudPage() {
 
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={() => setModalOpen(false)} className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Cancel</button>
-            <button type="submit" disabled={busy} className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60">
+            <button type="submit" disabled={busy} className="rounded-full bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60">
               {busy ? 'Saving…' : 'Save'}
             </button>
           </div>

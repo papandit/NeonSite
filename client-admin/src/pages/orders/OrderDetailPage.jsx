@@ -120,7 +120,7 @@ export default function OrderDetailPage() {
             <p className="text-sm font-medium text-amber-800">Design review</p>
             <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Review note (optional)" rows={2} className="mt-2 w-full rounded-md border border-amber-200 px-3 py-2 text-sm" />
             <div className="mt-2 flex gap-2">
-              <button disabled={busy} onClick={() => transition('approved')} className="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-60">Approve design</button>
+              <button disabled={busy} onClick={() => transition('approved')} className="rounded-full bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-60">Approve design</button>
               <button disabled={busy} onClick={() => transition('confirmed')} className="rounded-md border border-amber-300 bg-white px-4 py-2 text-sm font-medium text-amber-700 hover:bg-amber-100 disabled:opacity-60">Request rework</button>
             </div>
           </div>
@@ -141,7 +141,7 @@ export default function OrderDetailPage() {
                 <input type="checkbox" checked={override} onChange={(e) => setOverride(e.target.checked)} /> override
               </label>
             )}
-            <button disabled={busy || !target} onClick={() => transition(target, override)} className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60">
+            <button disabled={busy || !target} onClick={() => transition(target, override)} className="rounded-full bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60">
               Update status
             </button>
           </div>

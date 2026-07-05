@@ -66,7 +66,7 @@ export default function ReviewsPage() {
                   </div>
                 </div>
                 <div className="flex shrink-0 gap-2">
-                  {r.status !== 'approved' && <button onClick={() => moderate(r._id, 'approved')} className="rounded-md bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700">Approve</button>}
+                  {r.status !== 'approved' && <button onClick={() => moderate(r._id, 'approved')} className="rounded-full bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700">Approve</button>}
                   {r.status !== 'rejected' && <button onClick={() => moderate(r._id, 'rejected')} className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50">Reject</button>}
                 </div>
               </div>

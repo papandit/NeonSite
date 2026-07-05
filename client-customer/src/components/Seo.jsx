@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet-async';
 // Per-page title + meta/OG tags. Full bot-prerendering is a deploy concern
 // (documented in README); this gives crawlers correct titles/meta on hydrate.
 export default function Seo({ title, description, image, path }) {
-  const fullTitle = title ? `${title} · NameCraft` : 'NameCraft — Custom Name Plates';
+  const fullTitle = title ? `${title} · OWM NameCraft Ecom` : 'OWM NameCraft Ecom — Custom Name Plates';
   const url = path ? `${window.location.origin}${path}` : undefined;
   return (
     <Helmet>

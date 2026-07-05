@@ -127,7 +127,7 @@ export default function CheckoutPage() {
               <div className="flex justify-between border-t border-gray-100 pt-2 text-base font-semibold"><dt>Total</dt><dd>{formatPaise(totals.totalPaise)}</dd></div>
             </dl>
           )}
-          <button type="submit" disabled={paying || loadingQuote} className="mt-5 w-full rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60">
+          <button type="submit" disabled={paying || loadingQuote} className="mt-5 w-full rounded-full bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60">
             {paying ? 'Processing…' : totals ? `Pay ${formatPaise(totals.totalPaise)}` : 'Pay'}
           </button>
           <p className="mt-2 text-center text-xs text-gray-400">Secured by Razorpay</p>

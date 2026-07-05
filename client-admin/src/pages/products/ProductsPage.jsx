@@ -84,7 +84,7 @@ export default function ProductsPage() {
         title="Products"
         subtitle="Each product's customization panels are defined in the Product Builder."
         action={
-          <button onClick={() => navigate('/products/new')} className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
+          <button onClick={() => navigate('/products/new')} className="rounded-full bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
             + New product
           </button>
         }

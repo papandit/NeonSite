@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { getCategories, getProducts } from '../services/catalog';
 import ProductGrid from '../components/ProductGrid';
 import Seo from '../components/Seo';
+import { useLiveCatalog } from '../hooks/useLiveCatalog';
 
 const SORT_OPTIONS = [
   ['newest', 'Newest'],
@@ -24,10 +25,14 @@ export default function ProductsPage() {
   const [meta, setMeta] = useState({ page: 1, pages: 1, total: 0 });
   const [loading, setLoading] = useState(true);
   const [searchInput, setSearchInput] = useState(q);
+  const [tick, setTick] = useState(0);
+
+  // Live sync: bump `tick` when the admin changes the catalog -> refetch.
+  useLiveCatalog(() => setTick((t) => t + 1));
 
   useEffect(() => {
     getCategories().then(setCategories).catch(() => {});
-  }, []);
+  }, [tick]);
 
   useEffect(() => {
     setLoading(true);
@@ -38,7 +43,7 @@ export default function ProductsPage() {
       })
       .catch(() => setProducts([]))
       .finally(() => setLoading(false));
-  }, [category, q, sort, page]);
+  }, [category, q, sort, page, tick]);
 
   // Merge params, always resetting to page 1 unless page itself changes.
   const update = (patch, keepPage = false) => {

@@ -239,7 +239,7 @@ export default function ProductBuilderPage() {
           </div>
           <div className="mt-4 max-w-md">
             <FileUpload label="Add image (upload or paste URL, then Add)" kind="image" folder="products" value={newImage} onChange={setNewImage} />
-            <button type="button" onClick={addImage} className="mt-2 rounded-md bg-slate-800 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-900">Add image</button>
+            <button type="button" onClick={addImage} className="mt-2 rounded-full bg-slate-800 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-900">Add image</button>
           </div>
         </section>
 
@@ -303,7 +303,7 @@ export default function ProductBuilderPage() {
         <section className="rounded-xl border border-slate-200 bg-white p-5">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="font-semibold">Text fields</h3>
-            <button type="button" onClick={addTextField} className="rounded-md bg-slate-800 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-900">+ Add field</button>
+            <button type="button" onClick={addTextField} className="rounded-full bg-slate-800 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-900">+ Add field</button>
           </div>
           {textFields.length === 0 && <p className="text-sm text-slate-400">No text fields. Add ones like “familyName”, “subtitle”.</p>}
           <div className="space-y-3">
@@ -324,7 +324,7 @@ export default function ProductBuilderPage() {
 
         <div className="flex justify-end gap-3">
           <button type="button" onClick={() => navigate('/products')} className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Cancel</button>
-          <button type="submit" disabled={busy} className="rounded-md bg-indigo-600 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60">
+          <button type="submit" disabled={busy} className="rounded-full bg-indigo-600 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60">
             {busy ? 'Saving…' : isEdit ? 'Save changes' : 'Create product'}
           </button>
         </div>

@@ -1,87 +1,139 @@
+import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout, selectUser } from '../store/authSlice';
 import { OPTION_COLLECTIONS } from '../config/optionCollections';
+import Icon from '../components/Icon';
 
-const linkClass = ({ isActive }) =>
-  `block rounded-md px-3 py-2 text-sm font-medium transition ${
-    isActive ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-  }`;
+const OPTION_ICON = {
+  materials: 'cube', sizes: 'ruler', colors: 'droplet', fonts: 'type',
+  borders: 'square', backgrounds: 'image', mounttypes: 'pin', icons: 'sparkle',
+};
 
-function NavGroup({ title, children }) {
-  return (
-    <div className="mt-4">
-      <div className="px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
-        {title}
-      </div>
-      <div className="space-y-1">{children}</div>
-    </div>
-  );
-}
+const GROUPS = [
+  { title: null, items: [{ to: '/dashboard', label: 'Dashboard', icon: 'dashboard' }] },
+  {
+    title: 'Operations',
+    items: [
+      { to: '/orders', label: 'Orders', icon: 'orders' },
+      { to: '/reviews', label: 'Reviews', icon: 'reviews' },
+      { to: '/analytics', label: 'Analytics', icon: 'analytics' },
+    ],
+  },
+  {
+    title: 'Catalog',
+    items: [
+      { to: '/categories', label: 'Categories', icon: 'category' },
+      { to: '/subcategories', label: 'Subcategories', icon: 'layers' },
+      { to: '/products', label: 'Products', icon: 'product' },
+    ],
+  },
+  {
+    title: 'Options',
+    items: OPTION_COLLECTIONS.map((c) => ({ to: `/options/${c.key}`, label: c.label, icon: OPTION_ICON[c.key] || 'dot' })),
+  },
+  {
+    title: 'Store',
+    items: [
+      { to: '/coupons', label: 'Coupons', icon: 'coupon' },
+      { to: '/banners', label: 'Banners', icon: 'banner' },
+      { to: '/settings', label: 'Settings', icon: 'settings' },
+    ],
+  },
+];
+
+const COLLAPSE_KEY = 'nc_admin_sidebar_collapsed';
 
 export default function AdminLayout() {
   const user = useSelector(selectUser);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [collapsed, setCollapsed] = useState(() => localStorage.getItem(COLLAPSE_KEY) === '1');
+
+  const toggle = () => {
+    setCollapsed((c) => {
+      localStorage.setItem(COLLAPSE_KEY, c ? '0' : '1');
+      return !c;
+    });
+  };
 
   const onLogout = () => {
     dispatch(logout());
     navigate('/login', { replace: true });
   };
 
+  const linkClass = ({ isActive }) =>
+    `flex items-center gap-3 rounded-full px-3 py-2 text-sm font-medium transition ${
+      collapsed ? 'justify-center' : ''
+    } ${isActive ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'}`;
+
   return (
-    <div className="min-h-full flex bg-slate-100 text-slate-900">
-      <aside className="w-60 shrink-0 bg-slate-900 text-white flex flex-col">
-        <div className="h-16 flex items-center gap-2 px-5 border-b border-slate-800">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 font-bold">N</span>
-          <span className="font-semibold">NameCraft Admin</span>
+    <div className="flex h-screen overflow-hidden bg-slate-100 text-slate-900">
+      {/* Sidebar — full viewport height; only its nav scrolls */}
+      <aside
+        className={`${collapsed ? 'w-16' : 'w-64'} shrink-0 bg-slate-900 text-white flex flex-col transition-[width] duration-200`}
+      >
+        <div className="flex h-16 shrink-0 items-center gap-2 border-b border-slate-800 px-3">
+          <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-600 font-display text-lg font-semibold">
+            O
+          </span>
+          {!collapsed && (
+            <span className="flex-1 truncate font-display text-sm font-medium">
+              OWM NameCraft Ecom
+            </span>
+          )}
+          <button
+            onClick={toggle}
+            title={collapsed ? 'Expand' : 'Collapse'}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-300 hover:bg-slate-800 hover:text-white"
+          >
+            <Icon name="chevron" className={`h-5 w-5 transition-transform ${collapsed ? 'rotate-180' : ''}`} />
+          </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto p-3">
-          <NavLink to="/dashboard" className={linkClass}>Dashboard</NavLink>
-
-          <NavGroup title="Operations">
-            <NavLink to="/orders" className={linkClass}>Orders</NavLink>
-            <NavLink to="/reviews" className={linkClass}>Reviews</NavLink>
-            <NavLink to="/analytics" className={linkClass}>Analytics</NavLink>
-          </NavGroup>
-
-          <NavGroup title="Catalog">
-            <NavLink to="/categories" className={linkClass}>Categories</NavLink>
-            <NavLink to="/subcategories" className={linkClass}>Subcategories</NavLink>
-            <NavLink to="/products" className={linkClass}>Products</NavLink>
-          </NavGroup>
-
-          <NavGroup title="Options">
-            {OPTION_COLLECTIONS.map((c) => (
-              <NavLink key={c.key} to={`/options/${c.key}`} className={linkClass}>
-                {c.label}
-              </NavLink>
-            ))}
-          </NavGroup>
-
-          <NavGroup title="Store">
-            <NavLink to="/coupons" className={linkClass}>Coupons</NavLink>
-            <NavLink to="/banners" className={linkClass}>Banners</NavLink>
-            <NavLink to="/settings" className={linkClass}>Settings</NavLink>
-          </NavGroup>
+        <nav className="nav-scroll flex-1 overflow-y-auto px-3 py-3">
+          {GROUPS.map((group, gi) => (
+            <div key={group.title || gi} className={gi > 0 ? 'mt-4' : ''}>
+              {group.title && !collapsed && (
+                <div className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                  {group.title}
+                </div>
+              )}
+              {group.title && collapsed && gi > 0 && <div className="mx-2 mb-2 border-t border-slate-800" />}
+              <div className="space-y-1">
+                {group.items.map((item) => (
+                  <NavLink key={item.to} to={item.to} title={item.label} className={linkClass}>
+                    <Icon name={item.icon} className="h-5 w-5 shrink-0" />
+                    {!collapsed && <span className="truncate">{item.label}</span>}
+                  </NavLink>
+                ))}
+              </div>
+            </div>
+          ))}
         </nav>
 
-        <div className="p-3 border-t border-slate-800">
-          <div className="px-3 py-2 text-xs text-slate-400 truncate">{user?.email}</div>
-          <button onClick={onLogout} className="w-full rounded-md px-3 py-2 text-left text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white">
-            Logout
+        <div className="shrink-0 border-t border-slate-800 p-2">
+          {!collapsed && <div className="truncate px-3 py-1 text-xs text-slate-400">{user?.email}</div>}
+          <button
+            onClick={onLogout}
+            title="Logout"
+            className={`flex w-full items-center gap-3 rounded-full px-3 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white ${collapsed ? 'justify-center' : ''}`}
+          >
+            <Icon name="logout" className="h-5 w-5 shrink-0" />
+            {!collapsed && <span>Logout</span>}
           </button>
         </div>
       </aside>
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-16 bg-white border-b border-slate-200 flex items-center px-6">
+      {/* Content — scrolls independently of the sidebar */}
+      <div className="flex h-screen flex-1 flex-col overflow-hidden">
+        <header className="flex h-16 shrink-0 items-center border-b border-slate-200 bg-white px-6">
           <h1 className="text-sm font-medium text-slate-500">
             Signed in as <span className="text-slate-900">{user?.name}</span>
           </h1>
         </header>
-        <main className="flex-1 p-6 overflow-x-hidden">
+        <main className="flex-1 overflow-y-auto p-6">
           <Outlet />
         </main>
       </div>

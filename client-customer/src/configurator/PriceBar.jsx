@@ -29,7 +29,7 @@ export default function PriceBar({ pricing, status, errors, priceUpdated, onAddT
         <button
           onClick={onAddToCart}
           disabled={invalid || loading || adding}
-          className="rounded-md bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {adding ? 'Preparing…' : added ? 'Added ✓' : 'Add to cart'}
         </button>

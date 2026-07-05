@@ -45,7 +45,7 @@ export default function LoginPage() {
           <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 text-white font-bold">
             N
           </span>
-          <span className="text-lg font-semibold">NameCraft Admin</span>
+          <span className="text-lg font-semibold">OWM NameCraft Ecom</span>
         </div>
         <h1 className="mt-6 text-xl font-bold">Sign in</h1>
         <p className="mt-1 text-sm text-slate-500">Admin access only.</p>
@@ -86,7 +86,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={status === 'loading'}
-            className="w-full rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
+            className="w-full rounded-full bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
           >
             {status === 'loading' ? 'Signing in…' : 'Sign in'}
           </button>

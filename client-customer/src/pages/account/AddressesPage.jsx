@@ -25,7 +25,7 @@ export default function AddressesPage() {
     <div>
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold">Saved addresses</h2>
-        <button onClick={() => setShowForm((s) => !s)} className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700">
+        <button onClick={() => setShowForm((s) => !s)} className="rounded-full bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700">
           {showForm ? 'Cancel' : '+ Add address'}
         </button>
       </div>
@@ -43,7 +43,7 @@ export default function AddressesPage() {
             {field('state', 'State', { required: 'Required' })}
             {field('pincode', 'Pincode', { required: 'Required' })}
           </div>
-          <button type="submit" className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">Save address</button>
+          <button type="submit" className="rounded-full bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">Save address</button>
         </form>
       )}
 
