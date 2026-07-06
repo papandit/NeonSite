@@ -96,6 +96,12 @@ const config = {
     pass: optional('SMTP_PASS'),
     from: optional('MAIL_FROM', 'NameCraft <no-reply@namecraft.local>'),
   },
+
+  // Gemini chatbot (optional — the widget falls back to a canned reply if absent)
+  gemini: {
+    apiKey: optional('GEMINI_API_KEY'),
+    model: optional('GEMINI_MODEL', 'gemini-1.5-flash'),
+  },
 };
 
 if (missing.length > 0) {

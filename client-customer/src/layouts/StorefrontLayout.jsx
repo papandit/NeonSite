@@ -5,6 +5,9 @@ import { logout, selectIsAuthenticated, selectUser } from '../store/authSlice';
 import { resetCart, selectCartCount } from '../store/cartSlice';
 import { getCategories } from '../services/catalog';
 import { useLiveCatalog } from '../hooks/useLiveCatalog';
+import Footer from '../components/Footer';
+import ScrollProgress from '../components/ScrollProgress';
+import ChatBot from '../components/ChatBot';
 
 const navLinkClass = ({ isActive }) =>
   `px-3 py-2 text-sm font-semibold rounded-full transition ${
@@ -33,6 +36,7 @@ export default function StorefrontLayout() {
 
   return (
     <div className="min-h-full flex flex-col bg-gray-50 text-gray-900">
+      <ScrollProgress />
       <header className="sticky top-0 z-40 border-b border-gray-200 bg-[#fffdf9]/90 backdrop-blur">
         <div className="mx-auto max-w-6xl px-4 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
@@ -111,12 +115,8 @@ export default function StorefrontLayout() {
         <Outlet />
       </main>
 
-      <footer className="border-t border-gray-200 bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-6 text-sm text-gray-500 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>© {new Date().getFullYear()} OWM NameCraft Ecom · Onewebmart</span>
-          <span>Custom name plates, crafted to order.</span>
-        </div>
-      </footer>
+      <Footer categories={categories} />
+      <ChatBot />
     </div>
   );
 }

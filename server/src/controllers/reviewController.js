@@ -26,8 +26,10 @@ export const createReview = asyncHandler(async (req, res) => {
       rating: r,
       title,
       comment,
-      status: 'pending',
+      status: 'approved', // visible immediately; admin can still moderate/remove
     });
+    // Reflect the new review in the product's average rating right away.
+    await Review.recomputeProductRating(productId);
     return sendSuccess(res, review, 201);
   } catch (err) {
     if (err.code === 11000) throw ApiError.conflict('You have already reviewed this product');

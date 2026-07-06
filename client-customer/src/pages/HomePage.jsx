@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { getCategories, getProducts, getRecommendedProducts, getBanners } from '../services/catalog';
 import ProductGrid from '../components/ProductGrid';
 import HeroBanner from '../components/HeroBanner';
+import Reveal from '../components/Reveal';
 import Seo from '../components/Seo';
 import { useLiveCatalog } from '../hooks/useLiveCatalog';
 
@@ -42,14 +44,16 @@ const FAQS = [
 function Section({ title, subtitle, children, cta }) {
   return (
     <section className="mx-auto max-w-6xl px-4 py-12">
-      <div className="mb-6 flex items-end justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">{title}</h2>
-          {subtitle && <p className="mt-1 text-sm text-gray-500">{subtitle}</p>}
+      <Reveal>
+        <div className="mb-6 flex items-end justify-between">
+          <div>
+            <h2 className="text-2xl font-bold">{title}</h2>
+            {subtitle && <p className="mt-1 text-sm text-gray-500">{subtitle}</p>}
+          </div>
+          {cta}
         </div>
-        {cta}
-      </div>
-      {children}
+        {children}
+      </Reveal>
     </section>
   );
 }
@@ -80,7 +84,11 @@ export default function HomePage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const scrollCats = (dx) => catScroll.current?.scrollBy({ left: dx, behavior: 'smooth' });
+  // Scroll by ~one viewport; snap-mandatory guarantees we land on full circles.
+  const scrollCats = (dir) => {
+    const el = catScroll.current;
+    if (el) el.scrollBy({ left: dir * el.clientWidth * 0.86, behavior: 'smooth' });
+  };
 
   useEffect(() => { load(); }, [load]);
   // Live sync: refetch when the admin changes the catalog.
@@ -117,14 +125,22 @@ export default function HomePage() {
       {/* Features / trust strip */}
       <section className="border-b border-gray-200 bg-white">
         <div className="mx-auto grid max-w-6xl grid-cols-2 gap-6 px-4 py-8 sm:grid-cols-4">
-          {FEATURES.map(([icon, title, desc]) => (
-            <div key={title} className="flex items-start gap-3">
-              <span className="text-2xl">{icon}</span>
-              <div>
-                <div className="text-sm font-semibold text-gray-900">{title}</div>
-                <div className="text-xs text-gray-500">{desc}</div>
+          {FEATURES.map(([icon, title, desc], i) => (
+            <Reveal key={title} delay={i * 0.06}>
+              <div className="flex items-start gap-3">
+                <motion.span
+                  className="text-2xl"
+                  animate={{ y: [0, -5, 0] }}
+                  transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut', delay: i * 0.25 }}
+                >
+                  {icon}
+                </motion.span>
+                <div>
+                  <div className="text-sm font-semibold text-gray-900">{title}</div>
+                  <div className="text-xs text-gray-500">{desc}</div>
+                </div>
               </div>
-            </div>
+            </Reveal>
           ))}
         </div>
       </section>
@@ -137,7 +153,7 @@ export default function HomePage() {
           <div className="relative">
             {/* Left / right scroll arrows */}
             <button
-              onClick={() => scrollCats(-360)}
+              onClick={() => scrollCats(-1)}
               aria-label="Scroll left"
               className="absolute left-0 top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-gray-200 bg-white text-xl text-gray-700 shadow-md hover:bg-gray-50 sm:flex"
             >
@@ -145,15 +161,15 @@ export default function HomePage() {
             </button>
             <div
               ref={catScroll}
-              className="flex snap-x gap-10 overflow-x-auto scroll-smooth px-2 pb-3 sm:px-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              className="flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth px-2 pb-3 sm:px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             >
               {categories.map((c) => (
                 <Link
                   key={c._id}
                   to={`/products?category=${c.slug}`}
-                  className="group flex w-40 shrink-0 snap-start flex-col items-center gap-5 text-center sm:w-52"
+                  className="group flex w-40 shrink-0 snap-start flex-col items-center gap-4 text-center sm:w-48"
                 >
-                  <div className="h-40 w-40 overflow-hidden rounded-full border border-gray-200 bg-white shadow-sm ring-1 ring-transparent transition group-hover:shadow-lg group-hover:ring-indigo-200 sm:h-52 sm:w-52">
+                  <div className="h-40 w-40 overflow-hidden rounded-full border border-gray-200 bg-white shadow-sm ring-1 ring-transparent transition group-hover:shadow-lg group-hover:ring-indigo-200 sm:h-48 sm:w-48">
                     {c.banner ? (
                       <img src={c.banner} alt={c.name} className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
                     ) : (
@@ -169,7 +185,7 @@ export default function HomePage() {
               ))}
             </div>
             <button
-              onClick={() => scrollCats(360)}
+              onClick={() => scrollCats(1)}
               aria-label="Scroll right"
               className="absolute right-0 top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-gray-200 bg-white text-xl text-gray-700 shadow-md hover:bg-gray-50 sm:flex"
             >
@@ -198,15 +214,19 @@ export default function HomePage() {
       )}
 
       {/* Promo band */}
-      <section className="bg-linear-to-br from-indigo-600 to-indigo-500">
+      <section className="overflow-hidden bg-linear-to-br from-indigo-600 to-indigo-500">
         <div className="mx-auto max-w-6xl px-4 py-14 text-center text-white">
-          <h2 className="font-display text-3xl font-medium text-white sm:text-4xl">Ready to design yours?</h2>
-          <p className="mx-auto mt-3 max-w-xl text-indigo-50">
-            Create a one-of-a-kind name plate in minutes — or grab a ready design as-is.
-          </p>
-          <Link to="/products" className="mt-6 inline-block rounded-full bg-white px-6 py-3 text-sm font-semibold text-indigo-700 shadow-lg hover:bg-indigo-50">
-            Start designing
-          </Link>
+          <Reveal>
+            <h2 className="font-display text-3xl font-medium text-white sm:text-4xl">Ready to design yours?</h2>
+            <p className="mx-auto mt-3 max-w-xl text-indigo-50">
+              Create a one-of-a-kind name plate in minutes — or grab a ready design as-is.
+            </p>
+            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="mt-6 inline-block">
+              <Link to="/products" className="inline-block rounded-full bg-white px-6 py-3 text-sm font-semibold text-indigo-700 shadow-lg hover:bg-indigo-50">
+                Start designing
+              </Link>
+            </motion.div>
+          </Reveal>
         </div>
       </section>
 

@@ -113,16 +113,23 @@ export default function AdminLayout() {
           ))}
         </nav>
 
-        <div className="shrink-0 border-t border-slate-800 p-2">
-          {!collapsed && <div className="truncate px-3 py-1 text-xs text-slate-400">{user?.email}</div>}
-          <button
-            onClick={onLogout}
-            title="Logout"
-            className={`flex w-full items-center gap-3 rounded-full px-3 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white ${collapsed ? 'justify-center' : ''}`}
-          >
-            <Icon name="logout" className="h-5 w-5 shrink-0" />
-            {!collapsed && <span>Logout</span>}
-          </button>
+        <div className="shrink-0 border-t border-slate-800 p-2.5">
+          <div className={`flex items-center ${collapsed ? 'flex-col gap-2' : 'justify-between'}`}>
+            <span
+              title={user?.name || user?.email}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-600 text-sm font-semibold text-white"
+            >
+              {(user?.name || 'A').charAt(0).toUpperCase()}
+            </span>
+            <button
+              onClick={onLogout}
+              title="Logout"
+              aria-label="Logout"
+              className="flex h-9 w-9 items-center justify-center rounded-full text-slate-300 transition hover:bg-slate-800 hover:text-white"
+            >
+              <Icon name="logout" className="h-5 w-5" />
+            </button>
+          </div>
         </div>
       </aside>
 

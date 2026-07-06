@@ -51,6 +51,7 @@ export default function CustomizationPanels({ product }) {
       {/* Text fields first — they’re what the customer cares about most */}
       {(cfg.textFields || []).length > 0 && (
         <div className="space-y-3">
+          <h4 className="text-xs font-semibold uppercase tracking-wide text-indigo-600">Your text</h4>
           {cfg.textFields.map((tf) => (
             <div key={tf.key}>
               <label className="flex items-center justify-between text-sm font-medium text-gray-700">
@@ -104,7 +105,7 @@ export default function CustomizationPanels({ product }) {
       {cfg.icons?.enabled && cfg.icons.options?.length > 0 && (
         <div>
           <h4 className="mb-2 text-sm font-semibold text-gray-900">
-            Icons <span className="text-xs font-normal text-gray-400">(up to {cfg.icons.max} — {icons.length} selected)</span>
+            Add elements <span className="text-xs font-normal text-gray-400">(icons — up to {cfg.icons.max}, {icons.length} selected)</span>
           </h4>
           <div className="flex flex-wrap gap-2">
             {cfg.icons.options.map((opt) => {
