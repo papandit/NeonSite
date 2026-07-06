@@ -10,17 +10,34 @@ import { apiErrorMessage } from '../../services/api';
 import { paiseToRupees, rupeesToPaise } from '../../utils/money';
 import PageHeader from '../../components/PageHeader';
 import FileUpload from '../../components/FileUpload';
+import InlineOptionCreator from '../../components/InlineOptionCreator';
 
-// Panel -> option collection mapping.
+// Panel -> option collection mapping. `metaFields` mirrors the server option
+// registry so the admin can create a new option inline with the right fields.
 const PANELS = [
-  { panel: 'material', collKey: 'materials', label: 'Material', hasRequired: true },
-  { panel: 'size', collKey: 'sizes', label: 'Size', hasRequired: true },
-  { panel: 'font', collKey: 'fonts', label: 'Font' },
-  { panel: 'color', collKey: 'colors', label: 'Color' },
-  { panel: 'background', collKey: 'backgrounds', label: 'Background' },
-  { panel: 'border', collKey: 'borders', label: 'Border' },
-  { panel: 'mountType', collKey: 'mounttypes', label: 'Mount Type' },
-  { panel: 'icons', collKey: 'icons', label: 'Icons', isIcons: true },
+  { panel: 'material', collKey: 'materials', label: 'Material', hasRequired: true, metaFields: [] },
+  { panel: 'size', collKey: 'sizes', label: 'Size', hasRequired: true, metaFields: [
+    { name: 'widthMm', type: 'number', label: 'Width (mm)' },
+    { name: 'heightMm', type: 'number', label: 'Height (mm)' },
+  ] },
+  { panel: 'font', collKey: 'fonts', label: 'Font', metaFields: [
+    { name: 'fileUrl', type: 'font', label: 'Font file (ttf/otf/woff)' },
+    { name: 'format', type: 'text', label: 'Format' },
+    { name: 'family', type: 'text', label: 'Family name' },
+  ] },
+  { panel: 'color', collKey: 'colors', label: 'Color', metaFields: [
+    { name: 'hex', type: 'color', label: 'Hex' },
+  ] },
+  { panel: 'background', collKey: 'backgrounds', label: 'Background', metaFields: [
+    { name: 'type', type: 'text', label: 'Type (color/texture/image)' },
+    { name: 'value', type: 'text', label: 'Value (hex or URL)' },
+  ] },
+  { panel: 'border', collKey: 'borders', label: 'Border', metaFields: [] },
+  { panel: 'mountType', collKey: 'mounttypes', label: 'Mount Type', metaFields: [] },
+  { panel: 'icons', collKey: 'icons', label: 'Icons', isIcons: true, metaFields: [
+    { name: 'svgUrl', type: 'svg', label: 'SVG file' },
+    { name: 'group', type: 'text', label: 'Group' },
+  ] },
 ];
 
 const products = resource('products');
@@ -119,6 +136,13 @@ export default function ProductBuilderPage() {
       const next = opts.includes(optId) ? opts.filter((o) => o !== optId) : [...opts, optId];
       return { ...c, [panel]: { ...c[panel], options: next } };
     });
+
+  // A newly-created option (from the inline creator): add it to the collection
+  // list and auto-select it on this product's panel.
+  const handleOptionCreated = (panel, collKey, option) => {
+    setAllOptions((prev) => ({ ...prev, [collKey]: [...(prev[collKey] || []), option] }));
+    setConfig((c) => ({ ...c, [panel]: { ...c[panel], options: [...c[panel].options, String(option._id)] } }));
+  };
 
   // Text fields editor
   const addTextField = () =>
@@ -248,7 +272,7 @@ export default function ProductBuilderPage() {
           <h3 className="mb-1 font-semibold">Customization panels</h3>
           <p className="mb-4 text-sm text-slate-500">Enable a panel and pick which options it exposes.</p>
           <div className="space-y-4">
-            {PANELS.map(({ panel, collKey, label, hasRequired, isIcons }) => {
+            {PANELS.map(({ panel, collKey, label, hasRequired, isIcons, metaFields }) => {
               const opts = allOptions[collKey] || [];
               const panelCfg = config[panel];
               return (
@@ -275,22 +299,31 @@ export default function ProductBuilderPage() {
                   </div>
 
                   {panelCfg.enabled && (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {opts.length === 0 && <span className="text-xs text-slate-400">No {label.toLowerCase()} options exist yet.</span>}
-                      {opts.map((o) => {
-                        const checked = panelCfg.options.includes(o._id);
-                        return (
-                          <button
-                            type="button"
-                            key={o._id}
-                            onClick={() => toggleOption(panel, o._id)}
-                            className={`rounded-full border px-3 py-1 text-sm ${checked ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
-                          >
-                            {o.meta?.hex && <span className="mr-1 inline-block h-2.5 w-2.5 rounded-full align-middle" style={{ background: o.meta.hex }} />}
-                            {o.name}
-                          </button>
-                        );
-                      })}
+                    <div className="mt-3 space-y-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {opts.length === 0 && <span className="text-xs text-slate-400">No {label.toLowerCase()} options exist yet — add one below.</span>}
+                        {opts.map((o) => {
+                          const checked = panelCfg.options.includes(String(o._id));
+                          return (
+                            <button
+                              type="button"
+                              key={o._id}
+                              onClick={() => toggleOption(panel, String(o._id))}
+                              className={`rounded-full border px-3 py-1 text-sm ${checked ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
+                            >
+                              {o.meta?.hex && <span className="mr-1 inline-block h-2.5 w-2.5 rounded-full align-middle" style={{ background: o.meta.hex }} />}
+                              {o.name}
+                              {o.priceDeltaPaise > 0 && <span className={checked ? 'ml-1 text-indigo-100' : 'ml-1 text-slate-400'}>+₹{(o.priceDeltaPaise / 100).toFixed(0)}</span>}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <InlineOptionCreator
+                        collKey={collKey}
+                        label={label}
+                        metaFields={metaFields}
+                        onCreated={(opt) => handleOptionCreated(panel, collKey, opt)}
+                      />
                     </div>
                   )}
                 </div>
