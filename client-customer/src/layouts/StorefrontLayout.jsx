@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { logout, selectIsAuthenticated, selectUser } from '../store/authSlice';
-import { resetCart, selectCartCount } from '../store/cartSlice';
+import { Link, NavLink, Outlet } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { selectIsAuthenticated, selectUser } from '../store/authSlice';
+import { selectCartCount } from '../store/cartSlice';
 import { getCategories } from '../services/catalog';
 import { useLiveCatalog } from '../hooks/useLiveCatalog';
 import Footer from '../components/Footer';
@@ -18,8 +18,6 @@ export default function StorefrontLayout() {
   const isAuthed = useSelector(selectIsAuthenticated);
   const user = useSelector(selectUser);
   const cartCount = useSelector(selectCartCount);
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   const [categories, setCategories] = useState([]);
   const loadCats = useCallback(() => {
@@ -27,12 +25,6 @@ export default function StorefrontLayout() {
   }, []);
   useEffect(() => { loadCats(); }, [loadCats]);
   useLiveCatalog(loadCats); // dropdown updates when admin adds a category
-
-  const onLogout = () => {
-    dispatch(logout());
-    dispatch(resetCart());
-    navigate('/');
-  };
 
   return (
     <div className="min-h-full flex flex-col bg-gray-50 text-gray-900">
@@ -92,13 +84,14 @@ export default function StorefrontLayout() {
             </NavLink>
 
             {isAuthed ? (
-              <>
-                <NavLink to="/account" className={navLinkClass}>My Account</NavLink>
-                <span className="hidden sm:inline px-2 text-sm text-gray-400">{user?.name}</span>
-                <button onClick={onLogout} className="ml-1 rounded-full px-3 py-2 text-sm font-semibold text-gray-600 hover:text-gray-900">
-                  Logout
-                </button>
-              </>
+              <Link
+                to="/account"
+                title={user?.name ? `${user.name} — My Account` : 'My Account'}
+                aria-label="My Account"
+                className="ml-1 inline-flex h-9 w-9 items-center justify-center rounded-full bg-indigo-600 font-display text-sm font-semibold text-white ring-2 ring-transparent transition hover:ring-indigo-200"
+              >
+                {(user?.name || 'U').charAt(0).toUpperCase()}
+              </Link>
             ) : (
               <>
                 <NavLink to="/login" className={navLinkClass}>Login</NavLink>

@@ -15,10 +15,10 @@ const HOW_IT_WORKS = [
 ];
 
 const FEATURES = [
-  ['✍️', 'Made to order', 'Every plate is handcrafted just for you.'],
-  ['🚚', 'Free shipping over ₹2000', 'Fast, tracked delivery across India.'],
-  ['🎨', 'Live design preview', 'See exactly what you get before you buy.'],
-  ['🔒', 'Secure checkout', 'Razorpay-protected payments, always.'],
+  ['✍️', 'Made to order', 'Every plate is handcrafted just for you.', 'from-amber-50 to-orange-50'],
+  ['🚚', 'Free shipping over ₹2000', 'Fast, tracked delivery across India.', 'from-emerald-50 to-teal-50'],
+  ['🎨', 'Live design preview', 'See exactly what you get before you buy.', 'from-indigo-50 to-violet-50'],
+  ['🔒', 'Secure checkout', 'Razorpay-protected payments, always.', 'from-rose-50 to-pink-50'],
 ];
 
 const REVIEWS = [
@@ -123,23 +123,27 @@ export default function HomePage() {
       )}
 
       {/* Features / trust strip */}
-      <section className="border-b border-gray-200 bg-white">
-        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-6 px-4 py-8 sm:grid-cols-4">
-          {FEATURES.map(([icon, title, desc], i) => (
+      <section className="border-b border-gray-200 bg-linear-to-b from-[#fffdf9] to-[#f7f1e7]">
+        <div className="mx-auto grid max-w-6xl grid-cols-1 gap-4 px-4 py-12 sm:grid-cols-2 lg:grid-cols-4">
+          {FEATURES.map(([icon, title, desc, tint], i) => (
             <Reveal key={title} delay={i * 0.06}>
-              <div className="flex items-start gap-3">
+              <motion.div
+                whileHover={{ y: -6 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                className="group flex h-full items-start gap-4 rounded-2xl border border-gray-100 bg-white/80 p-5 shadow-sm ring-1 ring-black/2 backdrop-blur transition hover:border-indigo-100 hover:shadow-lg"
+              >
                 <motion.span
-                  className="text-2xl"
-                  animate={{ y: [0, -5, 0] }}
+                  className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-linear-to-br ${tint} text-2xl shadow-inner`}
+                  animate={{ y: [0, -4, 0] }}
                   transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut', delay: i * 0.25 }}
                 >
                   {icon}
                 </motion.span>
                 <div>
-                  <div className="text-sm font-semibold text-gray-900">{title}</div>
-                  <div className="text-xs text-gray-500">{desc}</div>
+                  <div className="font-display text-base font-semibold text-gray-900">{title}</div>
+                  <div className="mt-1 text-sm leading-snug text-gray-500">{desc}</div>
                 </div>
-              </div>
+              </motion.div>
             </Reveal>
           ))}
         </div>

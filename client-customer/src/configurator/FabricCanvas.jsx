@@ -1,6 +1,8 @@
-// Live preview canvas (Fabric.js v7). Renders text + icons + background + border
-// from the design. Text/icons are draggable; drops update the normalized layout.
-// This is the PREVIEW only — the manufacturing render is regenerated server-side.
+// Live preview canvas (Fabric.js v7). If the product has an admin-uploaded photo
+// it becomes the plate background (cover-fit) and the customer's text/icons are
+// laid over it; otherwise we fall back to the selected background colour. Text/
+// icons are draggable; drops update the normalized layout. This is the PREVIEW
+// only — the manufacturing render is regenerated server-side.
 
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -10,20 +12,27 @@ import { aspectRatio } from './layout';
 
 const CANVAS_W = 520;
 
-const FabricCanvas = forwardRef(function FabricCanvas(_props, ref) {
+const FabricCanvas = forwardRef(function FabricCanvas({ photoUrl }, ref) {
   const dispatch = useDispatch();
   const design = useSelector(selectDesignDocument);
   const elRef = useRef(null);
   const fcRef = useRef(null);
+  const photoRef = useRef(null); // loaded fabric.Image for the product photo
+  const photoTaintedRef = useRef(false); // true if the photo can't be exported (CORS)
 
-  // Expose an imperative preview generator to the parent.
+  // Expose an imperative preview generator to the parent. Guarded so a tainted
+  // (cross-origin) canvas never blocks add-to-cart — it just returns null.
   useImperativeHandle(ref, () => ({
     toDataURL() {
       const fc = fcRef.current;
-      if (!fc) return null;
-      fc.discardActiveObject();
-      fc.renderAll();
-      return fc.toDataURL({ format: 'png', multiplier: 1 });
+      if (!fc || photoTaintedRef.current) return null;
+      try {
+        fc.discardActiveObject();
+        fc.renderAll();
+        return fc.toDataURL({ format: 'png', multiplier: 1 });
+      } catch {
+        return null; // canvas tainted by a cross-origin image
+      }
     },
   }));
 
@@ -55,8 +64,61 @@ const FabricCanvas = forwardRef(function FabricCanvas(_props, ref) {
     };
   }, [dispatch]);
 
-  // Redraw whenever the design changes.
+  // Load the admin-uploaded product photo whenever it changes.
   useEffect(() => {
+    let cancelled = false;
+    photoRef.current = null;
+    photoTaintedRef.current = false;
+    if (!photoUrl) {
+      fcRef.current?.requestRenderAll();
+      return;
+    }
+    fabric.FabricImage.fromURL(photoUrl, { crossOrigin: 'anonymous' })
+      .then((img) => {
+        if (cancelled) return;
+        photoRef.current = img;
+        redraw();
+      })
+      .catch(() => {
+        // If it can't load cross-origin, retry without CORS so it still SHOWS
+        // (but mark it tainted so we don't try to export the canvas).
+        fabric.FabricImage.fromURL(photoUrl)
+          .then((img) => {
+            if (cancelled) return;
+            photoRef.current = img;
+            photoTaintedRef.current = true;
+            redraw();
+          })
+          .catch(() => {});
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [photoUrl]);
+
+  // Cover-fit the loaded photo into the current canvas size, centred.
+  function applyPhotoBackground(fc, W, H) {
+    const img = photoRef.current;
+    if (!img) {
+      fc.backgroundImage = null;
+      return false;
+    }
+    const scale = Math.max(W / img.width, H / img.height);
+    img.set({
+      scaleX: scale,
+      scaleY: scale,
+      originX: 'center',
+      originY: 'center',
+      left: W / 2,
+      top: H / 2,
+    });
+    fc.backgroundImage = img;
+    return true;
+  }
+
+  // Redraw everything from the current design + photo.
+  function redraw() {
     const fc = fcRef.current;
     if (!fc) return;
 
@@ -65,9 +127,15 @@ const FabricCanvas = forwardRef(function FabricCanvas(_props, ref) {
     const H = Math.round(W / ratio);
     fc.setDimensions({ width: W, height: H });
 
-    // Background
-    const bg = design.selections.background?.snapshot?.meta;
-    fc.backgroundColor = bg?.type === 'color' && bg?.value ? bg.value : '#f5efe6';
+    const hasPhoto = applyPhotoBackground(fc, W, H);
+
+    // Background colour only when there is no product photo behind the text.
+    if (!hasPhoto) {
+      const bg = design.selections.background?.snapshot?.meta;
+      fc.backgroundColor = bg?.type === 'color' && bg?.value ? bg.value : '#f5efe6';
+    } else {
+      fc.backgroundColor = 'transparent';
+    }
 
     fc.remove(...fc.getObjects());
 
@@ -107,6 +175,8 @@ const FabricCanvas = forwardRef(function FabricCanvas(_props, ref) {
           fontFamily: family,
           editable: false,
           hasControls: false,
+          // Legible over a photo: soft shadow so text reads on any background.
+          shadow: hasPhoto ? new fabric.Shadow({ color: 'rgba(0,0,0,0.55)', blur: 6, offsetX: 0, offsetY: 1 }) : null,
         });
         t.elementIndex = index;
         fc.add(t);
@@ -135,6 +205,7 @@ const FabricCanvas = forwardRef(function FabricCanvas(_props, ref) {
           originX: 'center',
           originY: 'center',
           hasControls: false,
+          shadow: hasPhoto ? new fabric.Shadow({ color: 'rgba(0,0,0,0.5)', blur: 6, offsetX: 0, offsetY: 1 }) : null,
         });
         group.elementIndex = index;
         fc.add(group);
@@ -142,6 +213,12 @@ const FabricCanvas = forwardRef(function FabricCanvas(_props, ref) {
     });
 
     fc.renderAll();
+  }
+
+  // Redraw whenever the design changes.
+  useEffect(() => {
+    redraw();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [design]);
 
   return (

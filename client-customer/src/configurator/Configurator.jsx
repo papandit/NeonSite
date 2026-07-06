@@ -75,10 +75,10 @@ export default function Configurator({ product }) {
     <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
       {/* Canvas */}
       <div>
-        <FabricCanvas ref={canvasRef} />
+        <FabricCanvas ref={canvasRef} photoUrl={product.images?.[0] || null} />
         <p className="mt-2 text-center text-xs text-gray-400">
-          Live preview — drag text or icons to reposition. The final print file is regenerated
-          server-side.
+          Live preview — your text sits on the actual plate photo. Drag text or icons to
+          reposition. The final print file is regenerated server-side.
         </p>
         {error && <div className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}
       </div>
