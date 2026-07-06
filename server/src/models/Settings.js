@@ -3,17 +3,22 @@
 
 import mongoose from 'mongoose';
 import { paiseField, moneyGuardPlugin } from './plugins/moneyGuard.js';
+import { DEFAULT_SITE_CONTENT } from '../config/siteContentDefaults.js';
 
 const { Schema, model } = mongoose;
 
 const SettingsSchema = new Schema(
   {
     key: { type: String, default: 'global', unique: true },
-    storeName: { type: String, default: 'NameCraft' },
+    storeName: { type: String, default: 'OWM NameCraft Ecom' },
     logoUrl: { type: String, default: '' },
     supportEmail: { type: String, default: 'support@namecraft.local' },
     supportPhone: { type: String, default: '' },
     socials: { type: Schema.Types.Mixed, default: {} },
+
+    // All storefront copy the admin can edit (hero, features, FAQs, info pages…).
+    // Defaults mirror the built-in customer content; see siteContentDefaults.js.
+    content: { type: Schema.Types.Mixed, default: () => ({ ...DEFAULT_SITE_CONTENT }) },
 
     // GST as a whole/decimal percent (e.g. 18 = 18%). tax = round(taxable * rate/100).
     gstRatePercent: { type: Number, default: 18, min: 0, max: 100 },

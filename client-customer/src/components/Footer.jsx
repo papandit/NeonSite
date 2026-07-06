@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useSiteSettings } from '../context/SiteSettings';
 
 const QUICK_LINKS = [
   ['About Us', '/p/about-us'],
@@ -18,24 +19,29 @@ const NAV_LINKS = [
   ['Login', '/login'],
 ];
 
-const SOCIALS = [
-  ['Instagram', 'https://instagram.com', (
+// key → { label, default href, inline SVG paths }. The href is overridden by the
+// admin's Settings › socials when set.
+const SOCIAL_DEFS = [
+  ['instagram', 'Instagram', 'https://instagram.com', (
     <>
       <rect x="3" y="3" width="18" height="18" rx="5" />
       <circle cx="12" cy="12" r="4" />
       <circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none" />
     </>
   )],
-  ['YouTube', 'https://youtube.com', (
+  ['youtube', 'YouTube', 'https://youtube.com', (
     <>
       <rect x="2.5" y="6" width="19" height="12" rx="4" />
       <path d="M10.5 9.2l4.2 2.8-4.2 2.8z" fill="currentColor" stroke="none" />
     </>
   )],
-  ['X', 'https://x.com', (
+  ['facebook', 'Facebook', 'https://facebook.com', (
+    <path d="M14 8.5h2V5.5h-2.2C11.7 5.5 11 6.9 11 8.4V10H9v3h2v6h3v-6h2.2l.4-3H14V8.8c0-.2.1-.3.4-.3z" fill="currentColor" stroke="none" />
+  )],
+  ['twitter', 'X', 'https://x.com', (
     <path d="M4 4l16 16M20 4L4 20" />
   )],
-  ['Pinterest', 'https://pinterest.com', (
+  ['pinterest', 'Pinterest', 'https://pinterest.com', (
     <>
       <circle cx="12" cy="12" r="9" />
       <path d="M9.5 20l2-8M11.5 12c0-2 4-2.5 4 .5 0 2-2 3.5-3.5 2.5" />
@@ -52,6 +58,13 @@ function FooterLink({ to, children }) {
 }
 
 export default function Footer({ categories = [] }) {
+  const { settings } = useSiteSettings();
+  const storeName = settings.storeName || 'OWM NameCraft Ecom';
+  const about = settings.content?.footer?.about;
+  const tagline = settings.content?.footer?.tagline;
+  const socials = settings.socials || {};
+  const initial = storeName.charAt(0).toUpperCase();
+
   return (
     <footer className="bg-gray-900 text-gray-200">
       <div className="mx-auto max-w-6xl px-6 py-14">
@@ -59,19 +72,31 @@ export default function Footer({ categories = [] }) {
           {/* Brand */}
           <div>
             <Link to="/" className="flex items-center gap-2">
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 font-display text-lg font-semibold text-white">
-                O
-              </span>
-              <span className="font-display text-lg font-medium text-white">OWM NameCraft Ecom</span>
+              {settings.logoUrl ? (
+                <img src={settings.logoUrl} alt={storeName} className="h-10 w-10 rounded-xl object-cover" />
+              ) : (
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 font-display text-lg font-semibold text-white">
+                  {initial}
+                </span>
+              )}
+              <span className="font-display text-lg font-medium text-white">{storeName}</span>
             </Link>
-            <p className="mt-4 max-w-xs text-sm text-gray-400">
-              Handcrafted, personalized name plates — designed by you, crafted to order by Onewebmart.
-            </p>
+            <p className="mt-4 max-w-xs text-sm text-gray-400">{about}</p>
+            {(settings.supportEmail || settings.supportPhone) && (
+              <div className="mt-4 space-y-1 text-sm text-gray-400">
+                {settings.supportEmail && (
+                  <a href={`mailto:${settings.supportEmail}`} className="block transition hover:text-indigo-400">
+                    {settings.supportEmail}
+                  </a>
+                )}
+                {settings.supportPhone && <div>{settings.supportPhone}</div>}
+              </div>
+            )}
             <div className="mt-5 flex gap-3">
-              {SOCIALS.map(([label, href, paths]) => (
+              {SOCIAL_DEFS.map(([key, label, defaultHref, paths]) => (
                 <a
-                  key={label}
-                  href={href}
+                  key={key}
+                  href={socials[key] || defaultHref}
                   target="_blank"
                   rel="noreferrer"
                   aria-label={label}
@@ -112,9 +137,9 @@ export default function Footer({ categories = [] }) {
               {categories.length === 0 ? (
                 <li className="text-sm text-gray-500">Coming soon</li>
               ) : (
-                categories.slice(0, 6).map((c) => (
-                  <li key={c._id}>
-                    <FooterLink to={`/products?category=${c.slug}`}>{c.name}</FooterLink>
+                categories.slice(0, 6).map((cat) => (
+                  <li key={cat._id}>
+                    <FooterLink to={`/products?category=${cat.slug}`}>{cat.name}</FooterLink>
                   </li>
                 ))
               )}
@@ -126,8 +151,8 @@ export default function Footer({ categories = [] }) {
       {/* Bottom bar */}
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-6 py-5 text-sm text-gray-400 sm:flex-row">
-          <span>© {new Date().getFullYear()} OWM NameCraft Ecom · Onewebmart</span>
-          <span>Custom name plates, crafted to order in India 🇮🇳</span>
+          <span>© {new Date().getFullYear()} {storeName} · Onewebmart</span>
+          <span>{tagline}</span>
         </div>
       </div>
     </footer>

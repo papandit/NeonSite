@@ -1,5 +1,6 @@
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import Seo from '../components/Seo';
+import { useSiteSettings } from '../context/SiteSettings';
 
 // Full content for the footer Quick Links — each a proper, detailed page.
 const CONTENT = {
@@ -143,10 +144,28 @@ function humanize(slug) {
   return (slug || '').split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 }
 
+// An admin-authored page stores plain text; blank lines separate paragraphs.
+// Turn it into the same { title, intro, sections[] } shape the renderer expects.
+function fromAdminPage(slug, p) {
+  const paras = (p.body || '').split(/\n\s*\n/).map((s) => s.trim()).filter(Boolean);
+  return {
+    title: p.title || humanize(slug),
+    intro: p.intro || '',
+    sections: paras.length ? [{ heading: '', body: paras }] : [],
+  };
+}
+
 export default function InfoPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const page = CONTENT[slug] || { title: humanize(slug), intro: 'Content coming soon.', sections: [] };
+  const { settings } = useSiteSettings();
+
+  // Admin override (Settings › Site content › Pages) wins; else the built-in
+  // rich page; else a graceful "coming soon" stub.
+  const override = settings.content?.pages?.[slug];
+  const page = override
+    ? fromAdminPage(slug, override)
+    : CONTENT[slug] || { title: humanize(slug), intro: 'Content coming soon.', sections: [] };
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
@@ -167,7 +186,7 @@ export default function InfoPage() {
       <div className="mt-8 space-y-8">
         {page.sections.map((s, i) => (
           <section key={i}>
-            <h2 className="font-display text-xl font-medium text-gray-900">{s.heading}</h2>
+            {s.heading && <h2 className="font-display text-xl font-medium text-gray-900">{s.heading}</h2>}
             <div className="mt-2 space-y-2 text-gray-600">
               {s.body.map((p, j) => (
                 <p key={j} className="leading-relaxed">{p}</p>

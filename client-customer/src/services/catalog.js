@@ -6,6 +6,11 @@ export function getCategories() {
   return api.get('/categories').then((r) => r.data.data);
 }
 
+// Public store settings + all editable storefront content (admin-managed).
+export function getSiteSettings() {
+  return api.get('/settings').then((r) => r.data.data);
+}
+
 export function getBanners(placement = 'home_hero') {
   return api.get('/banners', { params: { placement } }).then((r) => r.data.data);
 }

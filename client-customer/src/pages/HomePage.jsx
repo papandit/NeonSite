@@ -7,38 +7,14 @@ import HeroBanner from '../components/HeroBanner';
 import Reveal from '../components/Reveal';
 import Seo from '../components/Seo';
 import { useLiveCatalog } from '../hooks/useLiveCatalog';
+import { useSiteSettings } from '../context/SiteSettings';
 
-const HOW_IT_WORKS = [
-  ['1', 'Pick a design', 'Choose a name plate and open the live customizer.'],
-  ['2', 'Make it yours', 'Set material, size, font, colour, icons and your text.'],
-  ['3', 'We craft & ship', 'We produce your exact design and deliver it to your door.'],
-];
-
-const FEATURES = [
-  ['✍️', 'Made to order', 'Every plate is handcrafted just for you.', 'from-amber-50 to-orange-50'],
-  ['🚚', 'Free shipping over ₹2000', 'Fast, tracked delivery across India.', 'from-emerald-50 to-teal-50'],
-  ['🎨', 'Live design preview', 'See exactly what you get before you buy.', 'from-indigo-50 to-violet-50'],
-  ['🔒', 'Secure checkout', 'Razorpay-protected payments, always.', 'from-rose-50 to-pink-50'],
-];
-
-const REVIEWS = [
-  ['Aarti S.', 'The wooden plate looks stunning on our door. Exactly like the preview!'],
-  ['Rahul M.', 'Loved the live editor — I could see my name in different fonts instantly.'],
-  ['Priya K.', 'Premium quality and fast delivery. Highly recommend.'],
-  ['Imran Q.', 'Ordered a brass plate for our office cabin — looks so professional.'],
-  ['Sneha D.', 'The resin ocean design is gorgeous. Everyone asks where I got it.'],
-  ['Vikram N.', 'Simple to customise and the finish is top-notch. Will order again.'],
-];
-
-const FAQS = [
-  ['How long does delivery take?', 'Custom plates are made to order and typically ship in 5–7 business days.'],
-  ['Can I change my design after ordering?', 'Yes — there is a design review step before manufacturing where you approve the final artwork.'],
-  ['What materials are available?', 'Wood, acrylic, brass, steel and resin, with new options added regularly.'],
-  ['How do I customize my name plate?', 'Open any product and use the live editor to set material, size, font, colour, border, background, mount and icons — the price updates instantly.'],
-  ['Can I buy a plate without customizing?', 'Yes. Every product has an "Add to cart (as-is)" option that uses sensible defaults, or you can personalize it fully.'],
-  ['Do you offer bulk or corporate orders?', 'Absolutely — reach out via the support email for office and bulk pricing.'],
-  ['Do you ship across India?', 'Yes, we deliver pan-India with tracking. Shipping is free on orders over ₹2000.'],
-  ['What is your return policy?', 'Because each plate is personalised, we replace items only for manufacturing defects or shipping damage.'],
+// Presentation-only accent gradients for the feature cards, applied by position.
+const FEATURE_TINTS = [
+  'from-amber-50 to-orange-50',
+  'from-emerald-50 to-teal-50',
+  'from-indigo-50 to-violet-50',
+  'from-rose-50 to-pink-50',
 ];
 
 function Section({ title, subtitle, children, cta }) {
@@ -59,6 +35,8 @@ function Section({ title, subtitle, children, cta }) {
 }
 
 export default function HomePage() {
+  const { settings } = useSiteSettings();
+  const c = settings.content;
   const [categories, setCategories] = useState([]);
   const [recent, setRecent] = useState([]);
   const [recommended, setRecommended] = useState([]);
@@ -103,16 +81,11 @@ export default function HomePage() {
       ) : (
         <section className="bg-linear-to-br from-indigo-50 to-white">
           <div className="mx-auto max-w-6xl px-4 py-20 text-center">
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-              Custom name plates, <span className="text-indigo-600">designed by you</span>
-            </h1>
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-600">
-              Personalize material, size, font, colour and icons in a live editor — then we craft
-              your exact design and deliver it.
-            </p>
+            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">{c.hero.heading}</h1>
+            <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-600">{c.hero.subheading}</p>
             <div className="mt-8 flex justify-center gap-3">
               <Link to="/products" className="rounded-full bg-indigo-600 px-6 py-3 font-medium text-white hover:bg-indigo-700">
-                Start designing
+                {c.hero.ctaText}
               </Link>
               <a href="#how" className="rounded-md border border-gray-300 px-6 py-3 font-medium text-gray-700 hover:bg-gray-50">
                 How it works
@@ -125,23 +98,23 @@ export default function HomePage() {
       {/* Features / trust strip */}
       <section className="border-b border-gray-200 bg-linear-to-b from-[#fffdf9] to-[#f7f1e7]">
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-4 px-4 py-12 sm:grid-cols-2 lg:grid-cols-4">
-          {FEATURES.map(([icon, title, desc, tint], i) => (
-            <Reveal key={title} delay={i * 0.06}>
+          {c.features.map((f, i) => (
+            <Reveal key={`${f.title}-${i}`} delay={i * 0.06}>
               <motion.div
                 whileHover={{ y: -6 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                 className="group flex h-full items-start gap-4 rounded-2xl border border-gray-100 bg-white/80 p-5 shadow-sm ring-1 ring-black/2 backdrop-blur transition hover:border-indigo-100 hover:shadow-lg"
               >
                 <motion.span
-                  className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-linear-to-br ${tint} text-2xl shadow-inner`}
+                  className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-linear-to-br ${FEATURE_TINTS[i % FEATURE_TINTS.length]} text-2xl shadow-inner`}
                   animate={{ y: [0, -4, 0] }}
                   transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut', delay: i * 0.25 }}
                 >
-                  {icon}
+                  {f.icon}
                 </motion.span>
                 <div>
-                  <div className="font-display text-base font-semibold text-gray-900">{title}</div>
-                  <div className="mt-1 text-sm leading-snug text-gray-500">{desc}</div>
+                  <div className="font-display text-base font-semibold text-gray-900">{f.title}</div>
+                  <div className="mt-1 text-sm leading-snug text-gray-500">{f.desc}</div>
                 </div>
               </motion.div>
             </Reveal>
@@ -221,13 +194,11 @@ export default function HomePage() {
       <section className="overflow-hidden bg-linear-to-br from-indigo-600 to-indigo-500">
         <div className="mx-auto max-w-6xl px-4 py-14 text-center text-white">
           <Reveal>
-            <h2 className="font-display text-3xl font-medium text-white sm:text-4xl">Ready to design yours?</h2>
-            <p className="mx-auto mt-3 max-w-xl text-indigo-50">
-              Create a one-of-a-kind name plate in minutes — or grab a ready design as-is.
-            </p>
+            <h2 className="font-display text-3xl font-medium text-white sm:text-4xl">{c.promo.heading}</h2>
+            <p className="mx-auto mt-3 max-w-xl text-indigo-50">{c.promo.subheading}</p>
             <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="mt-6 inline-block">
               <Link to="/products" className="inline-block rounded-full bg-white px-6 py-3 text-sm font-semibold text-indigo-700 shadow-lg hover:bg-indigo-50">
-                Start designing
+                {c.promo.ctaText}
               </Link>
             </motion.div>
           </Reveal>
@@ -239,11 +210,11 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl px-4 py-12">
           <h2 className="text-center text-2xl font-bold">How it works</h2>
           <div className="mt-8 grid gap-6 sm:grid-cols-3">
-            {HOW_IT_WORKS.map(([n, title, desc]) => (
-              <div key={n} className="rounded-xl border border-gray-200 bg-white p-6 text-center">
-                <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 font-bold text-white">{n}</div>
-                <h3 className="mt-3 font-semibold">{title}</h3>
-                <p className="mt-1 text-sm text-gray-600">{desc}</p>
+            {c.howItWorks.map((s, i) => (
+              <div key={`${s.step}-${i}`} className="rounded-xl border border-gray-200 bg-white p-6 text-center">
+                <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 font-bold text-white">{s.step}</div>
+                <h3 className="mt-3 font-semibold">{s.title}</h3>
+                <p className="mt-1 text-sm text-gray-600">{s.desc}</p>
               </div>
             ))}
           </div>
@@ -253,11 +224,11 @@ export default function HomePage() {
       {/* Reviews */}
       <Section title="What customers say">
         <div className="grid gap-4 sm:grid-cols-3">
-          {REVIEWS.map(([name, quote]) => (
-            <figure key={name} className="rounded-xl border border-gray-200 bg-white p-6">
+          {c.testimonials.map((t, i) => (
+            <figure key={`${t.name}-${i}`} className="rounded-xl border border-gray-200 bg-white p-6">
               <div className="text-amber-400">★★★★★</div>
-              <blockquote className="mt-2 text-sm text-gray-700">“{quote}”</blockquote>
-              <figcaption className="mt-3 text-xs font-medium text-gray-500">{name}</figcaption>
+              <blockquote className="mt-2 text-sm text-gray-700">“{t.quote}”</blockquote>
+              <figcaption className="mt-3 text-xs font-medium text-gray-500">{t.name}</figcaption>
             </figure>
           ))}
         </div>
@@ -266,8 +237,8 @@ export default function HomePage() {
       {/* Newsletter */}
       <section className="bg-white">
         <div className="mx-auto max-w-2xl px-4 py-14 text-center">
-          <h2 className="font-display text-2xl font-medium text-gray-900">Join our list</h2>
-          <p className="mt-2 text-sm text-gray-500">Design ideas, new materials and offers — straight to your inbox.</p>
+          <h2 className="font-display text-2xl font-medium text-gray-900">{c.newsletter.heading}</h2>
+          <p className="mt-2 text-sm text-gray-500">{c.newsletter.subheading}</p>
           {subscribed ? (
             <p className="mt-6 rounded-full bg-green-50 px-4 py-2.5 text-sm font-medium text-green-700">
               Thanks for subscribing! 🎉
@@ -284,10 +255,10 @@ export default function HomePage() {
       {/* FAQ */}
       <Section title="Frequently asked questions">
         <div className="mx-auto max-w-3xl divide-y divide-gray-200 rounded-xl border border-gray-200 bg-white">
-          {FAQS.map(([q, a]) => (
-            <details key={q} className="group px-6 py-4">
-              <summary className="cursor-pointer list-none font-medium text-gray-900">{q}</summary>
-              <p className="mt-2 text-sm text-gray-600">{a}</p>
+          {c.faqs.map((f, i) => (
+            <details key={`${f.q}-${i}`} className="group px-6 py-4">
+              <summary className="cursor-pointer list-none font-medium text-gray-900">{f.q}</summary>
+              <p className="mt-2 text-sm text-gray-600">{f.a}</p>
             </details>
           ))}
         </div>

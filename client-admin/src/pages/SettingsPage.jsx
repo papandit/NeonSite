@@ -5,6 +5,7 @@ import { apiErrorMessage } from '../services/api';
 import { paiseToRupees, rupeesToPaise } from '../utils/money';
 import PageHeader from '../components/PageHeader';
 import FileUpload from '../components/FileUpload';
+import ContentEditor from '../components/ContentEditor';
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
@@ -22,9 +23,12 @@ export default function SettingsPage() {
         reset({
           storeName: s.storeName, supportEmail: s.supportEmail, supportPhone: s.supportPhone,
           invoicePrefix: s.invoicePrefix, gstRatePercent: s.gstRatePercent,
+          storeAddress: s.storeAddress || '',
           flatRupees: paiseToRupees(s.shipping.flatPaise),
           freeAboveRupees: paiseToRupees(s.shipping.freeAbovePaise),
           instagram: s.socials?.instagram || '', facebook: s.socials?.facebook || '',
+          youtube: s.socials?.youtube || '', twitter: s.socials?.twitter || '',
+          pinterest: s.socials?.pinterest || '',
         });
       })
       .catch((e) => setError(apiErrorMessage(e)))
@@ -43,7 +47,11 @@ export default function SettingsPage() {
         supportPhone: v.supportPhone,
         invoicePrefix: v.invoicePrefix,
         gstRatePercent: Number(v.gstRatePercent),
-        socials: { instagram: v.instagram, facebook: v.facebook },
+        storeAddress: v.storeAddress,
+        socials: {
+          instagram: v.instagram, facebook: v.facebook,
+          youtube: v.youtube, twitter: v.twitter, pinterest: v.pinterest,
+        },
         shipping: {
           flatPaise: rupeesToPaise(v.flatRupees),
           freeAbovePaise: rupeesToPaise(v.freeAboveRupees),
@@ -67,8 +75,8 @@ export default function SettingsPage() {
   );
 
   return (
-    <div className="max-w-2xl">
-      <PageHeader title="Settings" subtitle="Store info, GST, and shipping. GST flows into checkout tax." />
+    <div className="max-w-3xl">
+      <PageHeader title="Settings" subtitle="Store info, GST, shipping, and all storefront content." />
 
       {error && <div className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}
       {saved && <div className="mb-4 rounded-md bg-green-50 px-3 py-2 text-sm text-green-700">Settings saved.</div>}
@@ -83,9 +91,13 @@ export default function SettingsPage() {
             {field('supportPhone', 'Support phone')}
           </div>
           <FileUpload label="Logo" kind="image" folder="store" value={logoUrl} onChange={setLogoUrl} />
+          {field('storeAddress', 'Store address')}
           <div className="grid gap-4 sm:grid-cols-2">
             {field('instagram', 'Instagram URL')}
             {field('facebook', 'Facebook URL')}
+            {field('youtube', 'YouTube URL')}
+            {field('twitter', 'X (Twitter) URL')}
+            {field('pinterest', 'Pinterest URL')}
           </div>
         </section>
 
@@ -103,6 +115,11 @@ export default function SettingsPage() {
           {saving ? 'Saving…' : 'Save settings'}
         </button>
       </form>
+
+      {/* Storefront content — all editable copy shown on the customer site. */}
+      <div className="mt-10 border-t border-slate-200 pt-8">
+        <ContentEditor />
+      </div>
     </div>
   );
 }

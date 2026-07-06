@@ -11,9 +11,11 @@ import {
   listBanners,
 } from '../controllers/public/catalogController.js';
 import { listProductReviews } from '../controllers/reviewController.js';
+import { getPublicSettings } from '../controllers/public/settingsController.js';
 
 const router = Router();
 
+router.get('/settings', getPublicSettings);
 router.get('/banners', listBanners);
 router.get('/categories', listCategories);
 router.get('/products', listProducts);
