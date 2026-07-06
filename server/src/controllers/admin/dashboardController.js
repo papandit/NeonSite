@@ -5,6 +5,10 @@ import asyncHandler from '../../utils/asyncHandler.js';
 import { sendSuccess } from '../../utils/apiResponse.js';
 import Order from '../../models/Order.js';
 import User from '../../models/User.js';
+import Product from '../../models/Product.js';
+import Category from '../../models/Category.js';
+import Coupon from '../../models/Coupon.js';
+import Review from '../../models/Review.js';
 
 function startOfToday() {
   const d = new Date();
@@ -23,6 +27,11 @@ export const dashboard = asyncHandler(async (req, res) => {
     pendingAgg,
     customerCount,
     recentRaw,
+    productCount,
+    activeProducts,
+    categoryCount,
+    activeCoupons,
+    reviewAgg,
   ] = await Promise.all([
     Order.aggregate([
       { $group: { _id: null, salesPaise: { $sum: '$totalPaise' }, orders: { $sum: 1 } } },
@@ -38,6 +47,14 @@ export const dashboard = asyncHandler(async (req, res) => {
     ]),
     User.countDocuments({ role: 'customer' }),
     Order.find().sort('-createdAt').limit(8).lean({ virtuals: true }),
+    Product.countDocuments(),
+    Product.countDocuments({ status: 'active' }),
+    Category.countDocuments(),
+    Coupon.countDocuments({ status: 'active' }),
+    Review.aggregate([
+      { $match: { status: 'approved' } },
+      { $group: { _id: null, avg: { $avg: '$rating' }, count: { $sum: 1 } } },
+    ]),
   ]);
 
   const recentOrders = recentRaw.map((o) => ({
@@ -49,13 +66,23 @@ export const dashboard = asyncHandler(async (req, res) => {
     createdAt: o.createdAt,
   }));
 
+  const totalOrders = allTime[0]?.orders || 0;
+  const totalSalesPaise = allTime[0]?.salesPaise || 0;
+
   return sendSuccess(res, {
-    totalSalesPaise: allTime[0]?.salesPaise || 0,
-    totalOrders: allTime[0]?.orders || 0,
+    totalSalesPaise,
+    totalOrders,
+    avgOrderValuePaise: totalOrders ? Math.round(totalSalesPaise / totalOrders) : 0,
     todaysOrders: today[0]?.orders || 0,
     todaysRevenuePaise: today[0]?.salesPaise || 0,
     pendingOrders: pendingAgg[0]?.count || 0,
     customerCount,
+    productCount,
+    activeProducts,
+    categoryCount,
+    activeCoupons,
+    reviewCount: reviewAgg[0]?.count || 0,
+    avgRating: reviewAgg[0]?.avg ? Math.round(reviewAgg[0].avg * 10) / 10 : 0,
     recentOrders,
   });
 });
