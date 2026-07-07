@@ -9,10 +9,12 @@ import { neonApi } from '../services/ops';
 import { apiErrorMessage } from '../services/api';
 import { paiseToRupees, rupeesToPaise } from '../utils/money';
 import PageHeader from '../components/PageHeader';
+import FileUpload from '../components/FileUpload';
+import { NEON_FONT_LIBRARY } from '../config/neonFontLibrary';
 
 // A generic editable table of records. columns: [{ key, label, type, width }]
 // type ∈ text | number | money | color | bool.
-function RowEditor({ title, description, items, columns, onChange, makeEmpty, addLabel }) {
+function RowEditor({ title, description, items, columns, onChange, makeEmpty, addLabel, headerAction }) {
   const list = Array.isArray(items) ? items : [];
   const setCell = (i, key, val) => onChange(list.map((it, idx) => (idx === i ? { ...it, [key]: val } : it)));
   const remove = (i) => onChange(list.filter((_, idx) => idx !== i));
@@ -49,6 +51,13 @@ function RowEditor({ title, description, items, columns, onChange, makeEmpty, ad
         />
       );
     }
+    if (col.type === 'image') {
+      return (
+        <div className="w-52">
+          <FileUpload kind="image" folder="neon-scenes" label="" value={v || ''} onChange={(url) => setCell(i, col.key, url)} />
+        </div>
+      );
+    }
     return (
       <input
         type={col.type === 'number' ? 'number' : 'text'}
@@ -61,9 +70,12 @@ function RowEditor({ title, description, items, columns, onChange, makeEmpty, ad
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-5">
-      <div className="mb-3">
-        <h3 className="font-semibold text-slate-800">{title}</h3>
-        {description && <p className="text-xs text-slate-400">{description}</p>}
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <div>
+          <h3 className="font-semibold text-slate-800">{title}</h3>
+          {description && <p className="text-xs text-slate-400">{description}</p>}
+        </div>
+        {headerAction}
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
@@ -109,13 +121,23 @@ export default function NeonPage() {
       .then((c) => setCfg({
         maxChars: c.maxChars,
         fonts: c.fonts || [], colors: c.colors || [], sizes: c.sizes || [],
-        backings: c.backings || [], scenes: c.scenes || [],
+        backings: c.backings || [], adapters: c.adapters || [], scenes: c.scenes || [],
       }))
       .catch((e) => setError(apiErrorMessage(e)))
       .finally(() => setLoading(false));
   }, []);
 
   const set = (key, val) => { setCfg((c) => ({ ...c, [key]: val })); setSaved(false); };
+
+  // Merge any missing fonts from the curated library (dedup by key).
+  const loadFontLibrary = () => {
+    setCfg((c) => {
+      const existing = new Set((c.fonts || []).map((f) => f.key));
+      const additions = NEON_FONT_LIBRARY.filter((f) => !existing.has(f.key)).map((f) => ({ ...f, active: true }));
+      return { ...c, fonts: [...(c.fonts || []), ...additions] };
+    });
+    setSaved(false);
+  };
 
   const onSave = async () => {
     setSaving(true); setSaved(false); setError(null);
@@ -160,6 +182,11 @@ export default function NeonPage() {
           items={cfg.fonts} onChange={(v) => set('fonts', v)}
           makeEmpty={() => ({ key: '', name: '', cssFamily: "'Pacifico', cursive", script: false, active: true })}
           addLabel="Add font"
+          headerAction={
+            <button type="button" onClick={loadFontLibrary} className="shrink-0 rounded-full border border-indigo-300 px-3 py-1.5 text-sm font-medium text-indigo-600 hover:bg-indigo-50">
+              ✨ Load popular fonts
+            </button>
+          }
           columns={[
             { key: 'key', label: 'Key', type: 'text' },
             { key: 'name', label: 'Name', type: 'text' },
@@ -213,13 +240,27 @@ export default function NeonPage() {
         />
 
         <RowEditor
-          title="Preview scenes" description="Background scenes shown behind the sign (preview only)."
+          title="Power adapters" description="Regional plug types the sign can ship with. Add an optional price per type."
+          items={cfg.adapters} onChange={(v) => set('adapters', v)}
+          makeEmpty={() => ({ key: '', name: '', priceDeltaPaise: 0, active: true })}
+          addLabel="Add adapter"
+          columns={[
+            { key: 'key', label: 'Key', type: 'text' },
+            { key: 'name', label: 'Name', type: 'text' },
+            { key: 'priceDeltaPaise', label: 'Extra (₹)', type: 'money' },
+            { key: 'active', label: 'Active', type: 'bool' },
+          ]}
+        />
+
+        <RowEditor
+          title="Preview scenes" description="Backdrops shown behind the sign. Upload a background image (a room, wall, brick…) and it shows in the live preview."
           items={cfg.scenes} onChange={(v) => set('scenes', v)}
-          makeEmpty={() => ({ key: '', name: '', active: true })}
+          makeEmpty={() => ({ key: '', name: '', imageUrl: '', active: true })}
           addLabel="Add scene"
           columns={[
             { key: 'key', label: 'Key', type: 'text' },
             { key: 'name', label: 'Name', type: 'text' },
+            { key: 'imageUrl', label: 'Background image', type: 'image' },
             { key: 'active', label: 'Active', type: 'bool' },
           ]}
         />

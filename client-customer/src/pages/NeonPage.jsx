@@ -1,8 +1,8 @@
 // Neon Sign Studio — a live LED-neon customizer. Text / font / colour / size /
-// backing / scene, with a glowing preview and a price that scales with size and
-// character count. The client shows a live ESTIMATE; the server reprices on
-// add-to-cart and again at checkout (INVARIANT 2), so the charged price is
-// always authoritative. Neon signs buy through the normal cart → checkout flow.
+// backing / adapter / scene, with a glowing preview, day-night lighting, On/Off
+// power, and measured width×height dimension guides that track the actual text.
+// The client shows a live ESTIMATE; the server reprices on add-to-cart and again
+// at checkout (INVARIANT 2). Neon signs buy through the normal cart → checkout.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -19,6 +19,19 @@ export const PENDING_NEON_KEY = 'nc_pending_neon';
 
 const charCountOf = (t) => (t || '').replace(/\s/g, '').length;
 
+function SunIcon() {
+  return (
+    <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round">
+      <circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+    </svg>
+  );
+}
+function MoonIcon() {
+  return (
+    <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" /></svg>
+  );
+}
+
 export default function NeonPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -30,20 +43,25 @@ export default function NeonPage() {
   const [color, setColor] = useState('');
   const [size, setSize] = useState('');
   const [backing, setBacking] = useState('');
+  const [adapter, setAdapter] = useState('');
   const [scene, setScene] = useState('');
   const [on, setOn] = useState(true);
+  const [mode, setMode] = useState('night'); // night | day
   const [powering, setPowering] = useState(false);
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState(null);
 
+  const signRef = useRef(null);
+  const [box, setBox] = useState({ w: 0, h: 0 });
+
   const load = useCallback(() => {
     getNeonConfig().then((c) => {
       setCfg(c);
-      // Default to the first option of each once (only if unset).
       setFont((f) => f || c.fonts[0]?.key || '');
       setColor((v) => v || c.colors[0]?.key || '');
-      setSize((v) => v || c.sizes[1]?.key || c.sizes[0]?.key || ''); // default Medium
+      setSize((v) => v || c.sizes.find((s) => s.key === 'm')?.key || c.sizes[0]?.key || '');
       setBacking((v) => v || c.backings[0]?.key || '');
+      setAdapter((v) => v || c.adapters?.[0]?.key || '');
       setScene((v) => v || c.scenes[0]?.key || '');
     }).catch(() => {});
   }, []);
@@ -59,21 +77,41 @@ export default function NeonPage() {
     return () => es.close();
   }, [load]);
 
+  // Measure the rendered text box so the dimension guides track the real sign.
+  useEffect(() => {
+    const el = signRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const measure = () => {
+      const r = el.getBoundingClientRect();
+      setBox({ w: r.width, h: r.height });
+    };
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    measure();
+    return () => ro.disconnect();
+  }, [cfg]);
+
   const fontObj = useMemo(() => cfg?.fonts.find((f) => f.key === font), [cfg, font]);
   const colorObj = useMemo(() => cfg?.colors.find((c) => c.key === color), [cfg, color]);
   const sizeObj = useMemo(() => cfg?.sizes.find((s) => s.key === size), [cfg, size]);
   const backObj = useMemo(() => cfg?.backings.find((b) => b.key === backing), [cfg, backing]);
+  const adapterObj = useMemo(() => cfg?.adapters?.find((a) => a.key === adapter), [cfg, adapter]);
+  const sceneObj = useMemo(() => cfg?.scenes.find((s) => s.key === scene), [cfg, scene]);
 
   const charCount = charCountOf(text);
   const estPaise = sizeObj
-    ? sizeObj.basePricePaise + charCount * sizeObj.perCharPaise + (backObj?.priceDeltaPaise || 0)
+    ? sizeObj.basePricePaise + charCount * sizeObj.perCharPaise + (backObj?.priceDeltaPaise || 0) + (adapterObj?.priceDeltaPaise || 0)
     : 0;
 
-  // Rough tube estimate (matches the server heuristic).
   const tubeMeters = sizeObj ? charCount * (sizeObj.cm / 60) * 0.22 * (fontObj?.script ? 1.25 : 1) : 0;
-  const dimW = sizeObj?.cm || 0;
+
+  // Real-world dimensions derived from the ACTUAL rendered line(s).
   const lines = (text || ' ').split('\n');
-  const dimH = sizeObj ? Math.round((sizeObj.cm / 60) * (18 + (lines.length - 1) * 22)) : 0;
+  const lineCm = sizeObj ? Math.max(1, Math.round(sizeObj.fontSizePx * 0.33)) : 15;
+  const heightCm = lineCm * lines.length;
+  const widthCm = box.h > 0
+    ? Math.max(1, Math.round(heightCm * (box.w / box.h)))
+    : Math.max(1, Math.round(heightCm * Math.max(1, charCount * 0.5)));
 
   const powerOn = () => {
     setOn(true);
@@ -85,7 +123,7 @@ export default function NeonPage() {
     if (!sizeObj || !text.trim()) { setError('Add some text and pick a size first.'); return; }
     setAdding(true);
     setError(null);
-    const spec = { text, font, color, size, backing, scene };
+    const spec = { text, font, color, size, backing, adapter, scene };
     try {
       if (isAuthed) {
         await dispatch(addNeonToCart({ spec })).unwrap();
@@ -109,6 +147,10 @@ export default function NeonPage() {
     `rounded-full border px-4 py-2 text-sm font-medium transition ${
       active ? 'border-pink-500 bg-pink-500/10 text-white' : 'border-white/10 bg-white/5 text-slate-400 hover:border-white/25 hover:text-white'
     }`;
+  const modeBtn = (active) =>
+    `flex h-8 w-9 items-center justify-center rounded-md transition ${active ? 'bg-pink-600 text-white' : 'bg-white/10 text-slate-300 hover:bg-white/20'}`;
+  const powerBtn = (active) =>
+    `rounded-md px-3.5 py-1.5 text-sm font-semibold transition ${active ? 'bg-pink-600 text-white' : 'bg-white/10 text-slate-300 hover:bg-white/20'}`;
 
   return (
     <div className="bg-[#0a0a0f] text-slate-100" style={{
@@ -128,36 +170,50 @@ export default function NeonPage() {
         <div className="grid gap-6 lg:grid-cols-[1.15fr_.85fr] lg:items-start">
           {/* ---------- STAGE ---------- */}
           <div className="lg:sticky lg:top-24">
-            <div className={`neon-stage ${scene || 'wall'}`}>
-              <div
-                className={`neon-sign ${on ? 'on' : 'off'} ${powering ? 'powering' : ''}`}
-                style={{
-                  fontFamily: fontObj?.cssFamily || 'cursive',
-                  fontSize: `clamp(22px, 8vw, ${sizeObj?.fontSizePx || 46}px)`,
-                  '--neon-fill': colorObj?.fill || '#fff',
-                  '--neon-glow': colorObj?.glow || '#ff2d95',
-                }}
-              >
-                {lines.map((l, i) => <span key={i} className="neon-line">{l || ' '}</span>)}
-              </div>
+            <div
+              className={`neon-stage ${scene || 'wall'}`}
+              style={sceneObj?.imageUrl ? {
+                backgroundImage: `linear-gradient(rgba(4,4,8,${mode === 'day' ? 0.15 : 0.5}), rgba(4,4,8,${mode === 'day' ? 0.15 : 0.55})), url("${sceneObj.imageUrl}")`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              } : undefined}
+            >
               {backing === 'rect' && <div className="neon-backing" />}
+              {mode === 'day' && <div className="neon-day-veil" />}
 
-              <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 px-4 py-3" style={{ background: 'linear-gradient(0deg,rgba(6,6,10,.85),transparent)' }}>
-                <button
-                  onClick={() => (on ? setOn(false) : powerOn())}
-                  className={`neon-switch inline-flex items-center gap-2.5 text-[11px] uppercase tracking-[0.12em] text-slate-400 ${on ? 'is-on' : ''}`}
-                >
-                  <span className="neon-toggle" />
-                  {on ? 'On' : 'Off'}
-                </button>
-                <div className="text-xs text-slate-400">
-                  Approx. <b className="text-slate-100">{dimW}</b> × <b className="text-slate-100">{dimH}</b> cm
+              {/* top controls: day/night + power */}
+              <div className="absolute left-3 top-3 z-10 flex items-center gap-3">
+                <div className="flex items-center gap-1.5 rounded-lg bg-black/30 p-1 backdrop-blur">
+                  <button onClick={() => setMode('day')} title="Daytime" className={modeBtn(mode === 'day')}><SunIcon /></button>
+                  <button onClick={() => setMode('night')} title="Night" className={modeBtn(mode === 'night')}><MoonIcon /></button>
                 </div>
+                <div className="flex items-center gap-1.5 rounded-lg bg-black/30 p-1 backdrop-blur">
+                  <button onClick={powerOn} className={powerBtn(on)}>On</button>
+                  <button onClick={() => setOn(false)} className={powerBtn(!on)}>Off</button>
+                </div>
+              </div>
+
+              {/* the sign + measured dimension guides */}
+              <div className="neon-measure">
+                <div
+                  ref={signRef}
+                  className={`neon-sign ${on ? 'on' : 'off'} ${mode === 'day' ? 'day' : ''} ${powering ? 'powering' : ''}`}
+                  style={{
+                    fontFamily: fontObj?.cssFamily || 'cursive',
+                    fontSize: `clamp(22px, 8vw, ${sizeObj?.fontSizePx || 46}px)`,
+                    '--neon-fill': colorObj?.fill || '#fff',
+                    '--neon-glow': colorObj?.glow || '#ff2d95',
+                  }}
+                >
+                  {lines.map((l, i) => <span key={i} className="neon-line">{l || ' '}</span>)}
+                </div>
+                <div className="neon-dim-y"><span>{heightCm} cm</span></div>
+                <div className="neon-dim-x"><span>{widthCm} cm</span></div>
               </div>
             </div>
             <p className="mt-3 text-xs leading-relaxed text-slate-500">
-              Live preview of your LED neon flex sign on a laser-cut acrylic backboard. What you set here maps 1:1 to the
-              production spec our workshop receives.
+              Live preview on a laser-cut acrylic backboard. Dimensions track your actual text; toggle day/night and power to
+              see how it reads in a real room.
             </p>
           </div>
 
@@ -182,16 +238,19 @@ export default function NeonPage() {
 
               {/* font */}
               <div className="mb-6">
-                <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Font</div>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="mb-2 flex items-center justify-between text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+                  <span>Font style</span>
+                  <span className="font-normal normal-case tracking-normal text-slate-500">{cfg.fonts.length} styles</span>
+                </div>
+                <div className="grid max-h-72 grid-cols-3 gap-2 overflow-y-auto pr-1 [scrollbar-width:thin]">
                   {cfg.fonts.map((f) => (
                     <button
                       key={f.key}
                       onClick={() => setFont(f.key)}
                       className={`rounded-xl border px-2 py-3 text-center transition ${font === f.key ? 'border-pink-500 bg-pink-500/10' : 'border-white/10 bg-white/5 hover:border-white/25'}`}
                     >
-                      <span className="block text-xl leading-none text-slate-100" style={{ fontFamily: f.cssFamily }}>Ag</span>
-                      <span className="mt-1.5 block text-[10.5px] text-slate-400">{f.name}</span>
+                      <span className="block truncate text-xl leading-none text-slate-100" style={{ fontFamily: f.cssFamily }}>Ag</span>
+                      <span className="mt-1.5 block truncate text-[10.5px] text-slate-400">{f.name}</span>
                     </button>
                   ))}
                 </div>
@@ -227,19 +286,51 @@ export default function NeonPage() {
                 </div>
               </div>
 
-              {/* backing + scene */}
-              <div>
-                <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Backboard &amp; scene</div>
-                <div className="mb-2.5 flex flex-wrap gap-2">
+              {/* backing */}
+              <div className="mb-6">
+                <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Backboard</div>
+                <div className="flex flex-wrap gap-2">
                   {cfg.backings.map((b) => (
                     <button key={b.key} onClick={() => setBacking(b.key)} className={pill(backing === b.key)}>
                       {b.name}{b.priceDeltaPaise > 0 && <span className="ml-1.5 text-xs text-pink-300">+{formatPaise(b.priceDeltaPaise)}</span>}
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* power adapter */}
+              {cfg.adapters?.length > 0 && (
+                <div className="mb-6">
+                  <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Power adapter</div>
+                  <div className="flex flex-wrap gap-2">
+                    {cfg.adapters.map((a) => (
+                      <button key={a.key} onClick={() => setAdapter(a.key)} className={pill(adapter === a.key)}>
+                        {a.name}{a.priceDeltaPaise > 0 && <span className="ml-1.5 text-xs text-pink-300">+{formatPaise(a.priceDeltaPaise)}</span>}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* scene */}
+              <div>
+                <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Background scene</div>
                 <div className="flex flex-wrap gap-2">
                   {cfg.scenes.map((s) => (
-                    <button key={s.key} onClick={() => setScene(s.key)} className={pill(scene === s.key)}>{s.name}</button>
+                    <button
+                      key={s.key}
+                      onClick={() => setScene(s.key)}
+                      className={`overflow-hidden rounded-xl border transition ${scene === s.key ? 'border-pink-500' : 'border-white/10 hover:border-white/25'}`}
+                    >
+                      {s.imageUrl ? (
+                        <span className="flex flex-col">
+                          <img src={s.imageUrl} alt={s.name} className="h-12 w-20 object-cover" />
+                          <span className="px-2 py-1 text-[11px] text-slate-300">{s.name}</span>
+                        </span>
+                      ) : (
+                        <span className="block px-4 py-2 text-sm text-slate-300">{s.name}</span>
+                      )}
+                    </button>
                   ))}
                 </div>
               </div>
@@ -249,7 +340,8 @@ export default function NeonPage() {
             <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
               <Row label="Design" value={text || '—'} />
               <Row label="Colour & font" value={`${colorObj?.name || '—'} · ${fontObj?.name || '—'}`} />
-              <Row label="Size" value={sizeObj ? `${sizeObj.name} — ${sizeObj.cm} cm wide` : '—'} />
+              <Row label="Dimensions" value={`${widthCm} × ${heightCm} cm`} />
+              <Row label="Backing & adapter" value={`${backObj?.name || '—'} · ${adapterObj?.name || '—'}`} />
               <Row label="Est. tube length" value={`≈ ${tubeMeters.toFixed(1)} m`} />
               <div className="mt-4 flex items-baseline justify-between">
                 <span className="text-xs uppercase tracking-[0.14em] text-slate-400">Estimated total</span>

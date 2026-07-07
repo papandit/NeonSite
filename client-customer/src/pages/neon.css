@@ -30,13 +30,51 @@
 .neon-sign {
   text-align: center;
   line-height: 1.15;
-  padding: 0 8%;
+  padding: 0;
   user-select: none;
   transition: filter 0.3s;
-  max-width: 100%;
+  max-width: 90%;
   word-break: break-word;
 }
 .neon-sign .neon-line { display: block; white-space: pre-wrap; }
+
+/* wrapper that shrink-wraps the sign so the dimension guides hug the text */
+.neon-measure { position: relative; display: inline-block; }
+
+/* daytime lighting — a bright veil over the scene; neon glows less */
+.neon-day-veil { position: absolute; inset: 0; background: rgba(226, 228, 235, 0.6); pointer-events: none; }
+.neon-sign.on.day {
+  text-shadow: 0 0 2px var(--neon-glow), 0 0 6px var(--neon-glow), 0 0 12px var(--neon-glow);
+  filter: saturate(1.05);
+}
+
+/* ---- dimension guides (width bottom, height left) ---- */
+.neon-dim-x {
+  position: absolute; left: 0; right: 0; bottom: -18px; height: 7px;
+  border-top: 1px solid rgba(255, 255, 255, 0.55);
+  pointer-events: none;
+}
+.neon-dim-x::before, .neon-dim-x::after {
+  content: ""; position: absolute; top: 0; width: 1px; height: 7px; background: rgba(255, 255, 255, 0.55);
+}
+.neon-dim-x::before { left: 0; } .neon-dim-x::after { right: 0; }
+.neon-dim-x span {
+  position: absolute; left: 50%; top: 9px; transform: translateX(-50%);
+  font-size: 12px; color: #e9e9f0; white-space: nowrap; letter-spacing: 0.02em;
+}
+.neon-dim-y {
+  position: absolute; top: 0; bottom: 0; left: -18px; width: 7px;
+  border-left: 1px solid rgba(255, 255, 255, 0.55);
+  pointer-events: none;
+}
+.neon-dim-y::before, .neon-dim-y::after {
+  content: ""; position: absolute; left: 0; width: 7px; height: 1px; background: rgba(255, 255, 255, 0.55);
+}
+.neon-dim-y::before { top: 0; } .neon-dim-y::after { bottom: 0; }
+.neon-dim-y span {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%) rotate(-90deg);
+  transform-origin: center; font-size: 12px; color: #e9e9f0; white-space: nowrap; letter-spacing: 0.02em;
+}
 
 .neon-sign.on {
   color: var(--neon-fill);

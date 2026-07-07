@@ -40,6 +40,7 @@ export function quoteNeon(config, spec = {}) {
   const color = activeOr(config.colors, src.color);
   const size = activeOr(config.sizes, src.size);
   const backing = activeOr(config.backings, src.backing);
+  const adapter = activeOr(config.adapters, src.adapter);
   const scene = activeOr(config.scenes, src.scene);
 
   if (!font) errors.push('No neon fonts are available');
@@ -63,6 +64,10 @@ export function quoteNeon(config, spec = {}) {
     subtotalPaise += backing.priceDeltaPaise;
     breakdown.push({ label: backing.name, amountPaise: backing.priceDeltaPaise });
   }
+  if (adapter && adapter.priceDeltaPaise) {
+    subtotalPaise += adapter.priceDeltaPaise;
+    breakdown.push({ label: `${adapter.name} adapter`, amountPaise: adapter.priceDeltaPaise });
+  }
 
   const snap = (o, keys) => (o ? Object.fromEntries(keys.map((k) => [k, o[k]])) : null);
 
@@ -76,6 +81,7 @@ export function quoteNeon(config, spec = {}) {
       color: snap(color, ['key', 'name', 'fill', 'glow']),
       size: snap(size, ['key', 'name', 'cm', 'fontSizePx', 'basePricePaise', 'perCharPaise']),
       backing: snap(backing, ['key', 'name', 'priceDeltaPaise']),
+      adapter: snap(adapter, ['key', 'name', 'priceDeltaPaise']),
       scene: snap(scene, ['key', 'name']),
       tubeMeters: Math.round(neonTubeMeters(text, size, font) * 10) / 10,
     },

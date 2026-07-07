@@ -22,7 +22,8 @@ export const getNeonConfigPublic = asyncHandler(async (req, res) => {
     colors: activeOnly(c.colors, ['key', 'name', 'fill', 'glow']),
     sizes: activeOnly(c.sizes, ['key', 'name', 'cm', 'basePricePaise', 'perCharPaise', 'fontSizePx']),
     backings: activeOnly(c.backings, ['key', 'name', 'priceDeltaPaise']),
-    scenes: activeOnly(c.scenes, ['key', 'name']),
+    adapters: activeOnly(c.adapters, ['key', 'name', 'priceDeltaPaise']),
+    scenes: activeOnly(c.scenes, ['key', 'name', 'imageUrl']),
   });
 });
 

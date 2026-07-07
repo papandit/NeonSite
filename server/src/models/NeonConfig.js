@@ -42,9 +42,17 @@ const BackingSchema = new Schema({
   active: { type: Boolean, default: true },
 }, { _id: false });
 
+const AdapterSchema = new Schema({
+  key: { type: String, required: true, trim: true },
+  name: { type: String, required: true, trim: true },
+  priceDeltaPaise: paiseField({ default: 0 }),
+  active: { type: Boolean, default: true },
+}, { _id: false });
+
 const SceneSchema = new Schema({
   key: { type: String, required: true, trim: true },
   name: { type: String, required: true, trim: true },
+  imageUrl: { type: String, default: '' }, // admin-uploaded backdrop (optional)
   active: { type: Boolean, default: true },
 }, { _id: false });
 
@@ -56,6 +64,7 @@ const NeonConfigSchema = new Schema(
     colors: { type: [ColorSchema], default: () => DEFAULT_NEON.colors },
     sizes: { type: [SizeSchema], default: () => DEFAULT_NEON.sizes },
     backings: { type: [BackingSchema], default: () => DEFAULT_NEON.backings },
+    adapters: { type: [AdapterSchema], default: () => DEFAULT_NEON.adapters },
     scenes: { type: [SceneSchema], default: () => DEFAULT_NEON.scenes },
   },
   { timestamps: true }

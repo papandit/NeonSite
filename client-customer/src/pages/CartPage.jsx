@@ -10,7 +10,7 @@ function itemSummary(design) {
   // Neon signs carry their spec under `neon`, not selections/text.
   if (design?.kind === 'neon') {
     const n = design.neon || {};
-    const options = [n.color?.name, n.font?.name, n.size ? `${n.size.name} · ${n.size.cm}cm` : null, n.backing?.name]
+    const options = [n.color?.name, n.font?.name, n.size ? `${n.size.name} · ${n.size.cm}cm` : null, n.backing?.name, n.adapter?.name]
       .filter(Boolean)
       .join(', ');
     return { options, text: n.text || '' };

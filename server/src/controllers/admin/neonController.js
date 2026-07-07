@@ -9,7 +9,7 @@ import ApiError from '../../utils/ApiError.js';
 import NeonConfig, { getNeonConfig } from '../../models/NeonConfig.js';
 import { broadcast } from '../../services/events/bus.js';
 
-const ARRAYS = ['fonts', 'colors', 'sizes', 'backings', 'scenes'];
+const ARRAYS = ['fonts', 'colors', 'sizes', 'backings', 'adapters', 'scenes'];
 
 export const getNeonConfigAdmin = asyncHandler(async (req, res) => {
   const config = await getNeonConfig();
