@@ -320,16 +320,14 @@ export default function NeonPage() {
                     <button
                       key={s.key}
                       onClick={() => setScene(s.key)}
-                      className={`overflow-hidden rounded-xl border transition ${scene === s.key ? 'border-indigo-500' : 'border-white/10 hover:border-white/25'}`}
+                      className={`flex flex-col overflow-hidden rounded-xl border transition ${scene === s.key ? 'border-indigo-500' : 'border-white/10 hover:border-white/25'}`}
                     >
                       {s.imageUrl ? (
-                        <span className="flex flex-col">
-                          <img src={s.imageUrl} alt={s.name} className="h-12 w-20 object-cover" />
-                          <span className="px-2 py-1 text-[11px] text-slate-300">{s.name}</span>
-                        </span>
+                        <img src={s.imageUrl} alt={s.name} className="h-12 w-20 object-cover" />
                       ) : (
-                        <span className="block px-4 py-2 text-sm text-slate-300">{s.name}</span>
+                        <span className={`neon-thumb ${s.key}`} />
                       )}
+                      <span className="px-2 py-1 text-[11px] text-slate-300">{s.name}</span>
                     </button>
                   ))}
                 </div>

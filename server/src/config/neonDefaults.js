@@ -67,10 +67,17 @@ export const DEFAULT_NEON = {
     { key: 'uk', name: 'UK (Type G)', priceDeltaPaise: 0, active: true },
     { key: 'au', name: 'Australia / NZ (Type I)', priceDeltaPaise: 0, active: true },
   ],
-  // imageUrl optional — when set (admin upload), it's shown behind the sign.
+  // imageUrl optional — when set (admin upload), it's shown behind the sign;
+  // otherwise the key maps to a built-in CSS backdrop.
   scenes: [
     { key: 'wall', name: 'Dark wall', imageUrl: '', active: true },
     { key: 'brick', name: 'Brick', imageUrl: '', active: true },
     { key: 'room', name: 'Bedroom', imageUrl: '', active: true },
+    { key: 'cafe', name: 'Café', imageUrl: '', active: true },
+    { key: 'studio', name: 'Studio', imageUrl: '', active: true },
+    { key: 'bar', name: 'Bar / lounge', imageUrl: '', active: true },
+    { key: 'garden', name: 'Garden wall', imageUrl: '', active: true },
+    { key: 'sky', name: 'Night sky', imageUrl: '', active: true },
+    { key: 'gallery', name: 'Gallery', imageUrl: '', active: true },
   ],
 };

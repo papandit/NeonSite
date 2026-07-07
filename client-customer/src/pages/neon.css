@@ -12,10 +12,11 @@
   place-items: center;
   transition: background 0.4s ease;
 }
-.neon-stage.wall {
+/* Scene backdrops apply to both the stage and the small picker thumbnail. */
+.neon-stage.wall, .neon-thumb.wall {
   background: radial-gradient(120% 90% at 50% 20%, #1a1a22 0%, #101015 55%, #070709 100%);
 }
-.neon-stage.brick {
+.neon-stage.brick, .neon-thumb.brick {
   background: #0e0b0c;
   background-image:
     radial-gradient(120% 90% at 50% 20%, rgba(40, 30, 32, 0.9), rgba(10, 8, 9, 0.96)),
@@ -23,9 +24,28 @@
     repeating-linear-gradient(90deg, #1a1416 0 60px, #120d0f 60px 64px);
   background-blend-mode: multiply, normal, normal;
 }
-.neon-stage.room {
+.neon-stage.room, .neon-thumb.room {
   background: radial-gradient(130% 100% at 50% 0%, #22202c 0%, #14121b 45%, #0a0910 100%);
 }
+.neon-stage.cafe, .neon-thumb.cafe {
+  background: radial-gradient(120% 90% at 50% 15%, #2a1e17 0%, #160f0b 55%, #0a0705 100%);
+}
+.neon-stage.studio, .neon-thumb.studio {
+  background: radial-gradient(120% 90% at 50% 15%, #23252b 0%, #15171b 55%, #0a0b0d 100%);
+}
+.neon-stage.bar, .neon-thumb.bar {
+  background: radial-gradient(120% 100% at 50% 0%, #10262a 0%, #0a1518 45%, #050a0b 100%);
+}
+.neon-stage.garden, .neon-thumb.garden {
+  background: radial-gradient(120% 100% at 50% 10%, #16281b 0%, #0d1a10 50%, #060d08 100%);
+}
+.neon-stage.sky, .neon-thumb.sky {
+  background: radial-gradient(130% 100% at 50% 0%, #1a1f3a 0%, #121428 45%, #080910 100%);
+}
+.neon-stage.gallery, .neon-thumb.gallery {
+  background: radial-gradient(100% 80% at 50% 30%, #201a16 0%, #14100d 55%, #080605 100%);
+}
+.neon-thumb { height: 3rem; width: 5rem; }
 
 .neon-sign {
   text-align: center;
