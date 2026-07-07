@@ -26,6 +26,7 @@ const GROUPS = [
       { to: '/categories', label: 'Categories', icon: 'category' },
       { to: '/subcategories', label: 'Subcategories', icon: 'layers' },
       { to: '/products', label: 'Products', icon: 'product' },
+      { to: '/neon', label: 'Neon Studio', icon: 'sparkle' },
     ],
   },
   {

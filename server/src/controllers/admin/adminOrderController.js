@@ -102,6 +102,14 @@ export const productionRender = asyncHandler(async (req, res) => {
   const item = order.items.id(req.params.itemId);
   if (!item) throw ApiError.notFound('Order item not found');
 
+  // Neon signs aren't fabric renders — their production artwork is the captured
+  // preview image. Hand that back instead of rendering a plate.
+  if (item.designDocument?.kind === 'neon') {
+    const url = item.designDocument?.render?.previewImageUrl;
+    if (url) return res.redirect(url);
+    throw ApiError.badRequest('This neon item has no captured preview to download.');
+  }
+
   const { buffer, mime } = await renderProduction(item.designDocument);
 
   res.set('Content-Type', mime);

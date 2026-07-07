@@ -7,6 +7,14 @@ import { apiErrorMessage } from '../services/api';
 import { formatPaise } from '../utils/money';
 
 function itemSummary(design) {
+  // Neon signs carry their spec under `neon`, not selections/text.
+  if (design?.kind === 'neon') {
+    const n = design.neon || {};
+    const options = [n.color?.name, n.font?.name, n.size ? `${n.size.name} · ${n.size.cm}cm` : null, n.backing?.name]
+      .filter(Boolean)
+      .join(', ');
+    return { options, text: n.text || '' };
+  }
   const sels = design?.selections || {};
   const parts = Object.values(sels)
     .map((s) => s?.snapshot?.name)

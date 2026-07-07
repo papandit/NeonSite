@@ -71,6 +71,15 @@ export const clearCart = createAsyncThunk('cart/clear', async (_, { rejectWithVa
   }
 });
 
+// Add a neon sign (server prices it from the live NeonConfig).
+export const addNeonToCart = createAsyncThunk('cart/addNeon', async ({ spec, quantity = 1 }, { rejectWithValue }) => {
+  try {
+    return await cartApi.addNeon(spec, quantity);
+  } catch (e) {
+    return rejectWithValue(apiErrorMessage(e));
+  }
+});
+
 const cartSlice = createSlice({
   name: 'cart',
   initialState,
@@ -90,6 +99,7 @@ const cartSlice = createSlice({
       .addCase(fetchCart.fulfilled, setFromServer)
       .addCase(addToCart.fulfilled, setFromServer)
       .addCase(quickAddToCart.fulfilled, setFromServer)
+      .addCase(addNeonToCart.fulfilled, setFromServer)
       .addCase(updateCartItem.fulfilled, setFromServer)
       .addCase(removeCartItem.fulfilled, setFromServer)
       .addCase(clearCart.fulfilled, (state, action) => {

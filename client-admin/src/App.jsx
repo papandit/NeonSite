@@ -19,6 +19,7 @@ import BannersPage from './pages/BannersPage';
 import SettingsPage from './pages/SettingsPage';
 import ReviewsPage from './pages/ReviewsPage';
 import AnalyticsPage from './pages/AnalyticsPage';
+import NeonPage from './pages/NeonPage';
 import { loadProfile, selectIsAuthenticated } from './store/authSlice';
 
 export default function App() {
@@ -48,6 +49,7 @@ export default function App() {
           <Route path="products" element={<ProductsPage />} />
           <Route path="products/new" element={<ProductBuilderPage />} />
           <Route path="products/:id/edit" element={<ProductBuilderPage />} />
+          <Route path="neon" element={<NeonPage />} />
 
           <Route path="orders" element={<OrdersPage />} />
           <Route path="orders/:id" element={<OrderDetailPage />} />

@@ -8,12 +8,16 @@ import { sendSuccess } from '../utils/apiResponse.js';
 import ApiError from '../utils/ApiError.js';
 import Product from '../models/Product.js';
 import { quoteDesign } from '../services/pricing/quoteDesign.js';
+import { repriceItem } from '../services/pricing/repriceItem.js';
+import { quoteNeon } from '../services/neon/quoteNeon.js';
+import { getNeonConfig } from '../models/NeonConfig.js';
+import { getNeonProduct } from '../services/neon/neonProduct.js';
 import { getOrCreateCart, serializeCart } from '../services/cart/cartService.js';
 
 async function repriceOrThrow(productId, designDocument) {
   const product = await Product.findOne({ _id: productId, status: 'active' }).lean();
   if (!product) throw ApiError.notFound('Product not found');
-  const { errors, designDocument: corrected } = await quoteDesign(product, designDocument);
+  const { errors, designDocument: corrected } = await repriceItem(product, designDocument);
   if (errors.length > 0) {
     throw ApiError.badRequest('Design is invalid', { code: 'DESIGN_INVALID', details: errors });
   }
@@ -102,6 +106,32 @@ export const quickAdd = asyncHandler(async (req, res) => {
     designDocument: corrected,
     quantity: qty,
     unitPricePaise: corrected.pricing.subtotalPaise,
+  });
+  await cart.save();
+  return sendSuccess(res, await serializeCart(cart), 201);
+});
+
+// POST /api/cart/neon  { spec, quantity } — add a neon sign (server-priced).
+export const addNeonItem = asyncHandler(async (req, res) => {
+  const { spec, quantity = 1 } = req.body || {};
+  if (!spec || typeof spec !== 'object') {
+    throw ApiError.badRequest('A neon spec is required');
+  }
+  const qty = Math.max(1, parseInt(quantity, 10) || 1);
+
+  const config = await getNeonConfig();
+  const { errors, designDocument } = quoteNeon(config, spec);
+  if (errors.length > 0) {
+    throw ApiError.badRequest('Neon design is invalid', { code: 'NEON_INVALID', details: errors });
+  }
+
+  const neonProduct = await getNeonProduct();
+  const cart = await getOrCreateCart(req.user.id);
+  cart.items.push({
+    product: neonProduct._id,
+    designDocument,
+    quantity: qty,
+    unitPricePaise: designDocument.pricing.subtotalPaise, // SERVER price
   });
   await cart.save();
   return sendSuccess(res, await serializeCart(cart), 201);

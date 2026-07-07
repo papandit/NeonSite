@@ -6,7 +6,7 @@
 import Product from '../../models/Product.js';
 import Coupon from '../../models/Coupon.js';
 import { getSettings } from '../../models/Settings.js';
-import { quoteDesign } from '../pricing/quoteDesign.js';
+import { repriceItem } from '../pricing/repriceItem.js';
 import { getOrCreateCart, cartSubtotalPaise } from '../cart/cartService.js';
 import { computeTotals } from './computeTotals.js';
 
@@ -25,7 +25,7 @@ export async function revalidateCart(userId) {
       invalidItems.push({ itemId: String(item._id), errors: ['Product no longer available'] });
       continue;
     }
-    const { errors, designDocument } = await quoteDesign(product, item.designDocument);
+    const { errors, designDocument } = await repriceItem(product, item.designDocument);
     if (errors.length > 0) {
       invalidItems.push({ itemId: String(item._id), errors });
       continue;

@@ -8,6 +8,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import HomePage from './pages/HomePage';
 import ProductsPage from './pages/ProductsPage';
 import ProductDetailPage from './pages/ProductDetailPage';
+import NeonPage, { PENDING_NEON_KEY } from './pages/NeonPage';
 import InfoPage from './pages/InfoPage';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
@@ -20,7 +21,7 @@ import AddressesPage from './pages/account/AddressesPage';
 import ProfilePage from './pages/account/ProfilePage';
 import WishlistPage from './pages/account/WishlistPage';
 import { loadProfile, selectIsAuthenticated } from './store/authSlice';
-import { addToCart, fetchCart } from './store/cartSlice';
+import { addToCart, addNeonToCart, fetchCart } from './store/cartSlice';
 import { fetchWishlist } from './store/wishlistSlice';
 import { PENDING_KEY } from './configurator/Configurator';
 
@@ -37,6 +38,7 @@ export default function App() {
   useEffect(() => {
     if (!isAuthed) return;
     const pending = localStorage.getItem(PENDING_KEY);
+    const pendingNeon = localStorage.getItem(PENDING_NEON_KEY);
     if (pending) {
       try {
         dispatch(addToCart(JSON.parse(pending)));
@@ -44,6 +46,13 @@ export default function App() {
         /* ignore malformed pending item */
       }
       localStorage.removeItem(PENDING_KEY);
+    } else if (pendingNeon) {
+      try {
+        dispatch(addNeonToCart({ spec: JSON.parse(pendingNeon) }));
+      } catch {
+        /* ignore malformed pending neon */
+      }
+      localStorage.removeItem(PENDING_NEON_KEY);
     } else {
       dispatch(fetchCart());
     }
@@ -56,6 +65,7 @@ export default function App() {
         <Route index element={<HomePage />} />
         <Route path="products" element={<ProductsPage />} />
         <Route path="products/:slug" element={<ProductDetailPage />} />
+        <Route path="neon" element={<NeonPage />} />
         <Route path="p/:slug" element={<InfoPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />

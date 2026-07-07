@@ -1,0 +1,82 @@
+/* Neon Sign Studio — the glow, the scenes and the flicker. Scoped to `neon-`
+   classes so it never leaks into the rest of the (light) storefront. */
+
+.neon-stage {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid #262632;
+  box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.8);
+  aspect-ratio: 16 / 11;
+  display: grid;
+  place-items: center;
+  transition: background 0.4s ease;
+}
+.neon-stage.wall {
+  background: radial-gradient(120% 90% at 50% 20%, #1a1a22 0%, #101015 55%, #070709 100%);
+}
+.neon-stage.brick {
+  background: #0e0b0c;
+  background-image:
+    radial-gradient(120% 90% at 50% 20%, rgba(40, 30, 32, 0.9), rgba(10, 8, 9, 0.96)),
+    repeating-linear-gradient(0deg, #1a1416 0 26px, #120d0f 26px 28px),
+    repeating-linear-gradient(90deg, #1a1416 0 60px, #120d0f 60px 64px);
+  background-blend-mode: multiply, normal, normal;
+}
+.neon-stage.room {
+  background: radial-gradient(130% 100% at 50% 0%, #22202c 0%, #14121b 45%, #0a0910 100%);
+}
+
+.neon-sign {
+  text-align: center;
+  line-height: 1.15;
+  padding: 0 8%;
+  user-select: none;
+  transition: filter 0.3s;
+  max-width: 100%;
+  word-break: break-word;
+}
+.neon-sign .neon-line { display: block; white-space: pre-wrap; }
+
+.neon-sign.on {
+  color: var(--neon-fill);
+  text-shadow:
+    0 0 5px var(--neon-glow),
+    0 0 12px var(--neon-glow),
+    0 0 26px var(--neon-glow),
+    0 0 52px var(--neon-glow),
+    0 0 96px var(--neon-glow);
+}
+.neon-sign.off {
+  color: #33333d;
+  text-shadow: none;
+  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.5));
+}
+.neon-sign.powering { animation: neon-flicker 0.7s steps(1) 1; }
+@keyframes neon-flicker {
+  0% { opacity: 0.2; } 8% { opacity: 1; } 12% { opacity: 0.3; } 18% { opacity: 1; }
+  26% { opacity: 0.5; } 32% { opacity: 1; } 55% { opacity: 0.7; } 60% { opacity: 1; }
+  68% { opacity: 0.85; } 100% { opacity: 1; }
+}
+
+.neon-backing {
+  position: absolute;
+  border-radius: 14px;
+  pointer-events: none;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.02);
+  inset: 14% 10%;
+  background: rgba(255, 255, 255, 0.015);
+}
+
+/* pull switch */
+.neon-toggle {
+  width: 46px; height: 26px; border-radius: 999px; position: relative;
+  background: #23232e; border: 1px solid #262632; transition: 0.25s;
+}
+.neon-toggle::after {
+  content: ""; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px;
+  border-radius: 50%; background: #5a5a68; transition: 0.25s;
+}
+.neon-switch.is-on .neon-toggle { background: rgba(57, 255, 158, 0.18); border-color: rgba(57, 255, 158, 0.5); }
+.neon-switch.is-on .neon-toggle::after { left: 22px; background: #39ff9e; box-shadow: 0 0 10px #39ff9e; }

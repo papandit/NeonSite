@@ -31,6 +31,11 @@ export const settingsApi = {
   update: (body) => api.put('/admin/settings', body).then((r) => r.data.data),
 };
 
+export const neonApi = {
+  get: () => api.get('/admin/neon').then((r) => r.data.data),
+  update: (body) => api.put('/admin/neon', body).then((r) => r.data.data),
+};
+
 export const reviewsApi = {
   list: (status) => api.get('/admin/reviews', { params: status ? { status } : {} }).then((r) => r.data.data),
   moderate: (id, status) => api.patch(`/admin/reviews/${id}/moderate`, { status }).then((r) => r.data.data),

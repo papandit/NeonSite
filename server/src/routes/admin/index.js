@@ -20,6 +20,7 @@ import { isCloudinaryConfigured } from '../../services/cloudinary/index.js';
 import { dashboard, analytics } from '../../controllers/admin/dashboardController.js';
 import { listOrders, getOrder, updateStatus, productionRender } from '../../controllers/admin/adminOrderController.js';
 import { getStoreSettings, updateStoreSettings } from '../../controllers/admin/settingsController.js';
+import { getNeonConfigAdmin, updateNeonConfig } from '../../controllers/admin/neonController.js';
 import { adminListReviews, moderateReview } from '../../controllers/reviewController.js';
 
 const router = Router();
@@ -93,6 +94,10 @@ router.get('/orders/:id/production-render/:itemId', productionRender);
 // Store settings
 router.get('/settings', getStoreSettings);
 router.put('/settings', updateStoreSettings);
+
+// Neon Studio catalogue
+router.get('/neon', getNeonConfigAdmin);
+router.put('/neon', updateNeonConfig);
 
 // Reviews moderation
 router.get('/reviews', adminListReviews);
