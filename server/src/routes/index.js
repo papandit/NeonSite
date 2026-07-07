@@ -12,6 +12,7 @@ import engagementRoutes from './engagementRoutes.js';
 import eventsRoutes from './eventsRoutes.js';
 import chatRoutes from './chatRoutes.js';
 import neonRoutes from './neonRoutes.js';
+import assetRoutes from './assetRoutes.js';
 
 const router = Router();
 
@@ -22,6 +23,7 @@ router.use('/render', renderRoutes);
 router.use('/events', eventsRoutes);
 router.use('/chat', chatRoutes);
 router.use('/neon', neonRoutes);
+router.use('/assets', assetRoutes);
 
 // Commerce (Phase 4, auth): cart, coupons, checkout, payments, orders
 router.use('/cart', cartRoutes);

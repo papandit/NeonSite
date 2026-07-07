@@ -31,7 +31,9 @@ router.use(requireAuth, requireRole('admin'));
 // Lets the admin UI know whether uploads will work (or fall back to URL paste).
 router.get('/meta', (req, res) =>
   sendSuccess(res, {
-    uploadsEnabled: isCloudinaryConfigured(),
+    // Uploads always work now: Cloudinary when configured, else MongoDB store.
+    uploadsEnabled: true,
+    uploadStorage: isCloudinaryConfigured() ? 'cloudinary' : 'mongodb',
     optionCollections: OPTION_COLLECTIONS.map((c) => ({
       key: c.key,
       panel: c.panel,
