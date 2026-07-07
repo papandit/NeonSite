@@ -80,7 +80,7 @@ export default function StorefrontLayout() {
 
             <NavLink to="/products" className={navLinkClass}>Shop</NavLink>
             <NavLink to="/neon" className={({ isActive }) =>
-              `px-3 py-2 text-sm font-bold rounded-full transition ${isActive ? 'text-pink-600 bg-pink-50' : 'text-pink-600 hover:text-pink-700'}`
+              `px-3 py-2 text-sm font-bold rounded-full transition ${isActive ? 'text-indigo-700 bg-indigo-50' : 'text-indigo-600 hover:text-indigo-700'}`
             }>Neon ✨</NavLink>
             <NavLink to="/cart" className={navLinkClass}>
               <span className="relative inline-flex items-center">

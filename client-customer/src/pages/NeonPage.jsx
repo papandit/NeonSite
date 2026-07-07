@@ -145,23 +145,23 @@ export default function NeonPage() {
 
   const pill = (active) =>
     `rounded-full border px-4 py-2 text-sm font-medium transition ${
-      active ? 'border-pink-500 bg-pink-500/10 text-white' : 'border-white/10 bg-white/5 text-slate-400 hover:border-white/25 hover:text-white'
+      active ? 'border-indigo-500 bg-indigo-500/10 text-white' : 'border-white/10 bg-white/5 text-slate-400 hover:border-white/25 hover:text-white'
     }`;
   const modeBtn = (active) =>
-    `flex h-8 w-9 items-center justify-center rounded-md transition ${active ? 'bg-pink-600 text-white' : 'bg-white/10 text-slate-300 hover:bg-white/20'}`;
+    `flex h-8 w-9 items-center justify-center rounded-md transition ${active ? 'bg-indigo-600 text-white' : 'bg-white/10 text-slate-300 hover:bg-white/20'}`;
   const powerBtn = (active) =>
-    `rounded-md px-3.5 py-1.5 text-sm font-semibold transition ${active ? 'bg-pink-600 text-white' : 'bg-white/10 text-slate-300 hover:bg-white/20'}`;
+    `rounded-md px-3.5 py-1.5 text-sm font-semibold transition ${active ? 'bg-indigo-600 text-white' : 'bg-white/10 text-slate-300 hover:bg-white/20'}`;
 
   return (
     <div className="bg-[#0a0a0f] text-slate-100" style={{
       backgroundImage:
-        'radial-gradient(1200px 700px at 80% -10%, rgba(36,211,255,.06), transparent 60%), radial-gradient(900px 600px at 0% 110%, rgba(255,45,149,.06), transparent 55%)',
+        'radial-gradient(1200px 700px at 80% -10%, rgba(233,148,107,.05), transparent 60%), radial-gradient(900px 600px at 0% 110%, rgba(212,84,31,.06), transparent 55%)',
     }}>
       <Seo title="Neon Sign Studio" description="Design your own LED neon sign — text, font, colour, size — with a live glowing preview and instant pricing." path="/neon" />
 
       <div className="mx-auto max-w-6xl px-4 pb-40 pt-10">
         <header className="mb-8 text-center">
-          <h1 className="font-display text-4xl font-semibold" style={{ color: '#ffd9ec', textShadow: '0 0 6px #ff2d95,0 0 16px #ff2d95,0 0 34px #ff2d95' }}>
+          <h1 className="font-display text-4xl font-semibold" style={{ color: '#ffe4d1', textShadow: '0 0 6px #d4541f,0 0 16px #d4541f,0 0 34px #d4541f' }}>
             Neon Sign Studio
           </h1>
           <p className="mt-2 text-sm text-slate-400">Design a custom LED neon sign — live preview, size-based pricing, crafted to order.</p>
@@ -202,7 +202,7 @@ export default function NeonPage() {
                     fontFamily: fontObj?.cssFamily || 'cursive',
                     fontSize: `clamp(22px, 8vw, ${sizeObj?.fontSizePx || 46}px)`,
                     '--neon-fill': colorObj?.fill || '#fff',
-                    '--neon-glow': colorObj?.glow || '#ff2d95',
+                    '--neon-glow': colorObj?.glow || '#d4541f',
                   }}
                 >
                   {lines.map((l, i) => <span key={i} className="neon-line">{l || ' '}</span>)}
@@ -232,7 +232,7 @@ export default function NeonPage() {
                   rows={2}
                   onChange={(e) => setText(e.target.value)}
                   placeholder="Type your sign…"
-                  className="w-full resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-lg text-white placeholder:text-slate-500 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-500/20"
+                  className="w-full resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-lg text-white placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                 />
               </div>
 
@@ -247,7 +247,7 @@ export default function NeonPage() {
                     <button
                       key={f.key}
                       onClick={() => setFont(f.key)}
-                      className={`rounded-xl border px-2 py-3 text-center transition ${font === f.key ? 'border-pink-500 bg-pink-500/10' : 'border-white/10 bg-white/5 hover:border-white/25'}`}
+                      className={`rounded-xl border px-2 py-3 text-center transition ${font === f.key ? 'border-indigo-500 bg-indigo-500/10' : 'border-white/10 bg-white/5 hover:border-white/25'}`}
                     >
                       <span className="block truncate text-xl leading-none text-slate-100" style={{ fontFamily: f.cssFamily }}>Ag</span>
                       <span className="mt-1.5 block truncate text-[10.5px] text-slate-400">{f.name}</span>
@@ -280,7 +280,7 @@ export default function NeonPage() {
                   {cfg.sizes.map((s) => (
                     <button key={s.key} onClick={() => setSize(s.key)} className={pill(size === s.key)}>
                       {s.name}<span className="ml-1.5 text-xs text-slate-500">{s.cm}cm</span>
-                      <span className="ml-1.5 text-xs text-pink-300">{formatPaise(s.basePricePaise)}+</span>
+                      <span className="ml-1.5 text-xs text-indigo-300">{formatPaise(s.basePricePaise)}+</span>
                     </button>
                   ))}
                 </div>
@@ -292,7 +292,7 @@ export default function NeonPage() {
                 <div className="flex flex-wrap gap-2">
                   {cfg.backings.map((b) => (
                     <button key={b.key} onClick={() => setBacking(b.key)} className={pill(backing === b.key)}>
-                      {b.name}{b.priceDeltaPaise > 0 && <span className="ml-1.5 text-xs text-pink-300">+{formatPaise(b.priceDeltaPaise)}</span>}
+                      {b.name}{b.priceDeltaPaise > 0 && <span className="ml-1.5 text-xs text-indigo-300">+{formatPaise(b.priceDeltaPaise)}</span>}
                     </button>
                   ))}
                 </div>
@@ -305,7 +305,7 @@ export default function NeonPage() {
                   <div className="flex flex-wrap gap-2">
                     {cfg.adapters.map((a) => (
                       <button key={a.key} onClick={() => setAdapter(a.key)} className={pill(adapter === a.key)}>
-                        {a.name}{a.priceDeltaPaise > 0 && <span className="ml-1.5 text-xs text-pink-300">+{formatPaise(a.priceDeltaPaise)}</span>}
+                        {a.name}{a.priceDeltaPaise > 0 && <span className="ml-1.5 text-xs text-indigo-300">+{formatPaise(a.priceDeltaPaise)}</span>}
                       </button>
                     ))}
                   </div>
@@ -320,7 +320,7 @@ export default function NeonPage() {
                     <button
                       key={s.key}
                       onClick={() => setScene(s.key)}
-                      className={`overflow-hidden rounded-xl border transition ${scene === s.key ? 'border-pink-500' : 'border-white/10 hover:border-white/25'}`}
+                      className={`overflow-hidden rounded-xl border transition ${scene === s.key ? 'border-indigo-500' : 'border-white/10 hover:border-white/25'}`}
                     >
                       {s.imageUrl ? (
                         <span className="flex flex-col">
@@ -364,8 +364,8 @@ export default function NeonPage() {
           <button
             onClick={handleAdd}
             disabled={adding}
-            className="max-w-sm flex-1 rounded-xl px-6 py-3.5 font-display text-sm font-bold text-[#150008] transition disabled:opacity-60"
-            style={{ background: 'linear-gradient(90deg,#ff2d95,#ff5ea8)', boxShadow: '0 8px 26px -8px rgba(255,45,149,.6)' }}
+            className="max-w-sm flex-1 rounded-xl px-6 py-3.5 font-display text-sm font-bold text-white transition disabled:opacity-60"
+            style={{ background: 'linear-gradient(90deg,#d4541f,#e8703a)', boxShadow: '0 8px 26px -8px rgba(212,84,31,.55)' }}
           >
             {adding ? 'Adding…' : 'Add to cart'}
           </button>

@@ -33,10 +33,12 @@
   padding: 0;
   user-select: none;
   transition: filter 0.3s;
-  max-width: 90%;
-  word-break: break-word;
+  white-space: nowrap;      /* keep the sign on one line unless the user hits Enter */
+  word-break: normal;
+  overflow-wrap: normal;
 }
-.neon-sign .neon-line { display: block; white-space: pre-wrap; }
+/* each explicit line (split on \n) stays on its own single line */
+.neon-sign .neon-line { display: block; white-space: nowrap; }
 
 /* wrapper that shrink-wraps the sign so the dimension guides hug the text */
 .neon-measure { position: relative; display: inline-block; }
