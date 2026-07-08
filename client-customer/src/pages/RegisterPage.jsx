@@ -8,6 +8,7 @@ import {
   selectAuth,
   selectIsAuthenticated,
 } from '../store/authSlice';
+import PasswordInput from '../components/PasswordInput';
 
 export default function RegisterPage() {
   const dispatch = useDispatch();
@@ -76,10 +77,8 @@ export default function RegisterPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700">Password</label>
-            <input
-              type="password"
+            <PasswordInput
               autoComplete="new-password"
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
               {...field('password', {
                 required: 'Password is required',
                 minLength: { value: 8, message: 'At least 8 characters' },

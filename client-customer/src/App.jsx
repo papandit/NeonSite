@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import StorefrontLayout from './layouts/StorefrontLayout';
 import AccountLayout from './layouts/AccountLayout';
 import ProtectedRoute from './components/ProtectedRoute';
+import ScrollToTop from './components/ScrollToTop';
 import HomePage from './pages/HomePage';
 import ProductsPage from './pages/ProductsPage';
 import ProductDetailPage from './pages/ProductDetailPage';
@@ -60,7 +61,9 @@ export default function App() {
   }, [isAuthed, dispatch]);
 
   return (
-    <Routes>
+    <>
+      <ScrollToTop />
+      <Routes>
       <Route element={<StorefrontLayout />}>
         <Route index element={<HomePage />} />
         <Route path="products" element={<ProductsPage />} />
@@ -85,6 +88,7 @@ export default function App() {
 
         <Route path="*" element={<NotFoundPage />} />
       </Route>
-    </Routes>
+      </Routes>
+    </>
   );
 }

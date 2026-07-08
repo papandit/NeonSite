@@ -52,7 +52,9 @@ export default function NeonPage() {
   const [error, setError] = useState(null);
 
   const signRef = useRef(null);
+  const stageRef = useRef(null);
   const [box, setBox] = useState({ w: 0, h: 0 });
+  const [stageBox, setStageBox] = useState({ w: 0, h: 0 });
 
   const load = useCallback(() => {
     getNeonConfig().then((c) => {
@@ -77,19 +79,29 @@ export default function NeonPage() {
     return () => es.close();
   }, [load]);
 
-  // Measure the rendered text box so the dimension guides track the real sign.
+  // Measure the sign + stage (contentRect = layout size, unaffected by the
+  // fit-scale transform, so no feedback loop) to drive the dimension guides and
+  // auto-fit the sign so big/long text is never clipped.
   useEffect(() => {
-    const el = signRef.current;
-    if (!el || typeof ResizeObserver === 'undefined') return;
-    const measure = () => {
-      const r = el.getBoundingClientRect();
-      setBox({ w: r.width, h: r.height });
-    };
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    measure();
+    if (typeof ResizeObserver === 'undefined') return;
+    const sign = signRef.current;
+    const stage = stageRef.current;
+    const ro = new ResizeObserver((entries) => {
+      for (const e of entries) {
+        const cr = e.contentRect;
+        if (e.target === sign) setBox({ w: cr.width, h: cr.height });
+        else if (e.target === stage) setStageBox({ w: cr.width, h: cr.height });
+      }
+    });
+    if (sign) ro.observe(sign);
+    if (stage) ro.observe(stage);
     return () => ro.disconnect();
   }, [cfg]);
+
+  // Scale the sign down to fit within the stage (never up past 1).
+  const fitScale = (box.w > 0 && box.h > 0 && stageBox.w > 0)
+    ? Math.min(1, (stageBox.w * 0.8) / box.w, (stageBox.h * 0.6) / box.h)
+    : 1;
 
   const fontObj = useMemo(() => cfg?.fonts.find((f) => f.key === font), [cfg, font]);
   const colorObj = useMemo(() => cfg?.colors.find((c) => c.key === color), [cfg, color]);
@@ -171,6 +183,7 @@ export default function NeonPage() {
           {/* ---------- STAGE ---------- */}
           <div className="lg:sticky lg:top-24">
             <div
+              ref={stageRef}
               className={`neon-stage ${scene || 'wall'}`}
               style={sceneObj?.imageUrl ? {
                 backgroundImage: `linear-gradient(rgba(4,4,8,${mode === 'day' ? 0.15 : 0.5}), rgba(4,4,8,${mode === 'day' ? 0.15 : 0.55})), url("${sceneObj.imageUrl}")`,
@@ -193,8 +206,8 @@ export default function NeonPage() {
                 </div>
               </div>
 
-              {/* the sign + measured dimension guides */}
-              <div className="neon-measure">
+              {/* the sign + measured dimension guides (auto-fit to the stage) */}
+              <div className="neon-measure" style={{ transform: `scale(${fitScale})`, transition: 'transform 0.2s ease' }}>
                 <div
                   ref={signRef}
                   className={`neon-sign ${on ? 'on' : 'off'} ${mode === 'day' ? 'day' : ''} ${powering ? 'powering' : ''}`}

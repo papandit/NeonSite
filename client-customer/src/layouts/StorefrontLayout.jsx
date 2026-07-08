@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, NavLink, Outlet } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { selectIsAuthenticated, selectUser } from '../store/authSlice';
 import { selectCartCount } from '../store/cartSlice';
@@ -14,6 +14,27 @@ const navLinkClass = ({ isActive }) =>
   `px-3 py-2 text-sm font-semibold rounded-full transition ${
     isActive ? 'text-indigo-700 bg-indigo-50' : 'text-gray-600 hover:text-gray-900'
   }`;
+const neonLinkClass = ({ isActive }) =>
+  `px-3 py-2 text-sm font-bold rounded-full transition ${isActive ? 'text-indigo-700 bg-indigo-50' : 'text-indigo-600 hover:text-indigo-700'}`;
+
+// Mobile menu row link.
+const mobileLinkClass = ({ isActive }) =>
+  `block rounded-lg px-3 py-2.5 text-base font-semibold transition ${
+    isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-50'
+  }`;
+
+function CartBadge({ count }) {
+  return (
+    <span className="relative inline-flex items-center">
+      Cart
+      {count > 0 && (
+        <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-indigo-600 px-1 text-xs font-bold text-white">
+          {count}
+        </span>
+      )}
+    </span>
+  );
+}
 
 export default function StorefrontLayout() {
   const isAuthed = useSelector(selectIsAuthenticated);
@@ -21,31 +42,42 @@ export default function StorefrontLayout() {
   const cartCount = useSelector(selectCartCount);
   const { settings } = useSiteSettings();
   const storeName = settings.storeName || 'OWM NameCraft Ecom';
+  const location = useLocation();
 
   const [categories, setCategories] = useState([]);
+  const [menuOpen, setMenuOpen] = useState(false);
+
   const loadCats = useCallback(() => {
     getCategories().then(setCategories).catch(() => {});
   }, []);
   useEffect(() => { loadCats(); }, [loadCats]);
   useLiveCatalog(loadCats); // dropdown updates when admin adds a category
 
+  // Close the mobile menu on navigation.
+  useEffect(() => { setMenuOpen(false); }, [location.pathname, location.search]);
+
+  const Brand = (
+    <Link to="/" className="flex min-w-0 items-center gap-2">
+      {settings.logoUrl ? (
+        <img src={settings.logoUrl} alt={storeName} className="h-9 w-9 shrink-0 rounded-lg object-cover" />
+      ) : (
+        <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white font-display text-lg font-semibold">
+          {storeName.charAt(0).toUpperCase()}
+        </span>
+      )}
+      <span className="truncate font-display text-base font-medium tracking-tight text-gray-900 sm:text-xl">{storeName}</span>
+    </Link>
+  );
+
   return (
-    <div className="min-h-full flex flex-col bg-gray-50 text-gray-900">
+    <div className="min-h-full flex flex-col overflow-x-hidden bg-gray-50 text-gray-900">
       <ScrollProgress />
       <header className="sticky top-0 z-40 border-b border-gray-200 bg-[#fffdf9]/90 backdrop-blur">
-        <div className="mx-auto max-w-6xl px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            {settings.logoUrl ? (
-              <img src={settings.logoUrl} alt={storeName} className="h-9 w-9 rounded-lg object-cover" />
-            ) : (
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 text-white font-display text-lg font-semibold">
-                {storeName.charAt(0).toUpperCase()}
-              </span>
-            )}
-            <span className="font-display text-xl font-medium tracking-tight text-gray-900">{storeName}</span>
-          </Link>
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-4">
+          {Brand}
 
-          <nav className="flex items-center gap-1">
+          {/* Desktop nav */}
+          <nav className="hidden items-center gap-1 md:flex">
             <NavLink to="/" end className={navLinkClass}>Home</NavLink>
 
             {/* Categories dropdown (with subcategories) */}
@@ -79,19 +111,8 @@ export default function StorefrontLayout() {
             </div>
 
             <NavLink to="/products" className={navLinkClass}>Shop</NavLink>
-            <NavLink to="/neon" className={({ isActive }) =>
-              `px-3 py-2 text-sm font-bold rounded-full transition ${isActive ? 'text-indigo-700 bg-indigo-50' : 'text-indigo-600 hover:text-indigo-700'}`
-            }>Neon ✨</NavLink>
-            <NavLink to="/cart" className={navLinkClass}>
-              <span className="relative inline-flex items-center">
-                Cart
-                {cartCount > 0 && (
-                  <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-indigo-600 px-1 text-xs font-bold text-white">
-                    {cartCount}
-                  </span>
-                )}
-              </span>
-            </NavLink>
+            <NavLink to="/neon" className={neonLinkClass}>Neon ✨</NavLink>
+            <NavLink to="/cart" className={navLinkClass}><CartBadge count={cartCount} /></NavLink>
 
             {isAuthed ? (
               <Link
@@ -111,7 +132,65 @@ export default function StorefrontLayout() {
               </>
             )}
           </nav>
+
+          {/* Mobile cluster: cart + account + hamburger */}
+          <div className="flex items-center gap-1 md:hidden">
+            <Link to="/cart" aria-label="Cart" className="relative inline-flex h-10 w-10 items-center justify-center rounded-full text-gray-700 hover:bg-gray-100">
+              <svg className="h-5.5 w-5.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="20" r="1" /><circle cx="18" cy="20" r="1" /><path d="M2 3h2.2l2 12.4a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 2-1.6L21 7H6" /></svg>
+              {cartCount > 0 && (
+                <span className="absolute right-1 top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-indigo-600 px-1 text-[10px] font-bold text-white">{cartCount}</span>
+              )}
+            </Link>
+            <button
+              onClick={() => setMenuOpen((o) => !o)}
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={menuOpen}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full text-gray-700 hover:bg-gray-100"
+            >
+              {menuOpen ? (
+                <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+              ) : (
+                <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+              )}
+            </button>
+          </div>
         </div>
+
+        {/* Mobile menu panel */}
+        {menuOpen && (
+          <div className="border-t border-gray-200 bg-[#fffdf9] md:hidden">
+            <nav className="mx-auto max-w-6xl space-y-1 px-4 py-3">
+              <NavLink to="/" end className={mobileLinkClass}>Home</NavLink>
+              <NavLink to="/products" className={mobileLinkClass}>Shop</NavLink>
+              <NavLink to="/neon" className={mobileLinkClass}>Neon ✨</NavLink>
+              <NavLink to="/cart" className={mobileLinkClass}><CartBadge count={cartCount} /></NavLink>
+
+              {categories.length > 0 && (
+                <div className="pt-2">
+                  <div className="px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-gray-400">Categories</div>
+                  <div className="flex flex-wrap gap-1.5 px-3 pb-1">
+                    {categories.map((cat) => (
+                      <Link key={cat._id} to={`/products?category=${cat.slug}`} className="rounded-full bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-700">
+                        {cat.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-2 border-t border-gray-100 pt-3">
+                {isAuthed ? (
+                  <NavLink to="/account" className={mobileLinkClass}>My Account</NavLink>
+                ) : (
+                  <div className="flex gap-2 px-1">
+                    <NavLink to="/login" className="flex-1 rounded-lg border border-gray-300 px-3 py-2.5 text-center text-base font-semibold text-gray-700">Login</NavLink>
+                    <NavLink to="/register" className="flex-1 rounded-lg bg-indigo-600 px-3 py-2.5 text-center text-base font-semibold text-white">Sign up</NavLink>
+                  </div>
+                )}
+              </div>
+            </nav>
+          </div>
+        )}
       </header>
 
       <main className="flex-1">
