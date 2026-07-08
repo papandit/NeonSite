@@ -5,6 +5,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { getSiteSettings } from '../services/catalog';
+import { API_BASE_URL } from '../services/api';
 
 export const DEFAULT_CONTENT = {
   hero: {
@@ -107,7 +108,7 @@ export function SiteSettingsProvider({ children }) {
 
   // Live refresh when an admin saves settings/content.
   useEffect(() => {
-    const base = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api').replace(/\/$/, '');
+    const base = API_BASE_URL.replace(/\/$/, '');
     const es = new EventSource(`${base}/events`);
     let timer;
     const handler = () => {

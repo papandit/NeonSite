@@ -8,6 +8,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getNeonConfig } from '../services/neon';
+import { API_BASE_URL } from '../services/api';
 import { addNeonToCart } from '../store/cartSlice';
 import { selectIsAuthenticated } from '../store/authSlice';
 import { formatPaise } from '../utils/money';
@@ -72,7 +73,7 @@ export default function NeonPage() {
 
   // Live refresh when the admin edits the neon catalogue.
   useEffect(() => {
-    const base = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api').replace(/\/$/, '');
+    const base = API_BASE_URL.replace(/\/$/, '');
     const es = new EventSource(`${base}/events`);
     es.addEventListener('neon:changed', load);
     es.onerror = () => {};

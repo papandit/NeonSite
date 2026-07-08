@@ -3,13 +3,14 @@
 // storefront without a manual reload. The browser auto-reconnects on drop.
 
 import { useEffect, useRef } from 'react';
+import { API_BASE_URL } from '../services/api';
 
 export function useLiveCatalog(onChange) {
   const cb = useRef(onChange);
   cb.current = onChange;
 
   useEffect(() => {
-    const base = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api').replace(/\/$/, '');
+    const base = API_BASE_URL.replace(/\/$/, '');
     let timer;
     const es = new EventSource(`${base}/events`);
     const handler = () => {

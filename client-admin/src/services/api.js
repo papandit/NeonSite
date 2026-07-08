@@ -7,7 +7,12 @@ import axios from 'axios';
 export const TOKEN_KEY = 'nc_admin_token';
 export const USER_KEY = 'nc_admin_user';
 
-const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+// In production default to a SAME-ORIGIN '/api' (served via reverse proxy) so
+// the deployed admin never calls the visitor's localhost. Override with
+// VITE_API_BASE_URL at build time for a separate API host.
+export const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:5000/api');
+const baseURL = API_BASE_URL;
 
 export const api = axios.create({
   baseURL,
