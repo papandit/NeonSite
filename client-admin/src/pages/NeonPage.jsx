@@ -109,6 +109,50 @@ function RowEditor({ title, description, items, columns, onChange, makeEmpty, ad
   );
 }
 
+// Simple visual font picker — the admin just taps which library fonts to offer;
+// each is previewed in its real typeface. No key / CSS-family editing.
+function FontPicker({ fonts, onChange }) {
+  const selected = new Set((fonts || []).filter((f) => f.active !== false).map((f) => f.key));
+  const rebuild = (keys) => NEON_FONT_LIBRARY.filter((l) => keys.has(l.key)).map((l) => ({ ...l, active: true }));
+  const toggle = (key) => {
+    const keys = new Set(selected);
+    if (keys.has(key)) keys.delete(key); else keys.add(key);
+    onChange(rebuild(keys));
+  };
+
+  return (
+    <section className="rounded-xl border border-slate-200 bg-white p-5">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div>
+          <h3 className="font-semibold text-slate-800">Fonts</h3>
+          <p className="text-xs text-slate-400">Tap a style to offer it in the studio · {selected.size} of {NEON_FONT_LIBRARY.length} selected.</p>
+        </div>
+        <div className="flex gap-2">
+          <button type="button" onClick={() => onChange(rebuild(new Set(NEON_FONT_LIBRARY.map((l) => l.key))))} className="rounded-full border border-indigo-300 px-3 py-1.5 text-sm font-medium text-indigo-600 hover:bg-indigo-50">Select all</button>
+          <button type="button" onClick={() => onChange([])} className="rounded-full border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-500 hover:bg-slate-50">Clear</button>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        {NEON_FONT_LIBRARY.map((f) => {
+          const on = selected.has(f.key);
+          return (
+            <button
+              key={f.key}
+              type="button"
+              onClick={() => toggle(f.key)}
+              className={`relative rounded-xl border p-3 text-center transition ${on ? 'border-indigo-500 bg-indigo-50' : 'border-slate-200 bg-white hover:border-slate-300'}`}
+            >
+              {on && <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-xs text-white">✓</span>}
+              <span className="block truncate text-2xl leading-tight text-slate-800" style={{ fontFamily: f.cssFamily }}>{f.name}</span>
+              <span className="mt-1 block text-[11px] text-slate-400">{f.name}</span>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 export default function NeonPage() {
   const [cfg, setCfg] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -128,16 +172,6 @@ export default function NeonPage() {
   }, []);
 
   const set = (key, val) => { setCfg((c) => ({ ...c, [key]: val })); setSaved(false); };
-
-  // Merge any missing fonts from the curated library (dedup by key).
-  const loadFontLibrary = () => {
-    setCfg((c) => {
-      const existing = new Set((c.fonts || []).map((f) => f.key));
-      const additions = NEON_FONT_LIBRARY.filter((f) => !existing.has(f.key)).map((f) => ({ ...f, active: true }));
-      return { ...c, fonts: [...(c.fonts || []), ...additions] };
-    });
-    setSaved(false);
-  };
 
   const onSave = async () => {
     setSaving(true); setSaved(false); setError(null);
@@ -177,24 +211,7 @@ export default function NeonPage() {
             className="mt-1 w-32 rounded-md border border-slate-300 px-3 py-2 text-sm" />
         </section>
 
-        <RowEditor
-          title="Fonts" description="Key is a stable id; CSS family must be a loaded font."
-          items={cfg.fonts} onChange={(v) => set('fonts', v)}
-          makeEmpty={() => ({ key: '', name: '', cssFamily: "'Pacifico', cursive", script: false, active: true })}
-          addLabel="Add font"
-          headerAction={
-            <button type="button" onClick={loadFontLibrary} className="shrink-0 rounded-full border border-indigo-300 px-3 py-1.5 text-sm font-medium text-indigo-600 hover:bg-indigo-50">
-              ✨ Load popular fonts
-            </button>
-          }
-          columns={[
-            { key: 'key', label: 'Key', type: 'text' },
-            { key: 'name', label: 'Name', type: 'text' },
-            { key: 'cssFamily', label: 'CSS family', type: 'text' },
-            { key: 'script', label: 'Script?', type: 'bool' },
-            { key: 'active', label: 'Active', type: 'bool' },
-          ]}
-        />
+        <FontPicker fonts={cfg.fonts} onChange={(v) => set('fonts', v)} />
 
         <RowEditor
           title="Colours" description="Fill = inner tube colour, Glow = outer halo."
