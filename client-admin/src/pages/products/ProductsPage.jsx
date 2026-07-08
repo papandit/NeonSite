@@ -16,11 +16,12 @@ export default function ProductsPage() {
   const [error, setError] = useState(null);
   const [confirm, setConfirm] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [query, setQuery] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await products.list({ limit: 200 });
+      const { data } = await products.list({ q: query.trim() || undefined, limit: 200 });
       setRows(data);
       setError(null);
     } catch (err) {
@@ -28,9 +29,13 @@ export default function ProductsPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [query]);
 
-  useEffect(() => { load(); }, [load]);
+  // Debounced: reload as the admin types in the search box.
+  useEffect(() => {
+    const t = setTimeout(load, 250);
+    return () => clearTimeout(t);
+  }, [load]);
 
   const onToggle = async (row) => {
     try { await products.toggle(row._id); await load(); }
@@ -91,6 +96,20 @@ export default function ProductsPage() {
       />
 
       {error && <div className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}
+
+      {/* Search */}
+      <div className="mb-4 relative max-w-sm">
+        <svg className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" /></svg>
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search products by name…"
+          className="w-full rounded-full border border-slate-300 py-2 pl-9 pr-9 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+        />
+        {query && (
+          <button onClick={() => setQuery('')} aria-label="Clear search" className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">✕</button>
+        )}
+      </div>
 
       <DataTable
         columns={columns}

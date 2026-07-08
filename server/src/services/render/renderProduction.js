@@ -19,6 +19,13 @@ const DEFAULT_DPI = 300;
 const MM_PER_INCH = 25.4;
 const DEFAULT_SIZE_MM = { widthMm: 457, heightMm: 305 }; // ~18x12in fallback
 
+// node-canvas can back a canvas with a raster (PNG), vector PDF, or SVG surface.
+const FORMATS = {
+  png: { type: undefined, mime: 'image/png', ext: 'png', toBuffer: (c) => c.toBuffer('image/png') },
+  pdf: { type: 'pdf', mime: 'application/pdf', ext: 'pdf', toBuffer: (c) => c.toBuffer('application/pdf') },
+  svg: { type: 'svg', mime: 'image/svg+xml', ext: 'svg', toBuffer: (c) => c.toBuffer() },
+};
+
 const mmToPx = (mm, dpi) => Math.max(1, Math.round((mm / MM_PER_INCH) * dpi));
 
 // --- font handling: download a remote font once and register it -------------
@@ -56,12 +63,13 @@ function sizeMm(designDocument) {
  * @param {number} [opts.dpi=300]
  * @returns {Promise<{ buffer: Buffer, widthPx: number, heightPx: number, mime: string }>}
  */
-export async function renderProduction(designDocument, { dpi = DEFAULT_DPI } = {}) {
+export async function renderProduction(designDocument, { dpi = DEFAULT_DPI, format = 'png' } = {}) {
+  const fmt = FORMATS[format] || FORMATS.png;
   const { widthMm, heightMm } = sizeMm(designDocument);
   const W = mmToPx(widthMm, dpi);
   const H = mmToPx(heightMm, dpi);
 
-  const canvas = createCanvas(W, H);
+  const canvas = fmt.type ? createCanvas(W, H, fmt.type) : createCanvas(W, H);
   const ctx = canvas.getContext('2d');
 
   // Background (plate surface).
@@ -129,8 +137,8 @@ export async function renderProduction(designDocument, { dpi = DEFAULT_DPI } = {
     }
   }
 
-  const buffer = canvas.toBuffer('image/png');
-  return { buffer, widthPx: W, heightPx: H, mime: 'image/png' };
+  const buffer = fmt.toBuffer(canvas);
+  return { buffer, widthPx: W, heightPx: H, mime: fmt.mime, ext: fmt.ext, format: fmt.ext };
 }
 
 export default renderProduction;

@@ -28,9 +28,20 @@ export default function ProductCard({ product, wishlisted = false, onWishlist, o
 
   const addLabel = addState === 'adding' ? 'Adding…' : addState === 'added' ? 'Added ✓' : 'Add to cart';
 
+  // Pricing: basePricePaise is the selling price; compareAtPricePaise is the MRP.
+  const mrp = product.compareAtPricePaise || 0;
+  const hasOffer = mrp > product.basePricePaise;
+  const discountPct = hasOffer ? Math.round(((mrp - product.basePricePaise) / mrp) * 100) : 0;
+  const swatches = product.swatches || [];
+
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white transition hover:shadow-md">
       <div className="relative aspect-square overflow-hidden">
+        {hasOffer && (
+          <span className="absolute left-2 top-2 z-10 rounded-full bg-green-600 px-2 py-0.5 text-xs font-bold text-white shadow-sm">
+            {discountPct}% OFF
+          </span>
+        )}
         <Link to={`/products/${product.slug}`}>
           {product.images?.[0] ? (
             <img
@@ -72,9 +83,30 @@ export default function ProductCard({ product, wishlisted = false, onWishlist, o
           <Rating value={product.rating || 0} />
         </div>
 
-        <div className="mt-3">
+        {/* Colour swatches */}
+        {swatches.length > 0 && (
+          <div className="mt-2 flex items-center gap-1.5">
+            {swatches.slice(0, 6).map((s, i) => (
+              <span
+                key={`${s.hex}-${i}`}
+                title={s.name}
+                className="inline-block h-4 w-4 rounded-full border border-black/10 shadow-sm"
+                style={{ background: s.hex }}
+              />
+            ))}
+            {swatches.length > 6 && <span className="text-xs text-gray-400">+{swatches.length - 6}</span>}
+          </div>
+        )}
+
+        <div className="mt-3 flex items-baseline gap-2">
           <span className="text-xs text-gray-400">from </span>
           <span className="text-lg font-semibold text-gray-900">{formatPaise(product.basePricePaise)}</span>
+          {hasOffer && (
+            <>
+              <span className="text-sm text-gray-400 line-through">{formatPaise(mrp)}</span>
+              <span className="text-xs font-semibold text-green-600">{discountPct}% off</span>
+            </>
+          )}
         </div>
 
         {/* Both actions: personalize OR buy as-is */}

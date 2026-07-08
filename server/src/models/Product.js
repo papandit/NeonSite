@@ -30,6 +30,9 @@ const ProductSchema = new Schema(
     description: { type: String, default: '' },
     images: [{ type: String }], // Cloudinary URLs
     basePricePaise: paiseField({ required: true }),
+    // Optional "original" / MRP price shown struck-through when higher than the
+    // selling price (basePricePaise). 0 = no compare-at price.
+    compareAtPricePaise: paiseField({ default: 0 }),
     rating: { type: Number, default: 0, min: 0, max: 5 },
     status: { type: String, enum: ['active', 'hidden'], default: 'active', index: true },
     // 'neon' products are priced by the Neon Studio (quoteNeon), not the option

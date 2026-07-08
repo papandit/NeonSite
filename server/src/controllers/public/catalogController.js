@@ -27,6 +27,23 @@ const SORTS = {
 
 const NON_MATCHING_ID = '000000000000000000000000';
 
+// Light list projection: everything a card needs, plus the product's colour
+// panel so we can surface swatches — without the heavy full customizationConfig.
+const CARD_SELECT =
+  'name slug images basePricePaise compareAtPricePaise rating category subCategory status createdAt customizationConfig.color';
+const COLOR_POPULATE = { path: 'customizationConfig.color.options', match: { status: 'active' }, select: 'name meta' };
+
+// Turn a populated product into a card payload: derive colour swatches and drop
+// the config so the response stays small.
+function toCard(p) {
+  const opts = p.customizationConfig?.color?.options || [];
+  const swatches = opts
+    .map((o) => ({ name: o.name, hex: o.meta?.hex }))
+    .filter((s) => s.hex);
+  const { customizationConfig, ...rest } = p;
+  return { ...rest, swatches };
+}
+
 // Resolve an id-or-slug to a Category/SubCategory _id (or a non-matching id).
 async function resolveId(Model, value) {
   if (!value) return null;
@@ -63,7 +80,9 @@ export const listCategories = asyncHandler(async (req, res) => {
 export const listProducts = asyncHandler(async (req, res) => {
   const { q, sort = 'newest', page = '1', limit = '12' } = req.query;
 
-  const filter = { status: 'active' };
+  // Exclude the neon anchor product — it's bought via the Neon Studio, not the
+  // regular catalog listing.
+  const filter = { status: 'active', kind: { $ne: 'neon' } };
 
   const categoryId = await resolveId(Category, req.query.category);
   if (categoryId) filter.category = categoryId;
@@ -81,8 +100,9 @@ export const listProducts = asyncHandler(async (req, res) => {
 
   const [items, total] = await Promise.all([
     Product.find(filter)
-      .select('-customizationConfig') // keep list payloads light
+      .select(CARD_SELECT)
       .populate('category', 'name slug')
+      .populate(COLOR_POPULATE)
       .sort(sortSpec)
       .skip(skip)
       .limit(limitNum)
@@ -90,7 +110,7 @@ export const listProducts = asyncHandler(async (req, res) => {
     Product.countDocuments(filter),
   ]);
 
-  return sendSuccess(res, items, 200, {
+  return sendSuccess(res, items.map(toCard), 200, {
     meta: {
       page: pageNum,
       limit: limitNum,
@@ -127,22 +147,21 @@ export const getRelatedProducts = asyncHandler(async (req, res) => {
   if (!product) throw ApiError.notFound('Product not found');
 
   const limit = 8;
-  const proj = '-customizationConfig';
 
   let items = product.category
-    ? await Product.find({ status: 'active', _id: { $ne: product._id }, category: product.category })
-        .select(proj).populate('category', 'name slug').sort('-rating -createdAt').limit(limit).lean()
+    ? await Product.find({ status: 'active', kind: { $ne: 'neon' }, _id: { $ne: product._id }, category: product.category })
+        .select(CARD_SELECT).populate('category', 'name slug').populate(COLOR_POPULATE).sort('-rating -createdAt').limit(limit).lean()
     : [];
 
   // Top up with other active products if the category is thin.
   if (items.length < limit) {
     const have = new Set([String(product._id), ...items.map((p) => String(p._id))]);
-    const extra = await Product.find({ status: 'active', _id: { $nin: [...have] } })
-      .select(proj).populate('category', 'name slug').sort('-rating -createdAt').limit(limit - items.length).lean();
+    const extra = await Product.find({ status: 'active', kind: { $ne: 'neon' }, _id: { $nin: [...have] } })
+      .select(CARD_SELECT).populate('category', 'name slug').populate(COLOR_POPULATE).sort('-rating -createdAt').limit(limit - items.length).lean();
     items = items.concat(extra);
   }
 
-  return sendSuccess(res, items);
+  return sendSuccess(res, items.map(toCard));
 });
 
 // GET /api/products/recommended?exclude=slug&limit= — "More products for you":
@@ -151,18 +170,19 @@ export const getRecommendedProducts = asyncHandler(async (req, res) => {
   const { exclude } = req.query;
   const limit = Math.min(20, Math.max(1, parseInt(req.query.limit, 10) || 8));
 
-  const filter = { status: 'active' };
+  const filter = { status: 'active', kind: { $ne: 'neon' } };
   if (exclude) {
     const ex = await Product.findOne({ slug: exclude }).select('_id').lean();
     if (ex) filter._id = { $ne: ex._id };
   }
 
   const items = await Product.find(filter)
-    .select('-customizationConfig')
+    .select(CARD_SELECT)
     .populate('category', 'name slug')
+    .populate(COLOR_POPULATE)
     .sort('-rating -createdAt')
     .limit(limit)
     .lean();
 
-  return sendSuccess(res, items);
+  return sendSuccess(res, items.map(toCard));
 });

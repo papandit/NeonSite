@@ -11,9 +11,10 @@ export const adminOrders = {
     api.patch(`/admin/orders/${id}/status`, body).then((r) => r.data.data),
 };
 
-// Fetch the production render with auth, then trigger a browser download.
-export async function downloadRender(orderId, itemId, filename) {
+// Fetch the production render (png|svg|pdf) with auth, then trigger a download.
+export async function downloadRender(orderId, itemId, filename, format = 'png') {
   const res = await api.get(`/admin/orders/${orderId}/production-render/${itemId}`, {
+    params: { format },
     responseType: 'blob',
   });
   const url = URL.createObjectURL(res.data);

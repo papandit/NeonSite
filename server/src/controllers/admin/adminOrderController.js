@@ -110,12 +110,13 @@ export const productionRender = asyncHandler(async (req, res) => {
     throw ApiError.badRequest('This neon item has no captured preview to download.');
   }
 
-  const { buffer, mime } = await renderProduction(item.designDocument);
+  const format = ['png', 'svg', 'pdf'].includes(req.query.format) ? req.query.format : 'png';
+  const { buffer, mime, ext } = await renderProduction(item.designDocument, { format });
 
   res.set('Content-Type', mime);
   res.set(
     'Content-Disposition',
-    `attachment; filename="${order.orderNumber}-${req.params.itemId}.png"`
+    `attachment; filename="${order.orderNumber}-${req.params.itemId}.${ext}"`
   );
   return res.send(buffer);
 });

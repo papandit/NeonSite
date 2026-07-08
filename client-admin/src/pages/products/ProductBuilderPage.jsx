@@ -109,13 +109,14 @@ export default function ProductBuilderPage() {
             subCategory: product.subCategory?._id || '',
             description: product.description || '',
             priceRupees: paiseToRupees(product.basePricePaise),
+            compareRupees: product.compareAtPricePaise ? paiseToRupees(product.compareAtPricePaise) : '',
             status: product.status,
           });
           setConfig(configFromProduct(product));
           setTextFields(product.customizationConfig?.textFields || []);
           setImages(product.images || []);
         } else {
-          reset({ name: '', category: '', subCategory: '', description: '', priceRupees: 0, status: 'active' });
+          reset({ name: '', category: '', subCategory: '', description: '', priceRupees: 0, compareRupees: '', status: 'active' });
         }
         setError(null);
       } catch (err) {
@@ -166,6 +167,7 @@ export default function ProductBuilderPage() {
         subCategory: values.subCategory || undefined,
         description: values.description,
         basePricePaise: rupeesToPaise(values.priceRupees),
+        compareAtPricePaise: values.compareRupees ? rupeesToPaise(values.compareRupees) : 0,
         status: values.status,
         images,
         customizationConfig: {
@@ -233,8 +235,13 @@ export default function ProductBuilderPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700">Base price (₹)</label>
+              <label className="block text-sm font-medium text-slate-700">Selling price (₹)</label>
               <input type="number" step="0.01" min="0" className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" {...register('priceRupees', { required: true, min: 0 })} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700">Original price / MRP (₹)</label>
+              <input type="number" step="0.01" min="0" placeholder="optional — shows a struck-through price" className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" {...register('compareRupees', { min: 0 })} />
+              <p className="mt-1 text-xs text-slate-400">Leave blank if there's no discount. Must be higher than the selling price to show an offer.</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700">Status</label>
