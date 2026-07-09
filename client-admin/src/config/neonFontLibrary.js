@@ -27,6 +27,27 @@ export const NEON_FONT_LIBRARY = [
   { key: 'orbitron', name: 'Orbitron', cssFamily: "'Orbitron', sans-serif", script: false },
   { key: 'bebas', name: 'Bebas Neue', cssFamily: "'Bebas Neue', sans-serif", script: false },
   { key: 'anton', name: 'Anton', cssFamily: "'Anton', sans-serif", script: false },
+  // Extended catalogue.
+  { key: 'playfair', name: 'Playfair Display', cssFamily: "'Playfair Display', serif", script: false },
+  { key: 'cinzel', name: 'Cinzel', cssFamily: "'Cinzel', serif", script: false },
+  { key: 'cormorant', name: 'Cormorant', cssFamily: "'Cormorant Garamond', serif", script: false },
+  { key: 'abril', name: 'Abril Fatface', cssFamily: "'Abril Fatface', serif", script: false },
+  { key: 'alfaslab', name: 'Alfa Slab One', cssFamily: "'Alfa Slab One', serif", script: false },
+  { key: 'lobstertwo', name: 'Lobster Two', cssFamily: "'Lobster Two', cursive", script: true },
+  { key: 'pattaya', name: 'Pattaya', cssFamily: "'Pattaya', sans-serif", script: true },
+  { key: 'marck', name: 'Marck Script', cssFamily: "'Marck Script', cursive", script: true },
+  { key: 'rocksalt', name: 'Rock Salt', cssFamily: "'Rock Salt', cursive", script: true },
+  { key: 'amatic', name: 'Amatic SC', cssFamily: "'Amatic SC', cursive", script: true },
+  { key: 'tangerine', name: 'Tangerine', cssFamily: "'Tangerine', cursive", script: true },
+  { key: 'pinyon', name: 'Pinyon Script', cssFamily: "'Pinyon Script', cursive", script: true },
+  { key: 'alexbrush', name: 'Alex Brush', cssFamily: "'Alex Brush', cursive", script: true },
+  { key: 'kalam', name: 'Kalam', cssFamily: "'Kalam', cursive", script: true },
+  { key: 'damion', name: 'Damion', cssFamily: "'Damion', cursive", script: true },
+  { key: 'rye', name: 'Rye', cssFamily: "'Rye', cursive", script: false },
+  { key: 'fredericka', name: 'Fredericka', cssFamily: "'Fredericka the Great', cursive", script: true },
+  { key: 'bungeeshade', name: 'Bungee Shade', cssFamily: "'Bungee Shade', cursive", script: false },
+  { key: 'poiret', name: 'Poiret One', cssFamily: "'Poiret One', sans-serif", script: false },
+  { key: 'sail', name: 'Sail', cssFamily: "'Sail', cursive", script: false },
 ];
 
 export default NEON_FONT_LIBRARY;

@@ -12,6 +12,7 @@ export const familyOf = (css) => css.match(/'([^']+)'/)?.[1] || css.split(',')[0
 
 export default function FontLibraryModal({ open, onClose, existingFamilies = new Set(), onAddMany, busy }) {
   const [sel, setSel] = useState(new Set());
+  const [q, setQ] = useState('');
 
   const toggle = (fam) => setSel((s) => {
     const n = new Set(s);
@@ -19,7 +20,9 @@ export default function FontLibraryModal({ open, onClose, existingFamilies = new
     return n;
   });
 
-  const items = NEON_FONT_LIBRARY.map((f) => ({ ...f, family: familyOf(f.cssFamily) }));
+  const items = NEON_FONT_LIBRARY
+    .map((f) => ({ ...f, family: familyOf(f.cssFamily) }))
+    .filter((f) => f.family.toLowerCase().includes(q.trim().toLowerCase()));
   const addable = items.filter((f) => !existingFamilies.has(f.family));
   const allSelected = addable.length > 0 && addable.every((f) => sel.has(f.family));
 
@@ -31,12 +34,18 @@ export default function FontLibraryModal({ open, onClose, existingFamilies = new
 
   return (
     <Modal open={open} title="Add fonts from library" onClose={onClose}>
-      <div className="mb-3 flex items-center justify-between">
-        <p className="text-sm text-slate-500">Tap fonts to add · {sel.size} selected</p>
+      <div className="mb-3 flex items-center gap-2">
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Search fonts…"
+          className="flex-1 rounded-full border border-slate-300 px-4 py-1.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+        />
+        <span className="shrink-0 text-xs text-slate-400">{sel.size} selected</span>
         <button
           type="button"
           onClick={() => setSel(allSelected ? new Set() : new Set(addable.map((f) => f.family)))}
-          className="rounded-full border border-indigo-300 px-3 py-1 text-sm font-medium text-indigo-600 hover:bg-indigo-50"
+          className="shrink-0 rounded-full border border-indigo-300 px-3 py-1 text-sm font-medium text-indigo-600 hover:bg-indigo-50"
         >
           {allSelected ? 'Clear' : 'Select all'}
         </button>

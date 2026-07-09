@@ -117,8 +117,10 @@ function FontPicker({ fonts, onChange }) {
   const [custom, setCustom] = useState(() => (fonts || []).filter((f) => !libKeys.has(f.key)).map((f) => ({ key: f.key, name: f.name, cssFamily: f.cssFamily, script: f.script })));
   const [adding, setAdding] = useState(false);
   const [nf, setNf] = useState({ name: '', cssFamily: '' });
+  const [q, setQ] = useState('');
 
   const all = [...NEON_FONT_LIBRARY, ...custom];
+  const shown = all.filter((f) => f.name.toLowerCase().includes(q.trim().toLowerCase()));
   const selected = new Set((fonts || []).filter((f) => f.active !== false).map((f) => f.key));
   const asFont = (e) => ({ key: e.key, name: e.name, cssFamily: e.cssFamily, script: !!e.script, active: true });
 
@@ -155,6 +157,8 @@ function FontPicker({ fonts, onChange }) {
         </div>
       </div>
 
+      <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search fonts…" className="mb-3 w-full rounded-full border border-slate-300 px-4 py-1.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+
       {adding && (
         <div className="mb-3 grid gap-2 rounded-lg border border-indigo-200 bg-indigo-50/40 p-3 sm:grid-cols-[1fr_1.4fr_auto]">
           <input value={nf.name} onChange={(e) => setNf((s) => ({ ...s, name: e.target.value }))} placeholder="Font name (e.g. Georgia)" className="rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
@@ -164,8 +168,8 @@ function FontPicker({ fonts, onChange }) {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-        {all.map((f) => {
+      <div className="grid max-h-[28rem] grid-cols-2 gap-3 overflow-y-auto pr-1 sm:grid-cols-3 lg:grid-cols-4">
+        {shown.map((f) => {
           const on = selected.has(f.key);
           return (
             <button
