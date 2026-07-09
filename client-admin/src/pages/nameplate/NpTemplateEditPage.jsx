@@ -10,6 +10,7 @@ import { apiErrorMessage } from '../../services/api';
 import { paiseToRupees, rupeesToPaise } from '../../utils/money';
 import PageHeader from '../../components/PageHeader';
 import FileUpload from '../../components/FileUpload';
+import TemplateCanvasBuilder from './TemplateCanvasBuilder';
 
 const templates = resource('nameplate/templates');
 const ALLOW_KINDS = [
@@ -162,6 +163,17 @@ export default function NpTemplateEditPage() {
             <FileUpload label="Preview image" kind="image" folder="nameplate/plates" value={tpl.previewImageUrl} onChange={(v) => set('previewImageUrl', v)} />
             <FileUpload label="Transparent PNG" kind="image" folder="nameplate/plates" value={tpl.transparentPngUrl} onChange={(v) => set('transparentPngUrl', v)} />
           </div>
+        </section>
+
+        {/* Visual builder — drag fields onto the plate */}
+        <section className="rounded-xl border border-slate-200 bg-white p-5">
+          <h3 className="mb-3 font-semibold">Visual builder</h3>
+          <TemplateCanvasBuilder
+            baseImageUrl={tpl.basePlateImageUrl}
+            aspect={(Number(tpl.heightMm) || 150) / (Number(tpl.widthMm) || 300)}
+            fields={tpl.textFields}
+            onMove={(i, x, y) => updField(i, { x, y })}
+          />
         </section>
 
         {/* Text fields */}
