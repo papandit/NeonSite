@@ -2,13 +2,7 @@ import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout, selectUser } from '../store/authSlice';
-import { OPTION_COLLECTIONS } from '../config/optionCollections';
 import Icon from '../components/Icon';
-
-const OPTION_ICON = {
-  materials: 'cube', sizes: 'ruler', colors: 'droplet', fonts: 'type',
-  borders: 'square', backgrounds: 'image', mounttypes: 'pin', icons: 'sparkle',
-};
 
 const GROUPS = [
   { title: null, items: [{ to: '/dashboard', label: 'Dashboard', icon: 'dashboard' }] },
@@ -28,10 +22,6 @@ const GROUPS = [
       { to: '/products', label: 'Products', icon: 'product' },
       { to: '/neon', label: 'Neon Studio', icon: 'sparkle' },
     ],
-  },
-  {
-    title: 'Options',
-    items: OPTION_COLLECTIONS.map((c) => ({ to: `/options/${c.key}`, label: c.label, icon: OPTION_ICON[c.key] || 'dot' })),
   },
   {
     title: 'Name Plate Studio',
