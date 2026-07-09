@@ -111,6 +111,7 @@ export default function StorefrontLayout() {
             </div>
 
             <NavLink to="/products" className={navLinkClass}>Shop</NavLink>
+            <NavLink to="/nameplates" className={navLinkClass}>Name Plates</NavLink>
             <NavLink to="/neon" className={neonLinkClass}>Neon ✨</NavLink>
             <NavLink to="/cart" className={navLinkClass}><CartBadge count={cartCount} /></NavLink>
 
@@ -162,6 +163,7 @@ export default function StorefrontLayout() {
             <nav className="mx-auto max-w-6xl space-y-1 px-4 py-3">
               <NavLink to="/" end className={mobileLinkClass}>Home</NavLink>
               <NavLink to="/products" className={mobileLinkClass}>Shop</NavLink>
+              <NavLink to="/nameplates" className={mobileLinkClass}>Name Plates</NavLink>
               <NavLink to="/neon" className={mobileLinkClass}>Neon ✨</NavLink>
               <NavLink to="/cart" className={mobileLinkClass}><CartBadge count={cartCount} /></NavLink>
 

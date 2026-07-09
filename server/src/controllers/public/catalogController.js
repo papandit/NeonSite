@@ -82,7 +82,7 @@ export const listProducts = asyncHandler(async (req, res) => {
 
   // Exclude the neon anchor product — it's bought via the Neon Studio, not the
   // regular catalog listing.
-  const filter = { status: 'active', kind: { $ne: 'neon' } };
+  const filter = { status: 'active', kind: { $nin: ['neon', 'nameplate'] } };
 
   const categoryId = await resolveId(Category, req.query.category);
   if (categoryId) filter.category = categoryId;
@@ -149,14 +149,14 @@ export const getRelatedProducts = asyncHandler(async (req, res) => {
   const limit = 8;
 
   let items = product.category
-    ? await Product.find({ status: 'active', kind: { $ne: 'neon' }, _id: { $ne: product._id }, category: product.category })
+    ? await Product.find({ status: 'active', kind: { $nin: ['neon', 'nameplate'] }, _id: { $ne: product._id }, category: product.category })
         .select(CARD_SELECT).populate('category', 'name slug').populate(COLOR_POPULATE).sort('-rating -createdAt').limit(limit).lean()
     : [];
 
   // Top up with other active products if the category is thin.
   if (items.length < limit) {
     const have = new Set([String(product._id), ...items.map((p) => String(p._id))]);
-    const extra = await Product.find({ status: 'active', kind: { $ne: 'neon' }, _id: { $nin: [...have] } })
+    const extra = await Product.find({ status: 'active', kind: { $nin: ['neon', 'nameplate'] }, _id: { $nin: [...have] } })
       .select(CARD_SELECT).populate('category', 'name slug').populate(COLOR_POPULATE).sort('-rating -createdAt').limit(limit - items.length).lean();
     items = items.concat(extra);
   }
@@ -170,7 +170,7 @@ export const getRecommendedProducts = asyncHandler(async (req, res) => {
   const { exclude } = req.query;
   const limit = Math.min(20, Math.max(1, parseInt(req.query.limit, 10) || 8));
 
-  const filter = { status: 'active', kind: { $ne: 'neon' } };
+  const filter = { status: 'active', kind: { $nin: ['neon', 'nameplate'] } };
   if (exclude) {
     const ex = await Product.findOne({ slug: exclude }).select('_id').lean();
     if (ex) filter._id = { $ne: ex._id };

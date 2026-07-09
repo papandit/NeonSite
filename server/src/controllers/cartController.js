@@ -12,6 +12,9 @@ import { repriceItem } from '../services/pricing/repriceItem.js';
 import { quoteNeon } from '../services/neon/quoteNeon.js';
 import { getNeonConfig } from '../models/NeonConfig.js';
 import { getNeonProduct } from '../services/neon/neonProduct.js';
+import NpTemplate from '../modules/nameplate/models/NpTemplate.js';
+import { quoteNpDesign } from '../modules/nameplate/services/quoteDesign.js';
+import { getNameplateProduct } from '../modules/nameplate/services/nameplateProduct.js';
 import { getOrCreateCart, serializeCart } from '../services/cart/cartService.js';
 
 async function repriceOrThrow(productId, designDocument) {
@@ -133,6 +136,41 @@ export const addNeonItem = asyncHandler(async (req, res) => {
     quantity: qty,
     unitPricePaise: designDocument.pricing.subtotalPaise, // SERVER price
   });
+  await cart.save();
+  return sendSuccess(res, await serializeCart(cart), 201);
+});
+
+// POST /api/cart/nameplate  { templateSlug, design, canvas, previewImageUrl, quantity }
+export const addNameplateItem = asyncHandler(async (req, res) => {
+  const { templateSlug, design = {}, canvas = {}, previewImageUrl = null, quantity = 1 } = req.body || {};
+  const template = await NpTemplate.findOne({ slug: templateSlug, status: 'active' }).lean();
+  if (!template) throw ApiError.notFound('Name-plate template not found');
+  const qty = Math.max(1, parseInt(quantity, 10) || 1);
+
+  const { pricePaise, breakdown, errors } = await quoteNpDesign(template, design);
+  if (errors.length > 0) {
+    throw ApiError.badRequest('Name-plate design is invalid', { code: 'NP_DESIGN_INVALID', details: errors });
+  }
+
+  const designDocument = {
+    schemaVersion: 1,
+    kind: 'nameplate',
+    nameplate: {
+      templateId: String(template._id),
+      templateSlug: template.slug,
+      templateName: template.name,
+      fields: design.fields || {},
+      selections: design.selections || {},
+      elements: design.elements || [],
+      canvas,
+    },
+    render: { previewImageUrl },
+    pricing: { currency: 'INR', authoritative: true, breakdown, subtotalPaise: pricePaise, computedAt: new Date().toISOString() },
+  };
+
+  const product = await getNameplateProduct();
+  const cart = await getOrCreateCart(req.user.id);
+  cart.items.push({ product: product._id, designDocument, quantity: qty, unitPricePaise: pricePaise });
   await cart.save();
   return sendSuccess(res, await serializeCart(cart), 201);
 });

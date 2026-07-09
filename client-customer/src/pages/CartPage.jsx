@@ -7,6 +7,12 @@ import { apiErrorMessage } from '../services/api';
 import { formatPaise } from '../utils/money';
 
 function itemSummary(design) {
+  // Name plates carry their spec under `nameplate`.
+  if (design?.kind === 'nameplate') {
+    const n = design.nameplate || {};
+    const text = Object.values(n.fields || {}).filter(Boolean).join(' · ');
+    return { options: n.templateName || 'Custom name plate', text };
+  }
   // Neon signs carry their spec under `neon`, not selections/text.
   if (design?.kind === 'neon') {
     const n = design.neon || {};

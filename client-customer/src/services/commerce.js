@@ -11,6 +11,8 @@ export const cartApi = {
     api.post('/cart/quick', { productId, quantity }).then((r) => r.data.data),
   addNeon: (spec, quantity = 1) =>
     api.post('/cart/neon', { spec, quantity }).then((r) => r.data.data),
+  addNameplate: (payload) =>
+    api.post('/cart/nameplate', payload).then((r) => r.data.data),
   update: (itemId, patch) => api.patch(`/cart/${itemId}`, patch).then((r) => r.data.data),
   remove: (itemId) => api.delete(`/cart/${itemId}`).then((r) => r.data.data),
   clear: () => api.delete('/cart').then((r) => r.data.data),

@@ -35,9 +35,9 @@ const ProductSchema = new Schema(
     compareAtPricePaise: paiseField({ default: 0 }),
     rating: { type: Number, default: 0, min: 0, max: 5 },
     status: { type: String, enum: ['active', 'hidden'], default: 'active', index: true },
-    // 'neon' products are priced by the Neon Studio (quoteNeon), not the option
-    // engine; used to route cart/checkout repricing. Regular plates are 'plate'.
-    kind: { type: String, enum: ['plate', 'neon'], default: 'plate', index: true },
+    // Routes cart/checkout repricing: 'neon' -> Neon Studio, 'nameplate' -> Name
+    // Plate Studio (quoteNpDesign), else the option engine. Regular = 'plate'.
+    kind: { type: String, enum: ['plate', 'neon', 'nameplate'], default: 'plate', index: true },
 
     // Product Builder output — drives the storefront editor (Phase 3).
     customizationConfig: {

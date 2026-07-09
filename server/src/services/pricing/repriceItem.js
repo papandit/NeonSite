@@ -7,15 +7,23 @@
 import { quoteDesign } from './quoteDesign.js';
 import { quoteNeon } from '../neon/quoteNeon.js';
 import { getNeonConfig } from '../../models/NeonConfig.js';
+import { repriceNameplate } from '../../modules/nameplate/services/repriceNameplate.js';
 
 export function isNeon(product, designDocument) {
   return product?.kind === 'neon' || designDocument?.kind === 'neon';
+}
+
+export function isNameplate(product, designDocument) {
+  return product?.kind === 'nameplate' || designDocument?.kind === 'nameplate';
 }
 
 /**
  * @returns {Promise<{ errors: string[], designDocument: object }>}
  */
 export async function repriceItem(product, designDocument) {
+  if (isNameplate(product, designDocument)) {
+    return repriceNameplate(designDocument);
+  }
   if (isNeon(product, designDocument)) {
     const config = await getNeonConfig();
     return quoteNeon(config, designDocument);

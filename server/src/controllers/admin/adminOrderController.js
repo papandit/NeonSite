@@ -102,12 +102,12 @@ export const productionRender = asyncHandler(async (req, res) => {
   const item = order.items.id(req.params.itemId);
   if (!item) throw ApiError.notFound('Order item not found');
 
-  // Neon signs aren't fabric renders — their production artwork is the captured
-  // preview image. Hand that back instead of rendering a plate.
-  if (item.designDocument?.kind === 'neon') {
+  // Neon signs and name plates aren't fabric plate renders — their production
+  // artwork is the captured preview image. Hand that back instead.
+  if (item.designDocument?.kind === 'neon' || item.designDocument?.kind === 'nameplate') {
     const url = item.designDocument?.render?.previewImageUrl;
     if (url) return res.redirect(url);
-    throw ApiError.badRequest('This neon item has no captured preview to download.');
+    throw ApiError.badRequest('This item has no captured preview to download.');
   }
 
   const format = ['png', 'svg', 'pdf'].includes(req.query.format) ? req.query.format : 'png';

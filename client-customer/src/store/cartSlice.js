@@ -80,6 +80,15 @@ export const addNeonToCart = createAsyncThunk('cart/addNeon', async ({ spec, qua
   }
 });
 
+// Add a custom name plate (server prices it from the template + price rules).
+export const addNameplateToCart = createAsyncThunk('cart/addNameplate', async (payload, { rejectWithValue }) => {
+  try {
+    return await cartApi.addNameplate(payload);
+  } catch (e) {
+    return rejectWithValue(apiErrorMessage(e));
+  }
+});
+
 const cartSlice = createSlice({
   name: 'cart',
   initialState,
@@ -100,6 +109,7 @@ const cartSlice = createSlice({
       .addCase(addToCart.fulfilled, setFromServer)
       .addCase(quickAddToCart.fulfilled, setFromServer)
       .addCase(addNeonToCart.fulfilled, setFromServer)
+      .addCase(addNameplateToCart.fulfilled, setFromServer)
       .addCase(updateCartItem.fulfilled, setFromServer)
       .addCase(removeCartItem.fulfilled, setFromServer)
       .addCase(clearCart.fulfilled, (state, action) => {
