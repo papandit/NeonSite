@@ -105,6 +105,14 @@ export default function NamePlateDesignerPage() {
       o.set({ fontSize: Math.round(o.fontSize * (o.scaleY || 1)), scaleX: 1, scaleY: 1 });
     });
 
+    // Select the first field so the style panel (with the FULL font library) is
+    // visible immediately, not hidden until the customer clicks the plate.
+    const firstKey = (d.template.textFields || []).find((f) => f.status !== 'inactive')?.key;
+    if (firstKey && textRefs.current[firstKey]) {
+      fc.setActiveObject(textRefs.current[firstKey]);
+      setActiveKey(firstKey);
+    }
+
     fc.renderAll();
     return () => { fc.dispose(); fcRef.current = null; textRefs.current = {}; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
