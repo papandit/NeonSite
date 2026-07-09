@@ -9,7 +9,6 @@ import { useParams } from 'react-router-dom';
 import { resource } from '../../services/resourceApi';
 import { apiErrorMessage } from '../../services/api';
 import { NP_BY_KEY } from '../../config/nameplateCollections';
-import { NEON_FONT_LIBRARY } from '../../config/neonFontLibrary';
 import { formatPaise, paiseToRupees, rupeesToPaise } from '../../utils/money';
 import PageHeader from '../../components/PageHeader';
 import DataTable from '../../components/DataTable';
@@ -17,6 +16,7 @@ import Modal from '../../components/Modal';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import StatusBadge from '../../components/StatusBadge';
 import FileUpload from '../../components/FileUpload';
+import FontLibraryModal from '../../components/FontLibraryModal';
 
 function Thumb({ row }) {
   const img = row.meta?.image || row.meta?.thumbnail || row.meta?.svg || row.imageUrl;
@@ -25,9 +25,6 @@ function Thumb({ row }) {
   if (img) return <img src={img} alt="" className="h-8 w-8 rounded object-cover" />;
   return <div className="flex h-8 w-8 items-center justify-center rounded bg-slate-100 text-xs text-slate-400">—</div>;
 }
-
-// The real family name from a CSS family string, e.g. "'Dancing Script', cursive" -> "Dancing Script".
-const familyOf = (css) => css.match(/'([^']+)'/)?.[1] || css.split(',')[0].trim();
 
 export default function NpCrudPage() {
   const { key } = useParams();
@@ -38,6 +35,7 @@ export default function NpCrudPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [fontLibOpen, setFontLibOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [confirm, setConfirm] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -90,18 +88,17 @@ export default function NpCrudPage() {
     }
   };
 
-  // Fonts only: one-click add the popular font library (families already loaded).
-  const loadPopularFonts = async () => {
+  // Fonts only: add the picked library families (each renders in its own type).
+  const addFromLibrary = async (families) => {
     setBusy(true);
     try {
       const existing = new Set(rows.map((r) => (r.meta?.family || r.name)));
-      const additions = NEON_FONT_LIBRARY
-        .map((f) => familyOf(f.cssFamily))
-        .filter((fam) => !existing.has(fam));
-      for (const fam of additions) {
+      for (const fam of families) {
+        if (existing.has(fam)) continue;
         await apiRes.create({ name: fam, status: 'active', priceDeltaPaise: 0, meta: { family: fam } });
       }
       await load();
+      setFontLibOpen(false);
     } catch (err) { setError(apiErrorMessage(err)); }
     finally { setBusy(false); }
   };
@@ -138,7 +135,7 @@ export default function NpCrudPage() {
         action={
           <div className="flex gap-2">
             {key === 'fonts' && (
-              <button onClick={loadPopularFonts} disabled={busy} className="rounded-full border border-indigo-300 px-4 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-50 disabled:opacity-60">✨ Load popular fonts</button>
+              <button onClick={() => setFontLibOpen(true)} className="rounded-full border border-indigo-300 px-4 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-50">✨ Add from library</button>
             )}
             <button onClick={openCreate} className="rounded-full bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">+ New {single.toLowerCase()}</button>
           </div>
@@ -219,6 +216,16 @@ export default function NpCrudPage() {
       </Modal>
 
       <ConfirmDialog open={Boolean(confirm)} message={`Delete "${confirm?.name}"?`} onConfirm={onDelete} onCancel={() => setConfirm(null)} busy={busy} />
+
+      {key === 'fonts' && (
+        <FontLibraryModal
+          open={fontLibOpen}
+          onClose={() => setFontLibOpen(false)}
+          existingFamilies={new Set(rows.map((r) => r.meta?.family || r.name))}
+          onAddMany={addFromLibrary}
+          busy={busy}
+        />
+      )}
     </div>
   );
 }

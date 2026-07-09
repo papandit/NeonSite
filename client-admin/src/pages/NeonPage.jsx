@@ -109,15 +109,36 @@ function RowEditor({ title, description, items, columns, onChange, makeEmpty, ad
   );
 }
 
-// Simple visual font picker — the admin just taps which library fonts to offer;
-// each is previewed in its real typeface. No key / CSS-family editing.
+// Visual font picker — tap library styles to offer them (each previewed in its
+// real typeface), plus '+ Add font' for a custom family the admin brings.
 function FontPicker({ fonts, onChange }) {
+  const libKeys = new Set(NEON_FONT_LIBRARY.map((l) => l.key));
+  // Custom fonts already saved (not part of the curated library) persist here.
+  const [custom, setCustom] = useState(() => (fonts || []).filter((f) => !libKeys.has(f.key)).map((f) => ({ key: f.key, name: f.name, cssFamily: f.cssFamily, script: f.script })));
+  const [adding, setAdding] = useState(false);
+  const [nf, setNf] = useState({ name: '', cssFamily: '' });
+
+  const all = [...NEON_FONT_LIBRARY, ...custom];
   const selected = new Set((fonts || []).filter((f) => f.active !== false).map((f) => f.key));
-  const rebuild = (keys) => NEON_FONT_LIBRARY.filter((l) => keys.has(l.key)).map((l) => ({ ...l, active: true }));
+  const asFont = (e) => ({ key: e.key, name: e.name, cssFamily: e.cssFamily, script: !!e.script, active: true });
+
   const toggle = (key) => {
     const keys = new Set(selected);
-    if (keys.has(key)) keys.delete(key); else keys.add(key);
-    onChange(rebuild(keys));
+    keys.has(key) ? keys.delete(key) : keys.add(key);
+    onChange(all.filter((e) => keys.has(e.key)).map(asFont));
+  };
+
+  const addCustom = () => {
+    const name = nf.name.trim();
+    if (!name) return;
+    const key = 'custom-' + name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const cssFamily = nf.cssFamily.trim() || `'${name}', sans-serif`;
+    if (all.some((e) => e.key === key)) { setAdding(false); return; }
+    const entry = { key, name, cssFamily, script: false };
+    setCustom((c) => [...c, entry]);
+    onChange([...all.filter((e) => selected.has(e.key)).map(asFont), asFont(entry)]);
+    setNf({ name: '', cssFamily: '' });
+    setAdding(false);
   };
 
   return (
@@ -125,15 +146,26 @@ function FontPicker({ fonts, onChange }) {
       <div className="mb-3 flex items-center justify-between gap-3">
         <div>
           <h3 className="font-semibold text-slate-800">Fonts</h3>
-          <p className="text-xs text-slate-400">Tap a style to offer it in the studio · {selected.size} of {NEON_FONT_LIBRARY.length} selected.</p>
+          <p className="text-xs text-slate-400">Tap a style to offer it · {selected.size} of {all.length} selected.</p>
         </div>
         <div className="flex gap-2">
-          <button type="button" onClick={() => onChange(rebuild(new Set(NEON_FONT_LIBRARY.map((l) => l.key))))} className="rounded-full border border-indigo-300 px-3 py-1.5 text-sm font-medium text-indigo-600 hover:bg-indigo-50">Select all</button>
+          <button type="button" onClick={() => setAdding((a) => !a)} className="rounded-full border border-indigo-300 px-3 py-1.5 text-sm font-medium text-indigo-600 hover:bg-indigo-50">+ Add font</button>
+          <button type="button" onClick={() => onChange(all.map(asFont))} className="rounded-full border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50">Select all</button>
           <button type="button" onClick={() => onChange([])} className="rounded-full border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-500 hover:bg-slate-50">Clear</button>
         </div>
       </div>
+
+      {adding && (
+        <div className="mb-3 grid gap-2 rounded-lg border border-indigo-200 bg-indigo-50/40 p-3 sm:grid-cols-[1fr_1.4fr_auto]">
+          <input value={nf.name} onChange={(e) => setNf((s) => ({ ...s, name: e.target.value }))} placeholder="Font name (e.g. Georgia)" className="rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
+          <input value={nf.cssFamily} onChange={(e) => setNf((s) => ({ ...s, cssFamily: e.target.value }))} placeholder="CSS family — optional, e.g. 'Georgia', serif" className="rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
+          <button type="button" onClick={addCustom} className="rounded-full bg-indigo-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-indigo-700">Add</button>
+          <p className="text-[11px] text-slate-400 sm:col-span-3">Tip: use a web-safe family (Georgia, Arial, Times New Roman) or a Google font that's loaded, so it renders in the preview and on the sign.</p>
+        </div>
+      )}
+
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-        {NEON_FONT_LIBRARY.map((f) => {
+        {all.map((f) => {
           const on = selected.has(f.key);
           return (
             <button
