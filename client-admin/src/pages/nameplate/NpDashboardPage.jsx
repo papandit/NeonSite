@@ -50,17 +50,17 @@ export default function NpDashboardPage() {
       <div className="overflow-hidden rounded-2xl bg-linear-to-br from-slate-900 to-slate-800 p-6 text-white sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <div className="text-xs font-semibold uppercase tracking-widest text-indigo-300">Name Plate Studio</div>
-            <h1 className="mt-1 font-display text-3xl font-semibold">Design studio overview</h1>
-            <p className="mt-1 max-w-xl text-sm text-slate-300">A fully dynamic, Canva-style name-plate designer — every template, field, font and price is admin-controlled.</p>
+            <div className="text-xs font-semibold uppercase tracking-widest text-amber-300">Name Plate Studio</div>
+            <h1 className="mt-1 font-display text-3xl font-semibold text-white!">Design studio overview</h1>
+            <p className="mt-1 max-w-xl text-sm text-white/70">A fully dynamic, Canva-style name-plate designer — every template, field, font and price is admin-controlled.</p>
           </div>
-          <Link to="/nameplate/templates/new" className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-slate-900 shadow hover:bg-slate-100">+ New template</Link>
+          <Link to="/nameplate/templates/new" className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-slate-900! shadow hover:bg-slate-100">+ New template</Link>
         </div>
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {HERO_STATS.map((s) => (
             <div key={s.label} className="rounded-xl bg-white/10 p-4 backdrop-blur">
-              <div className="flex items-center gap-2 text-slate-300"><Icon name={s.icon} className="h-4 w-4" /><span className="text-xs">{s.label}</span></div>
-              <div className="mt-1 text-2xl font-bold">{s.value ?? '—'}</div>
+              <div className="flex items-center gap-2 text-white/70"><Icon name={s.icon} className="h-4 w-4" /><span className="text-xs">{s.label}</span></div>
+              <div className="mt-1 text-2xl font-bold text-white!">{s.value ?? '—'}</div>
             </div>
           ))}
         </div>
@@ -87,9 +87,9 @@ export default function NpDashboardPage() {
           No templates yet. <Link to="/nameplate/templates/new" className="font-medium text-indigo-600 hover:underline">Create your first →</Link>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
           {recent.map((t) => (
-            <Link key={t._id} to={`/nameplate/templates/${t._id}`} className="group overflow-hidden rounded-xl border border-slate-200 bg-white transition hover:shadow-md">
+            <Link key={t._id} to={`/nameplate/templates/${t._id}`} className="group overflow-hidden rounded-lg border border-slate-200 bg-white transition hover:shadow-md">
               <div className="aspect-video overflow-hidden bg-slate-100">
                 {(t.previewImageUrl || t.basePlateImageUrl) ? (
                   <img src={t.previewImageUrl || t.basePlateImageUrl} alt={t.name} className="h-full w-full object-cover transition group-hover:scale-105" />
@@ -97,13 +97,12 @@ export default function NpDashboardPage() {
                   <div className="flex h-full items-center justify-center text-xs text-slate-400">No preview</div>
                 )}
               </div>
-              <div className="p-3">
-                <div className="truncate text-sm font-medium text-slate-900">{t.name}</div>
-                <div className="mt-0.5 flex items-center justify-between text-xs text-slate-400">
-                  <span>{t.category?.name || '—'}</span>
-                  <span className="font-medium text-slate-600">{formatPaise(t.basePricePaise)}</span>
+              <div className="p-2.5">
+                <div className="truncate text-xs font-semibold text-slate-900">{t.name}</div>
+                <div className="mt-0.5 flex items-center justify-between text-[11px] text-slate-400">
+                  <span className="truncate">{t.category?.name || '—'}</span>
+                  <span className="shrink-0 font-medium text-slate-600">{formatPaise(t.basePricePaise)}</span>
                 </div>
-                <span className={`mt-2 inline-block rounded-full px-2 py-0.5 text-[11px] font-medium ${t.status === 'active' ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-500'}`}>{t.status}</span>
               </div>
             </Link>
           ))}
