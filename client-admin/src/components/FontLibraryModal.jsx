@@ -1,19 +1,31 @@
-// A Google-Fonts / MS-Word-style font browser. Shows a big catalogue of family
-// names; each previews in its real typeface (fonts load dynamically on demand).
-// The admin searches, ticks the ones to add, and confirms — no CSS family or
-// name typing. Already-added families are shown as disabled/ticked.
+// A Google-Fonts / MS-Word-style font browser. Shows the WHOLE catalogue; each
+// family previews in its real typeface, lazy-loaded as it scrolls into view so
+// hundreds stay fast. The admin searches, ticks the ones to add, and confirms —
+// no CSS family or name typing. Already-added families are disabled/ticked.
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Modal from './Modal';
 import { GOOGLE_FONTS_SORTED } from '../config/googleFonts';
 import { ensureGoogleFont } from '../lib/loadFont';
 
-const MAX_SHOWN = 90; // cap rendered previews for performance
-
 function FontCard({ family, added, on, onToggle }) {
-  useEffect(() => { ensureGoogleFont(family); }, [family]);
+  const ref = useRef(null);
+
+  // Only load the font when the card is near the viewport.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === 'undefined') { ensureGoogleFont(family); return; }
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { ensureGoogleFont(family); io.disconnect(); }
+    }, { rootMargin: '300px' });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [family]);
+
   return (
     <button
+      ref={ref}
       type="button"
       disabled={added}
       onClick={() => onToggle(family)}
@@ -41,10 +53,11 @@ export default function FontLibraryModal({ open, onClose, existingFamilies = new
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    const list = needle ? GOOGLE_FONTS_SORTED.filter((f) => f.toLowerCase().includes(needle)) : GOOGLE_FONTS_SORTED;
-    return list;
+    return needle ? GOOGLE_FONTS_SORTED.filter((f) => f.toLowerCase().includes(needle)) : GOOGLE_FONTS_SORTED;
   }, [q]);
-  const shown = filtered.slice(0, MAX_SHOWN);
+
+  const addable = filtered.filter((f) => !existingFamilies.has(f));
+  const allSelected = addable.length > 0 && addable.every((f) => sel.has(f));
 
   const confirm = async () => {
     if (sel.size === 0) return;
@@ -59,22 +72,28 @@ export default function FontLibraryModal({ open, onClose, existingFamilies = new
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder={`Search ${GOOGLE_FONTS_SORTED.length}+ fonts…`}
+          placeholder={`Search ${GOOGLE_FONTS_SORTED.length} fonts…`}
           className="flex-1 rounded-full border border-slate-300 px-4 py-1.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
         />
         <span className="shrink-0 text-xs text-slate-400">{sel.size} selected</span>
+        <button
+          type="button"
+          onClick={() => setSel(allSelected ? new Set() : new Set(addable))}
+          className="shrink-0 rounded-full border border-indigo-300 px-3 py-1 text-sm font-medium text-indigo-600 hover:bg-indigo-50"
+        >
+          {allSelected ? 'Clear' : 'Select all'}
+        </button>
       </div>
 
       <div className="grid max-h-[55vh] grid-cols-2 gap-2 overflow-y-auto pr-1 sm:grid-cols-3">
-        {shown.map((fam) => (
+        {filtered.map((fam) => (
           <FontCard key={fam} family={fam} added={existingFamilies.has(fam)} on={sel.has(fam)} onToggle={toggle} />
         ))}
+        {filtered.length === 0 && <p className="col-span-full py-8 text-center text-sm text-slate-400">No fonts match “{q}”.</p>}
       </div>
-      {filtered.length > MAX_SHOWN && (
-        <p className="mt-2 text-center text-xs text-slate-400">Showing {MAX_SHOWN} of {filtered.length} — type to narrow the list.</p>
-      )}
+      <p className="mt-2 text-center text-xs text-slate-400">{filtered.length} fonts — scroll to browse them all.</p>
 
-      <div className="mt-4 flex justify-end gap-3">
+      <div className="mt-3 flex justify-end gap-3">
         <button type="button" onClick={onClose} className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Close</button>
         <button type="button" onClick={confirm} disabled={busy || sel.size === 0} className="rounded-full bg-indigo-600 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60">
           {busy ? 'Adding…' : `Add ${sel.size || ''} font${sel.size === 1 ? '' : 's'}`}
