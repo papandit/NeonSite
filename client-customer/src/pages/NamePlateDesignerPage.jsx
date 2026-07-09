@@ -9,6 +9,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import * as fabric from 'fabric';
 import { getNpTemplate, quoteNpDesign } from '../services/nameplate';
+import { ensureGoogleFont } from '../lib/loadFont';
 import { uploadPreview } from '../services/pricing';
 import { addNameplateToCart } from '../store/cartSlice';
 import { selectIsAuthenticated } from '../store/authSlice';
@@ -59,6 +60,17 @@ export default function NamePlateDesignerPage() {
   const template = data?.template;
   const aspect = template ? (template.heightMm || 150) / (template.widthMm || 300) : 0.5;
   const CANVAS_H = Math.round(CANVAS_W * aspect);
+
+  // Load every offered font, then re-render the canvas once they're ready so
+  // catalogue fonts show correctly on the plate.
+  useEffect(() => {
+    if (!data) return;
+    const fams = [
+      ...(data.options.fonts || []).map((fo) => fo.meta?.family || fo.name),
+      ...(data.template.textFields || []).map((f) => f.defaultFontFamily).filter(Boolean),
+    ];
+    Promise.all([...new Set(fams)].map(ensureGoogleFont)).then(() => fcRef.current?.requestRenderAll());
+  }, [data]);
 
   // ---- create fabric canvas once template known ----
   useEffect(() => {

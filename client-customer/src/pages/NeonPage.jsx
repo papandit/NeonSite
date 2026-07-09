@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getNeonConfig } from '../services/neon';
 import { API_BASE_URL } from '../services/api';
+import { ensureGoogleFont } from '../lib/loadFont';
 import { addNeonToCart } from '../store/cartSlice';
 import { selectIsAuthenticated } from '../store/authSlice';
 import { formatPaise } from '../utils/money';
@@ -60,6 +61,8 @@ export default function NeonPage() {
   const load = useCallback(() => {
     getNeonConfig().then((c) => {
       setCfg(c);
+      // Load every offered font so custom / catalogue fonts render on the sign.
+      (c.fonts || []).forEach((f) => { const fam = f.cssFamily?.match(/'([^']+)'/)?.[1] || f.name; ensureGoogleFont(fam); });
       setFont((f) => f || c.fonts[0]?.key || '');
       setColor((v) => v || c.colors[0]?.key || '');
       setSize((v) => v || c.sizes.find((s) => s.key === 'm')?.key || c.sizes[0]?.key || '');
