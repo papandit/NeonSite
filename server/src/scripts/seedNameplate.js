@@ -88,13 +88,19 @@ async function run() {
     cats[name] = await NpCategory.findOneAndUpdate({ name }, { $setOnInsert: { name, status: 'active' } }, { new: true, upsert: true, setDefaultsOnInsert: true });
   }
 
-  // Fonts (families already loaded in the customer app)
-  const fontDefs = [
-    ['Fraunces', 'Fraunces'], ['Nunito', 'Nunito'], ['Pacifico', 'Pacifico'],
-    ['Great Vibes', 'Great Vibes'], ['Dancing Script', 'Dancing Script'], ['Bebas Neue', 'Bebas Neue'], ['Monoton', 'Monoton'],
+  // Fonts — the full catalogue (all families are preloaded in the customer app).
+  const FONT_FAMILIES = [
+    'Fraunces', 'Nunito', 'Pacifico', 'Dancing Script', 'Kaushan Script', 'Great Vibes',
+    'Sacramento', 'Satisfy', 'Cookie', 'Allura', 'Parisienne', 'Yellowtail', 'Lobster',
+    'Courgette', 'Caveat', 'Permanent Marker', 'Shadows Into Light', 'Neonderthaw',
+    'Tilt Neon', 'Monoton', 'Bungee', 'Audiowide', 'Righteous', 'Orbitron', 'Bebas Neue',
+    'Anton', 'Playfair Display', 'Cinzel', 'Cormorant Garamond', 'Abril Fatface',
+    'Alfa Slab One', 'Lobster Two', 'Pattaya', 'Marck Script', 'Rock Salt', 'Amatic SC',
+    'Tangerine', 'Pinyon Script', 'Alex Brush', 'Kalam', 'Damion', 'Rye',
+    'Fredericka the Great', 'Bungee Shade', 'Poiret One', 'Sail',
   ];
-  for (const [name, family] of fontDefs) {
-    await NpFont.findOneAndUpdate({ name }, { $setOnInsert: { name, status: 'active', meta: { family } } }, { upsert: true, setDefaultsOnInsert: true });
+  for (const family of FONT_FAMILIES) {
+    await NpFont.findOneAndUpdate({ name: family }, { $setOnInsert: { name: family, status: 'active', meta: { family } } }, { upsert: true, setDefaultsOnInsert: true });
   }
 
   // Colours
