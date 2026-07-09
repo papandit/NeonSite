@@ -14,6 +14,7 @@ import chatRoutes from './chatRoutes.js';
 import neonRoutes from './neonRoutes.js';
 import assetRoutes from './assetRoutes.js';
 import nameplateRoutes from '../modules/nameplate/routes/publicRoutes.js';
+import { getFonts } from '../controllers/public/fontsController.js';
 
 const router = Router();
 
@@ -26,6 +27,7 @@ router.use('/chat', chatRoutes);
 router.use('/neon', neonRoutes);
 router.use('/assets', assetRoutes);
 router.use('/nameplate', nameplateRoutes);
+router.get('/fonts', getFonts);
 
 // Commerce (Phase 4, auth): cart, coupons, checkout, payments, orders
 router.use('/cart', cartRoutes);

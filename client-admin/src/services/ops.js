@@ -4,6 +4,10 @@ import { api } from './api';
 
 export const getDashboard = () => api.get('/admin/dashboard').then((r) => r.data.data);
 
+// Full Google Fonts catalogue (server-proxied, key stays server-side). Returns
+// [] when no key is configured so the caller falls back to a bundled list.
+export const getFontCatalog = () => api.get('/fonts').then((r) => r.data.data.families || []);
+
 export const adminOrders = {
   list: (params) => api.get('/admin/orders', { params }).then((r) => r.data),
   get: (id) => api.get(`/admin/orders/${id}`).then((r) => r.data.data),

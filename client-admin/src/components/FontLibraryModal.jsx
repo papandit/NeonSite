@@ -7,6 +7,20 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Modal from './Modal';
 import { GOOGLE_FONTS_SORTED } from '../config/googleFonts';
 import { ensureGoogleFont } from '../lib/loadFont';
+import { getFontCatalog } from '../services/ops';
+
+// Module-level cache of the full (server-proxied) Google Fonts list.
+let catalogCache = null;
+async function loadCatalog() {
+  if (catalogCache) return catalogCache;
+  try {
+    const families = await getFontCatalog();
+    catalogCache = families.length ? families : GOOGLE_FONTS_SORTED;
+  } catch {
+    catalogCache = GOOGLE_FONTS_SORTED;
+  }
+  return catalogCache;
+}
 
 function FontCard({ family, added, on, onToggle }) {
   const ref = useRef(null);
@@ -44,6 +58,11 @@ function FontCard({ family, added, on, onToggle }) {
 export default function FontLibraryModal({ open, onClose, existingFamilies = new Set(), onAddMany, busy }) {
   const [sel, setSel] = useState(new Set());
   const [q, setQ] = useState('');
+  const [catalog, setCatalog] = useState(catalogCache || GOOGLE_FONTS_SORTED);
+
+  useEffect(() => {
+    if (open) loadCatalog().then(setCatalog);
+  }, [open]);
 
   const toggle = (fam) => setSel((s) => {
     const n = new Set(s);
@@ -53,8 +72,8 @@ export default function FontLibraryModal({ open, onClose, existingFamilies = new
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    return needle ? GOOGLE_FONTS_SORTED.filter((f) => f.toLowerCase().includes(needle)) : GOOGLE_FONTS_SORTED;
-  }, [q]);
+    return needle ? catalog.filter((f) => f.toLowerCase().includes(needle)) : catalog;
+  }, [q, catalog]);
 
   const addable = filtered.filter((f) => !existingFamilies.has(f));
   const allSelected = addable.length > 0 && addable.every((f) => sel.has(f));
@@ -72,7 +91,7 @@ export default function FontLibraryModal({ open, onClose, existingFamilies = new
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder={`Search ${GOOGLE_FONTS_SORTED.length} fonts…`}
+          placeholder={`Search ${catalog.length} fonts…`}
           className="flex-1 rounded-full border border-slate-300 px-4 py-1.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
         />
         <span className="shrink-0 text-xs text-slate-400">{sel.size} selected</span>

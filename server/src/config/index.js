@@ -102,6 +102,12 @@ const config = {
     apiKey: optional('GEMINI_API_KEY'),
     model: optional('GEMINI_MODEL', 'gemini-1.5-flash'),
   },
+
+  // Google Fonts Developer API (optional — used to serve the full font catalogue
+  // to the admin font browser; the key stays server-side).
+  googleFonts: {
+    apiKey: optional('GOOGLE_FONTS_API_KEY'),
+  },
 };
 
 if (missing.length > 0) {
