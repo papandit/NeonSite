@@ -4,22 +4,26 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logout, selectUser } from '../store/authSlice';
 import Icon from '../components/Icon';
 
+// Three separate verticals: plain E-commerce, Neon Studio, Name Plate Studio.
 const GROUPS = [
   { title: null, items: [{ to: '/dashboard', label: 'Dashboard', icon: 'dashboard' }] },
   {
-    title: 'Operations',
+    title: 'E-commerce',
     items: [
       { to: '/orders', label: 'Orders', icon: 'orders' },
+      { to: '/products', label: 'Products', icon: 'product' },
+      { to: '/categories', label: 'Categories', icon: 'category' },
+      { to: '/subcategories', label: 'Subcategories', icon: 'layers' },
+      { to: '/coupons', label: 'Coupons', icon: 'coupon' },
+      { to: '/banners', label: 'Banners', icon: 'banner' },
       { to: '/reviews', label: 'Reviews', icon: 'reviews' },
       { to: '/analytics', label: 'Analytics', icon: 'analytics' },
+      { to: '/settings', label: 'Settings', icon: 'settings' },
     ],
   },
   {
-    title: 'Catalog',
+    title: 'Neon Studio',
     items: [
-      { to: '/categories', label: 'Categories', icon: 'category' },
-      { to: '/subcategories', label: 'Subcategories', icon: 'layers' },
-      { to: '/products', label: 'Products', icon: 'product' },
       { to: '/neon', label: 'Neon Studio', icon: 'sparkle' },
     ],
   },
@@ -38,14 +42,6 @@ const GROUPS = [
       { to: '/nameplate/c/sizes', label: 'Sizes', icon: 'ruler' },
       { to: '/nameplate/c/backgrounds', label: 'Backgrounds', icon: 'image' },
       { to: '/nameplate/price-rules', label: 'Price Rules', icon: 'coupon' },
-    ],
-  },
-  {
-    title: 'Store',
-    items: [
-      { to: '/coupons', label: 'Coupons', icon: 'coupon' },
-      { to: '/banners', label: 'Banners', icon: 'banner' },
-      { to: '/settings', label: 'Settings', icon: 'settings' },
     ],
   },
 ];

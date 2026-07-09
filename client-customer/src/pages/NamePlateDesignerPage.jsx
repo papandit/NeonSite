@@ -235,9 +235,26 @@ export default function NamePlateDesignerPage() {
               <h3 className="text-xs font-semibold uppercase tracking-wide text-indigo-600">Style: {activeField.label}</h3>
               <div className="mt-3 space-y-3">
                 {activeField.canChangeFont && fonts.length > 0 && (
-                  <select value={activeStyle.font} onChange={(e) => setStyle(activeKey, { font: e.target.value })} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
-                    {fonts.map((fo) => <option key={fo._id} value={fo.meta?.family || fo.name}>{fo.name}</option>)}
-                  </select>
+                  <div>
+                    <div className="mb-1 text-xs font-medium text-gray-500">Font ({fonts.length})</div>
+                    <div className="grid max-h-40 grid-cols-2 gap-1.5 overflow-y-auto pr-1">
+                      {fonts.map((fo) => {
+                        const fam = fo.meta?.family || fo.name;
+                        const on = activeStyle.font === fam;
+                        return (
+                          <button
+                            key={fo._id}
+                            onClick={() => { setStyle(activeKey, { font: fam }); setSelections((s) => ({ ...s, font: fo._id })); }}
+                            className={`truncate rounded-md border px-2 py-1.5 text-left text-base transition ${on ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 bg-white hover:border-gray-300'}`}
+                            style={{ fontFamily: fam }}
+                            title={fo.name}
+                          >
+                            {fo.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                 )}
                 <div className="flex items-center gap-3">
                   {activeField.canChangeColor && (

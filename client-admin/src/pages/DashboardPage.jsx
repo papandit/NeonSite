@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getDashboard, getAnalytics } from '../services/ops';
+import { getDashboard, getAnalytics, neonApi } from '../services/ops';
+import { resource } from '../services/resourceApi';
 import { formatPaise } from '../utils/money';
 import { apiErrorMessage } from '../services/api';
 import { AreaChart, Donut, BarList } from '../components/Charts';
@@ -70,14 +71,40 @@ function Panel({ title, cta, children }) {
   );
 }
 
+// Small stat pill for the studio sections.
+function MiniStat({ label, value }) {
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-4">
+      <div className="text-xl font-bold text-slate-900">{value ?? '—'}</div>
+      <div className="mt-0.5 text-xs text-slate-500">{label}</div>
+    </div>
+  );
+}
+
+function SectionTitle({ children, accent }) {
+  return (
+    <div className="mb-4 mt-10 flex items-center gap-2">
+      <span className={`inline-block h-5 w-1.5 rounded-full ${accent}`} />
+      <h2 className="text-lg font-semibold text-slate-800">{children}</h2>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const [data, setData] = useState(null);
   const [analytics, setAnalytics] = useState(null);
+  const [neon, setNeon] = useState(null);
+  const [np, setNp] = useState({});
   const [error, setError] = useState(null);
 
   useEffect(() => {
     getDashboard().then(setData).catch((e) => setError(apiErrorMessage(e)));
     getAnalytics().then(setAnalytics).catch(() => {}); // charts are best-effort
+    neonApi.get().then(setNeon).catch(() => {});
+    // Name Plate counts (templates + collections).
+    const npKeys = ['templates', 'categories', 'fonts', 'colors', 'elements'];
+    Promise.all(npKeys.map((k) => resource(`nameplate/${k}`).list({ limit: 1 }).then((r) => [k, r.meta?.total ?? 0]).catch(() => [k, 0])))
+      .then((pairs) => setNp(Object.fromEntries(pairs)));
   }, []);
 
   if (error) return <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>;
@@ -99,8 +126,10 @@ export default function DashboardPage() {
         <Link to="/products/new" className="rounded-full bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">+ New product</Link>
       </div>
 
+      <SectionTitle accent="bg-indigo-500">E-commerce store</SectionTitle>
+
       {/* KPI cards */}
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         <StatCard tone="green" label="Total revenue" value={formatPaise(data.totalSalesPaise)} sub={`${data.totalOrders} orders all-time`} />
         <StatCard tone="indigo" label="Today's revenue" value={formatPaise(data.todaysRevenuePaise)} sub={`${data.todaysOrders} orders today`} />
         <StatCard label="Avg order value" value={formatPaise(data.avgOrderValuePaise)} />
@@ -208,6 +237,45 @@ export default function DashboardPage() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* ---------------- Neon Studio ---------------- */}
+      <SectionTitle accent="bg-pink-500">Neon Studio</SectionTitle>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <MiniStat label="Fonts" value={neon?.fonts?.length} />
+        <MiniStat label="Colours" value={neon?.colors?.length} />
+        <MiniStat label="Sizes" value={neon?.sizes?.length} />
+        <MiniStat label="Adapters" value={neon?.adapters?.length} />
+        <MiniStat label="Scenes" value={neon?.scenes?.length} />
+      </div>
+      <div className="mt-3">
+        <Link to="/neon" className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:border-pink-200 hover:bg-pink-50">
+          <Icon name="sparkle" className="h-4 w-4" /> Open Neon Studio
+        </Link>
+      </div>
+
+      {/* ---------------- Name Plate Studio ---------------- */}
+      <SectionTitle accent="bg-amber-500">Name Plate Studio</SectionTitle>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <MiniStat label="Templates" value={np.templates} />
+        <MiniStat label="Categories" value={np.categories} />
+        <MiniStat label="Fonts" value={np.fonts} />
+        <MiniStat label="Colours" value={np.colors} />
+        <MiniStat label="Elements" value={np.elements} />
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {[
+          ['/nameplate/dashboard', 'Studio', 'dashboard'],
+          ['/nameplate/templates', 'Templates', 'layers'],
+          ['/nameplate/c/fonts', 'Fonts', 'type'],
+          ['/nameplate/c/colors', 'Colors', 'droplet'],
+          ['/nameplate/c/elements', 'Elements', 'sparkle'],
+          ['/nameplate/price-rules', 'Price rules', 'coupon'],
+        ].map(([to, label, icon]) => (
+          <Link key={to} to={to} className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:border-amber-200 hover:bg-amber-50">
+            <Icon name={icon} className="h-4 w-4" /> {label}
+          </Link>
+        ))}
       </div>
     </div>
   );

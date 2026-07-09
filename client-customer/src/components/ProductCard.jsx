@@ -109,21 +109,19 @@ export default function ProductCard({ product, wishlisted = false, onWishlist, o
           )}
         </div>
 
-        {/* Both actions: personalize OR buy as-is */}
+        {/* Simple store product: view details or add to cart */}
         <div className="mt-3 flex gap-2">
           <Link
             to={`/products/${product.slug}`}
-            className="flex-1 rounded-full bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white transition hover:bg-indigo-700"
+            className="rounded-full border border-gray-300 px-3 py-2 text-center text-sm font-semibold text-gray-700 transition hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700"
           >
-            Customize
+            View
           </Link>
           <button
             onClick={handleAdd}
             disabled={addState === 'adding'}
-            className={`flex-1 rounded-full border px-3 py-2 text-sm font-semibold transition ${
-              addState === 'added'
-                ? 'border-green-500 bg-green-50 text-green-700'
-                : 'border-gray-300 text-gray-700 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700'
+            className={`flex-1 rounded-full px-3 py-2 text-sm font-semibold text-white transition ${
+              addState === 'added' ? 'bg-green-600' : 'bg-indigo-600 hover:bg-indigo-700'
             }`}
           >
             {addLabel}

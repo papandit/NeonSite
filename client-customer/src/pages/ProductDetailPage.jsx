@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getProductBySlug, getRelatedProducts, getRecommendedProducts } from '../services/catalog';
@@ -10,9 +10,6 @@ import ProductGrid from '../components/ProductGrid';
 import Reviews from '../components/Reviews';
 import Seo from '../components/Seo';
 
-// Lazy-load the editor (and Fabric.js) so it only ships on the product page.
-const Configurator = lazy(() => import('../configurator/Configurator'));
-
 export default function ProductDetailPage() {
   const { slug } = useParams();
   const dispatch = useDispatch();
@@ -22,6 +19,7 @@ export default function ProductDetailPage() {
   const [related, setRelated] = useState([]);
   const [recommended, setRecommended] = useState([]);
   const [activeImage, setActiveImage] = useState(0);
+  const [qty, setQty] = useState(1);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [addState, setAddState] = useState('idle');
@@ -38,14 +36,14 @@ export default function ProductDetailPage() {
     getRecommendedProducts({ exclude: slug, limit: 4 }).then(setRecommended).catch(() => setRecommended([]));
   }, [slug]);
 
-  const handleQuickAdd = async () => {
+  const handleAdd = async () => {
     if (!isAuthed) {
       navigate('/login', { state: { from: { pathname: `/products/${slug}` } } });
       return;
     }
     setAddState('adding');
     try {
-      await dispatch(quickAddToCart({ productId: product._id, quantity: 1 })).unwrap();
+      await dispatch(quickAddToCart({ productId: product._id, quantity: qty })).unwrap();
       navigate('/cart');
     } catch {
       setAddState('idle');
@@ -115,43 +113,36 @@ export default function ProductDetailPage() {
           {product.category?.name && <span className="text-sm text-gray-400">{product.category.name}</span>}
           <h1 className="mt-1 text-3xl font-bold">{product.name}</h1>
           <div className="mt-2"><Rating value={product.rating || 0} showValue /></div>
-          <div className="mt-4">
-            <span className="text-sm text-gray-500">Starting at</span>
+          <div className="mt-4 flex items-baseline gap-3">
             <div className="text-3xl font-semibold text-gray-900">{formatPaise(product.basePricePaise)}</div>
-          </div>
-          {product.description && <p className="mt-4 text-gray-600">{product.description}</p>}
-          <div className="mt-6 flex flex-wrap gap-3">
-            <a href="#customize" className="rounded-full bg-indigo-600 px-5 py-3 text-sm font-semibold text-white hover:bg-indigo-700">
-              Customize this plate ↓
-            </a>
-            <button
-              onClick={handleQuickAdd}
-              disabled={addState === 'adding'}
-              className={`rounded-full border px-5 py-3 text-sm font-semibold transition disabled:opacity-60 ${
-                addState === 'added'
-                  ? 'border-green-500 bg-green-50 text-green-700'
-                  : 'border-gray-300 text-gray-700 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700'
-              }`}
-            >
-              {addState === 'adding' ? 'Adding…' : addState === 'added' ? 'Added to cart ✓' : 'Add to cart (as-is)'}
-            </button>
-            {addState === 'added' && (
-              <Link to="/cart" className="self-center text-sm font-medium text-indigo-600 hover:underline">
-                View cart →
-              </Link>
+            {product.compareAtPricePaise > product.basePricePaise && (
+              <>
+                <span className="text-lg text-gray-400 line-through">{formatPaise(product.compareAtPricePaise)}</span>
+                <span className="rounded-full bg-green-600 px-2 py-0.5 text-xs font-bold text-white">
+                  {Math.round(((product.compareAtPricePaise - product.basePricePaise) / product.compareAtPricePaise) * 100)}% OFF
+                </span>
+              </>
             )}
           </div>
-          <p className="mt-2 text-xs text-gray-400">Buy as-is with default options, or customize it your way.</p>
+          {product.description && <p className="mt-4 text-gray-600">{product.description}</p>}
+
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <div className="inline-flex items-center rounded-full border border-gray-300">
+              <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="px-3 py-2 text-gray-600 hover:bg-gray-50">−</button>
+              <span className="min-w-8 px-2 text-center text-sm">{qty}</span>
+              <button onClick={() => setQty((q) => q + 1)} className="px-3 py-2 text-gray-600 hover:bg-gray-50">+</button>
+            </div>
+            <button
+              onClick={handleAdd}
+              disabled={addState === 'adding'}
+              className="rounded-full bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:opacity-60"
+            >
+              {addState === 'adding' ? 'Adding…' : 'Add to cart'}
+            </button>
+          </div>
+          <p className="mt-3 text-xs text-gray-400">Looking to personalize? Try our <Link to="/nameplates" className="font-medium text-indigo-600 hover:underline">Name Plate Studio</Link> or <Link to="/neon" className="font-medium text-indigo-600 hover:underline">Neon Studio</Link>.</p>
         </div>
       </div>
-
-      {/* Live configurator */}
-      <section id="customize" className="mt-16">
-        <h2 className="mb-6 text-2xl font-bold">Design your plate</h2>
-        <Suspense fallback={<div className="py-16 text-center text-gray-400">Loading editor…</div>}>
-          <Configurator product={product} />
-        </Suspense>
-      </section>
 
       {/* Reviews */}
       <section className="mt-16">
