@@ -8,6 +8,25 @@ const PIPELINE = ['pending', 'confirmed', 'design_review', 'approved', 'manufact
 const LABEL = (s) => s.replace('_', ' ');
 
 function itemSummary(design) {
+  // Name plate: show the customer's field values + chosen font/colour/symbol.
+  if (design?.kind === 'nameplate') {
+    const n = design.nameplate || {};
+    const text = Object.entries(n.fields || {}).map(([k, v]) => `${k}: ${v}`).filter((s) => !s.endsWith(': ')).join(' · ');
+    const sel = n.selections || {};
+    const parts = [
+      n.templateName && `Template: ${n.templateName}`,
+      sel.fontFamily && `Font: ${sel.fontFamily}`,
+      sel.colorHex && `Colour: ${sel.colorHex}`,
+      (n.elements || []).length && `Symbols: ${(n.elements || []).length}`,
+    ].filter(Boolean);
+    return { options: parts.join(' · '), text, icons: '' };
+  }
+  // Neon sign.
+  if (design?.kind === 'neon') {
+    const n = design.neon || {};
+    const options = [n.color?.name, n.font?.name, n.size && `${n.size.name} ${n.size.cm}cm`, n.backing?.name, n.adapter?.name].filter(Boolean).join(', ');
+    return { options, text: n.text || '', icons: '' };
+  }
   const options = Object.values(design?.selections || {}).map((s) => s?.snapshot?.name).filter(Boolean).join(', ');
   const text = (design?.text || []).map((t) => `${t.field}: ${t.value}`).filter(Boolean).join(' · ');
   const icons = (design?.icons || []).map((i) => i?.snapshot?.name).filter(Boolean).join(', ');
