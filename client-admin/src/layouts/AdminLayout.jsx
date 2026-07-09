@@ -34,6 +34,23 @@ const GROUPS = [
     items: OPTION_COLLECTIONS.map((c) => ({ to: `/options/${c.key}`, label: c.label, icon: OPTION_ICON[c.key] || 'dot' })),
   },
   {
+    title: 'Name Plate Studio',
+    items: [
+      { to: '/nameplate/dashboard', label: 'Dashboard', icon: 'dashboard' },
+      { to: '/nameplate/templates', label: 'Templates', icon: 'layers' },
+      { to: '/nameplate/c/categories', label: 'Categories', icon: 'category' },
+      { to: '/nameplate/c/fonts', label: 'Fonts', icon: 'type' },
+      { to: '/nameplate/c/colors', label: 'Colors', icon: 'droplet' },
+      { to: '/nameplate/c/elements', label: 'Elements', icon: 'sparkle' },
+      { to: '/nameplate/c/icons', label: 'Icons', icon: 'sparkle' },
+      { to: '/nameplate/c/shapes', label: 'Shapes', icon: 'square' },
+      { to: '/nameplate/c/materials', label: 'Materials', icon: 'cube' },
+      { to: '/nameplate/c/sizes', label: 'Sizes', icon: 'ruler' },
+      { to: '/nameplate/c/backgrounds', label: 'Backgrounds', icon: 'image' },
+      { to: '/nameplate/price-rules', label: 'Price Rules', icon: 'coupon' },
+    ],
+  },
+  {
     title: 'Store',
     items: [
       { to: '/coupons', label: 'Coupons', icon: 'coupon' },

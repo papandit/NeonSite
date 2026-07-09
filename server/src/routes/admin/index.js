@@ -21,6 +21,7 @@ import { dashboard, analytics } from '../../controllers/admin/dashboardControlle
 import { listOrders, getOrder, updateStatus, productionRender } from '../../controllers/admin/adminOrderController.js';
 import { getStoreSettings, updateStoreSettings } from '../../controllers/admin/settingsController.js';
 import { getNeonConfigAdmin, updateNeonConfig } from '../../controllers/admin/neonController.js';
+import nameplateAdminRoutes from '../../modules/nameplate/routes/adminRoutes.js';
 import { adminListReviews, moderateReview } from '../../controllers/reviewController.js';
 
 const router = Router();
@@ -100,6 +101,9 @@ router.put('/settings', updateStoreSettings);
 // Neon Studio catalogue
 router.get('/neon', getNeonConfigAdmin);
 router.put('/neon', updateNeonConfig);
+
+// Name Plate Studio (independent module — own models/controllers/routes)
+router.use('/nameplate', nameplateAdminRoutes);
 
 // Reviews moderation
 router.get('/reviews', adminListReviews);

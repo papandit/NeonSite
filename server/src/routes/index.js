@@ -13,6 +13,7 @@ import eventsRoutes from './eventsRoutes.js';
 import chatRoutes from './chatRoutes.js';
 import neonRoutes from './neonRoutes.js';
 import assetRoutes from './assetRoutes.js';
+import nameplateRoutes from '../modules/nameplate/routes/publicRoutes.js';
 
 const router = Router();
 
@@ -24,6 +25,7 @@ router.use('/events', eventsRoutes);
 router.use('/chat', chatRoutes);
 router.use('/neon', neonRoutes);
 router.use('/assets', assetRoutes);
+router.use('/nameplate', nameplateRoutes);
 
 // Commerce (Phase 4, auth): cart, coupons, checkout, payments, orders
 router.use('/cart', cartRoutes);

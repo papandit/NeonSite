@@ -20,6 +20,11 @@ import SettingsPage from './pages/SettingsPage';
 import ReviewsPage from './pages/ReviewsPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import NeonPage from './pages/NeonPage';
+import NpDashboardPage from './pages/nameplate/NpDashboardPage';
+import NpCrudPage from './pages/nameplate/NpCrudPage';
+import NpTemplatesPage from './pages/nameplate/NpTemplatesPage';
+import NpTemplateEditPage from './pages/nameplate/NpTemplateEditPage';
+import NpPriceRulesPage from './pages/nameplate/NpPriceRulesPage';
 import { loadProfile, selectIsAuthenticated } from './store/authSlice';
 
 export default function App() {
@@ -50,6 +55,14 @@ export default function App() {
           <Route path="products/new" element={<ProductBuilderPage />} />
           <Route path="products/:id/edit" element={<ProductBuilderPage />} />
           <Route path="neon" element={<NeonPage />} />
+
+          {/* Name Plate Studio (independent module) */}
+          <Route path="nameplate/dashboard" element={<NpDashboardPage />} />
+          <Route path="nameplate/templates" element={<NpTemplatesPage />} />
+          <Route path="nameplate/templates/new" element={<NpTemplateEditPage />} />
+          <Route path="nameplate/templates/:id" element={<NpTemplateEditPage />} />
+          <Route path="nameplate/price-rules" element={<NpPriceRulesPage />} />
+          <Route path="nameplate/c/:key" element={<NpCrudPage />} />
 
           <Route path="orders" element={<OrdersPage />} />
           <Route path="orders/:id" element={<OrderDetailPage />} />
