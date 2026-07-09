@@ -70,9 +70,9 @@
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(90% 70% at 82% 8%, rgba(255, 244, 214, 0.9), rgba(255, 244, 214, 0) 55%),
-    radial-gradient(120% 100% at 20% 100%, rgba(255, 234, 205, 0.35), rgba(255, 234, 205, 0) 60%),
-    linear-gradient(180deg, rgba(244, 247, 252, 0.82), rgba(232, 237, 245, 0.85));
+    radial-gradient(90% 70% at 82% 8%, rgba(255, 240, 205, 1), rgba(255, 240, 205, 0) 55%),
+    radial-gradient(120% 100% at 20% 100%, rgba(255, 231, 200, 0.8), rgba(255, 231, 200, 0) 60%),
+    linear-gradient(180deg, #fbf3e6, #f3e7d3);
 }
 /* a faint sunbeam streak across the wall */
 .neon-day-veil::after {

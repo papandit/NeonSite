@@ -193,7 +193,7 @@ export default function NeonPage() {
               } : undefined}
             >
               {backing === 'rect' && <div className="neon-backing" />}
-              {mode === 'day' && <div className="neon-day-veil" />}
+              {mode === 'day' && !sceneObj?.imageUrl && <div className="neon-day-veil" />}
 
               {/* top controls: day/night + power */}
               <div className="absolute left-3 top-3 z-10 flex items-center gap-3">
