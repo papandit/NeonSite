@@ -2,6 +2,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout, selectUser } from '../store/authSlice';
 import { resetCart } from '../store/cartSlice';
+import { toast } from '../lib/toast';
 
 const NAV = [
   ['/account/orders', 'Orders', '🧾'],
@@ -24,6 +25,7 @@ export default function AccountLayout() {
   const onLogout = () => {
     dispatch(logout());
     dispatch(resetCart());
+    toast.info('Signed out');
     navigate('/');
   };
 

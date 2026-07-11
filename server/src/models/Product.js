@@ -21,6 +21,17 @@ const TextFieldSchema = new Schema(
   { _id: false }
 );
 
+// A simple, first-class colour option for the plain store product. The buyer
+// picks one on the product page; the choice is snapshotted onto the order. Kept
+// separate from the customizationConfig option engine (Studios) on purpose.
+const ColorSchema = new Schema(
+  {
+    name: { type: String, trim: true, default: '' },
+    hex: { type: String, trim: true, required: true },
+  },
+  { _id: false }
+);
+
 const ProductSchema = new Schema(
   {
     name: { type: String, required: true, trim: true, maxlength: 200 },
@@ -29,6 +40,7 @@ const ProductSchema = new Schema(
     subCategory: { type: Schema.Types.ObjectId, ref: 'SubCategory' },
     description: { type: String, default: '' },
     images: [{ type: String }], // Cloudinary URLs
+    colors: { type: [ColorSchema], default: [] }, // buyer-selectable colours
     basePricePaise: paiseField({ required: true }),
     // Optional "original" / MRP price shown struck-through when higher than the
     // selling price (basePricePaise). 0 = no compare-at price.

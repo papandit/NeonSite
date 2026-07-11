@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { adminOrders, downloadRender } from '../../services/ops';
 import { apiErrorMessage } from '../../services/api';
+import { toast } from '../../lib/toast';
 import { formatPaise } from '../../utils/money';
 
 const PIPELINE = ['pending', 'confirmed', 'design_review', 'approved', 'manufacturing', 'packed', 'shipped', 'delivered'];
@@ -30,7 +31,7 @@ function itemSummary(design) {
   const options = Object.values(design?.selections || {}).map((s) => s?.snapshot?.name).filter(Boolean).join(', ');
   const text = (design?.text || []).map((t) => `${t.field}: ${t.value}`).filter(Boolean).join(' · ');
   const icons = (design?.icons || []).map((i) => i?.snapshot?.name).filter(Boolean).join(', ');
-  return { options, text, icons };
+  return { options, text, icons, color: design?.selectedColor || null };
 }
 
 function Stepper({ history }) {
@@ -91,8 +92,11 @@ export default function OrderDetailPage() {
       setTarget(updated.nextStatuses?.[0] || '');
       setNote('');
       setOverride(false);
+      toast.success(`Order marked ${status.replace(/_/g, ' ')}`);
     } catch (e) {
-      setError(apiErrorMessage(e));
+      const msg = apiErrorMessage(e);
+      setError(msg);
+      toast.error(msg);
     } finally {
       setBusy(false);
     }
@@ -182,6 +186,13 @@ export default function OrderDetailPage() {
                 {s.text && <div className="text-slate-600">{s.text}</div>}
                 {s.options && <div className="text-xs text-slate-400">Options: {s.options}</div>}
                 {s.icons && <div className="text-xs text-slate-400">Icons: {s.icons}</div>}
+                {s.color && (
+                  <div className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
+                    <span className="font-medium text-slate-600">Colour:</span>
+                    <span className="inline-block h-3.5 w-3.5 rounded-full border border-black/10" style={{ background: s.color.hex }} />
+                    {s.color.name || s.color.hex}
+                  </div>
+                )}
                 <div className="mt-1 text-xs text-slate-500">Qty {it.quantity} · {formatPaise(it.lineTotalPaise)}</div>
               </div>
               <div className="h-fit shrink-0">

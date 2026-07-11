@@ -3,6 +3,7 @@
 
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { api, apiErrorMessage, TOKEN_KEY, USER_KEY } from '../services/api';
+import { toast } from '../lib/toast';
 
 function loadInitialState() {
   let user = null;
@@ -35,9 +36,13 @@ export const login = createAsyncThunk(
   async (credentials, { rejectWithValue }) => {
     try {
       const { data } = await api.post('/auth/login', credentials);
+      const first = data.data.user?.name?.split(' ')[0];
+      toast.success(first ? `Welcome back, ${first}!` : 'Signed in');
       return data.data; // { token, user }
     } catch (error) {
-      return rejectWithValue(apiErrorMessage(error, 'Login failed'));
+      const msg = apiErrorMessage(error, 'Login failed');
+      toast.error(msg);
+      return rejectWithValue(msg);
     }
   }
 );
@@ -47,9 +52,12 @@ export const register = createAsyncThunk(
   async (payload, { rejectWithValue }) => {
     try {
       const { data } = await api.post('/auth/register', payload);
+      toast.success('Account created — welcome to NameCraft!');
       return data.data; // { token, user }
     } catch (error) {
-      return rejectWithValue(apiErrorMessage(error, 'Registration failed'));
+      const msg = apiErrorMessage(error, 'Registration failed');
+      toast.error(msg);
+      return rejectWithValue(msg);
     }
   }
 );

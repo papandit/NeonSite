@@ -5,6 +5,7 @@ import { fetchCart, updateCartItem, removeCartItem, setCoupon, selectCart } from
 import { applyCoupon } from '../services/commerce';
 import { apiErrorMessage } from '../services/api';
 import { formatPaise } from '../utils/money';
+import { toast } from '../lib/toast';
 
 function itemSummary(design) {
   // Name plates carry their spec under `nameplate`.
@@ -26,7 +27,7 @@ function itemSummary(design) {
     .map((s) => s?.snapshot?.name)
     .filter(Boolean);
   const text = (design?.text || []).map((t) => t.value).filter(Boolean).join(' · ');
-  return { options: parts.join(', '), text };
+  return { options: parts.join(', '), text, color: design?.selectedColor || null };
 }
 
 export default function CartPage() {
@@ -50,9 +51,12 @@ export default function CartPage() {
       setDiscountPaise(res.discountPaise);
       dispatch(setCoupon(res.code));
       setCouponMsg(`Coupon ${res.code} applied — you save ${formatPaise(res.discountPaise)}`);
+      toast.success(`Coupon ${res.code} applied`);
     } catch (e) {
+      const msg = apiErrorMessage(e, 'Invalid coupon');
       setDiscountPaise(0);
-      setCouponErr(apiErrorMessage(e, 'Invalid coupon'));
+      setCouponErr(msg);
+      toast.error(msg);
     }
   };
 
@@ -96,6 +100,12 @@ export default function CartPage() {
                       <div className="font-medium text-gray-900">{it.product?.name}</div>
                       {s.text && <div className="text-sm text-gray-600">“{s.text}”</div>}
                       {s.options && <div className="mt-0.5 text-xs text-gray-400">{s.options}</div>}
+                      {s.color && (
+                        <div className="mt-1 flex items-center gap-1.5 text-xs text-gray-500">
+                          <span className="inline-block h-3.5 w-3.5 rounded-full border border-black/10" style={{ background: s.color.hex }} />
+                          {s.color.name || s.color.hex}
+                        </div>
+                      )}
                     </div>
                     <button onClick={() => dispatch(removeCartItem(it._id))} className="text-sm text-red-600 hover:underline">
                       Remove

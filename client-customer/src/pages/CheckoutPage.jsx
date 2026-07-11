@@ -8,6 +8,7 @@ import { payAndVerify } from '../services/razorpay';
 import { useAddresses } from '../hooks/useAddresses';
 import { apiErrorMessage } from '../services/api';
 import { formatPaise } from '../utils/money';
+import { toast } from '../lib/toast';
 
 const PAY_KEY = 'nc_payment_method'; // remember the last-used method
 
@@ -73,9 +74,12 @@ export default function CheckoutPage() {
         result = await payAndVerify({ orderResp, address, giftWrap, couponCode: cart.couponCode, onVerify: verifyPayment });
       }
       await dispatch(fetchCart()); // server cleared the cart
+      toast.success(method === 'cod' ? 'Order placed! Pay on delivery.' : 'Payment successful — order placed!');
       navigate(`/account/orders/${result.order._id}?new=1`);
     } catch (e) {
-      setError(apiErrorMessage(e, method === 'cod' ? 'Could not place your order' : 'Payment could not be completed'));
+      const msg = apiErrorMessage(e, method === 'cod' ? 'Could not place your order' : 'Payment could not be completed');
+      setError(msg);
+      toast.error(msg);
     } finally {
       setPaying(false);
     }

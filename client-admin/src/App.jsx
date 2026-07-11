@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import AdminLayout from './layouts/AdminLayout';
 import AdminProtectedRoute from './components/AdminProtectedRoute';
+import { Toaster } from './lib/toast';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import NotFoundPage from './pages/NotFoundPage';
@@ -37,7 +38,9 @@ export default function App() {
   }, []);
 
   return (
-    <Routes>
+    <>
+      <Toaster />
+      <Routes>
       <Route path="/login" element={<LoginPage />} />
 
       <Route element={<AdminProtectedRoute />}>
@@ -76,6 +79,7 @@ export default function App() {
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Route>
-    </Routes>
+      </Routes>
+    </>
   );
 }

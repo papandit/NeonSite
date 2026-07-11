@@ -7,6 +7,7 @@
 import { useEffect, useState } from 'react';
 import { settingsApi } from '../services/ops';
 import { apiErrorMessage } from '../services/api';
+import { toast } from '../lib/toast';
 
 const EMPTY = {
   hero: { heading: '', subheading: '', ctaText: '' },
@@ -157,8 +158,11 @@ export default function ContentEditor() {
       const payload = { ...content, pages: listToPages(pageList) };
       await settingsApi.update({ content: payload });
       setSaved(true);
+      toast.success('Content saved');
     } catch (e) {
-      setError(apiErrorMessage(e));
+      const msg = apiErrorMessage(e);
+      setError(msg);
+      toast.error(msg);
     } finally {
       setSaving(false);
     }

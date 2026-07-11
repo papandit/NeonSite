@@ -3,6 +3,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout, selectUser } from '../store/authSlice';
 import Icon from '../components/Icon';
+import { toast } from '../lib/toast';
 
 // Three separate verticals: plain E-commerce, Neon Studio, Name Plate Studio.
 const GROUPS = [
@@ -63,6 +64,7 @@ export default function AdminLayout() {
 
   const onLogout = () => {
     dispatch(logout());
+    toast.info('Signed out');
     navigate('/login', { replace: true });
   };
 

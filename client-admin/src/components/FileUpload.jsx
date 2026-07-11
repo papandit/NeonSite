@@ -13,6 +13,7 @@ const ACCEPT = {
 export default function FileUpload({
   value = '',
   onChange,
+  onUploaded,
   kind = 'image',
   folder,
   label = 'File',
@@ -36,6 +37,7 @@ export default function FileUpload({
     try {
       const res = await uploadAsset(kind, file, { folder });
       onChange(res.url);
+      onUploaded?.(res.url); // let multi-image callers auto-append on upload
     } catch (err) {
       setError(apiErrorMessage(err, 'Upload failed'));
     } finally {

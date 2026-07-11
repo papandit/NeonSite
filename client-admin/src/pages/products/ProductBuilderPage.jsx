@@ -24,6 +24,9 @@ export default function ProductBuilderPage() {
   const [subCats, setSubCats] = useState([]);
   const [images, setImages] = useState([]);
   const [newImage, setNewImage] = useState('');
+  const [colors, setColors] = useState([]);
+  const [colorName, setColorName] = useState('');
+  const [colorHex, setColorHex] = useState('#111827');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -53,6 +56,7 @@ export default function ProductBuilderPage() {
             status: product.status,
           });
           setImages(product.images || []);
+          setColors(product.colors || []);
         } else {
           reset({ name: '', category: '', subCategory: '', description: '', priceRupees: 0, compareRupees: '', status: 'active' });
         }
@@ -68,6 +72,16 @@ export default function ProductBuilderPage() {
 
   const addImage = () => { if (newImage.trim()) { setImages((im) => [...im, newImage.trim()]); setNewImage(''); } };
   const removeImage = (i) => setImages((im) => im.filter((_, idx) => idx !== i));
+  const makeMainImage = (i) => setImages((im) => (i <= 0 ? im : [im[i], ...im.filter((_, idx) => idx !== i)]));
+
+  const addColor = () => {
+    const hex = colorHex.trim();
+    if (!hex) return;
+    if (colors.some((c) => c.hex.toLowerCase() === hex.toLowerCase())) { setColorName(''); return; }
+    setColors((cs) => [...cs, { name: colorName.trim(), hex }]);
+    setColorName('');
+  };
+  const removeColor = (i) => setColors((cs) => cs.filter((_, idx) => idx !== i));
 
   const onSubmit = async (values) => {
     setBusy(true);
@@ -82,6 +96,7 @@ export default function ProductBuilderPage() {
         compareAtPricePaise: values.compareRupees ? rupeesToPaise(values.compareRupees) : 0,
         status: values.status,
         images,
+        colors,
       };
       if (isEdit) await products.update(id, payload);
       else await products.create(payload);
@@ -151,18 +166,63 @@ export default function ProductBuilderPage() {
         </section>
 
         <section className="rounded-xl border border-slate-200 bg-white p-5">
-          <h3 className="mb-4 font-semibold">Images</h3>
-          <div className="flex flex-wrap gap-3">
-            {images.map((url, i) => (
-              <div key={i} className="relative">
-                <img src={url} alt="" className="h-20 w-20 rounded border border-slate-200 object-cover" />
-                <button type="button" onClick={() => removeImage(i)} className="absolute -right-2 -top-2 h-5 w-5 rounded-full bg-red-600 text-xs text-white">✕</button>
-              </div>
-            ))}
-          </div>
+          <h3 className="mb-1 font-semibold">Images</h3>
+          <p className="mb-4 text-xs text-slate-400">Add as many as you like — the first image is the main one shown on the card and gallery. Uploading a file adds it automatically.</p>
+          {images.length > 0 && (
+            <div className="flex flex-wrap gap-3">
+              {images.map((url, i) => (
+                <div key={`${url}-${i}`} className="group relative">
+                  <img src={url} alt="" className={`h-24 w-24 rounded-lg border object-cover ${i === 0 ? 'border-indigo-500 ring-2 ring-indigo-200' : 'border-slate-200'}`} />
+                  {i === 0 && <span className="absolute left-1 top-1 rounded bg-indigo-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">Main</span>}
+                  <button type="button" onClick={() => removeImage(i)} className="absolute -right-2 -top-2 h-5 w-5 rounded-full bg-red-600 text-xs text-white shadow" title="Remove">✕</button>
+                  {i > 0 && (
+                    <button type="button" onClick={() => makeMainImage(i)} className="absolute inset-x-1 bottom-1 rounded bg-black/60 py-0.5 text-[10px] font-medium text-white opacity-0 transition group-hover:opacity-100" title="Set as main image">Set main</button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
           <div className="mt-4 max-w-md">
-            <FileUpload label="Add image (upload or paste URL, then Add)" kind="image" folder="products" value={newImage} onChange={setNewImage} />
-            <button type="button" onClick={addImage} className="mt-2 rounded-full bg-slate-800 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-900">Add image</button>
+            <FileUpload
+              label="Add image (upload — added automatically, or paste a URL then Add)"
+              kind="image"
+              folder="products"
+              value={newImage}
+              onChange={setNewImage}
+              onUploaded={(url) => { setImages((im) => [...im, url]); setNewImage(''); }}
+            />
+            <button type="button" onClick={addImage} disabled={!newImage.trim()} className="mt-2 rounded-full bg-slate-800 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-900 disabled:opacity-40">Add pasted URL</button>
+          </div>
+        </section>
+
+        <section className="rounded-xl border border-slate-200 bg-white p-5">
+          <h3 className="mb-1 font-semibold">Colours</h3>
+          <p className="mb-4 text-xs text-slate-400">Optional. Colours the buyer can choose on the product page — the chosen colour is saved with the order. Shown as swatches on the product card.</p>
+          {colors.length > 0 && (
+            <div className="mb-4 flex flex-wrap gap-2">
+              {colors.map((c, i) => (
+                <span key={`${c.hex}-${i}`} className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 py-1 pl-1.5 pr-2 text-sm">
+                  <span className="inline-block h-5 w-5 rounded-full border border-black/10" style={{ background: c.hex }} />
+                  <span className="text-slate-700">{c.name || c.hex}</span>
+                  <button type="button" onClick={() => removeColor(i)} className="text-slate-400 hover:text-red-600" title="Remove">✕</button>
+                </span>
+              ))}
+            </div>
+          )}
+          <div className="flex flex-wrap items-end gap-3">
+            <div>
+              <label className="block text-xs font-medium text-slate-500">Swatch</label>
+              <input type="color" value={colorHex} onChange={(e) => setColorHex(e.target.value)} className="mt-1 h-9 w-12 rounded border border-slate-300" />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-500">Hex</label>
+              <input value={colorHex} onChange={(e) => setColorHex(e.target.value)} placeholder="#RRGGBB" className="mt-1 w-28 rounded-md border border-slate-300 px-3 py-2 text-sm" />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-500">Name</label>
+              <input value={colorName} onChange={(e) => setColorName(e.target.value)} placeholder="e.g. Midnight Black" onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addColor(); } }} className="mt-1 w-48 rounded-md border border-slate-300 px-3 py-2 text-sm" />
+            </div>
+            <button type="button" onClick={addColor} className="rounded-full bg-slate-800 px-3 py-2 text-sm font-medium text-white hover:bg-slate-900">Add colour</button>
           </div>
         </section>
 

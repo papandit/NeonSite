@@ -7,6 +7,7 @@ import PageHeader from '../components/PageHeader';
 import FileUpload from '../components/FileUpload';
 import ContentEditor from '../components/ContentEditor';
 import IntegrationsEditor from '../components/IntegrationsEditor';
+import { toast } from '../lib/toast';
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
@@ -59,8 +60,11 @@ export default function SettingsPage() {
         },
       });
       setSaved(true);
+      toast.success('Settings saved');
     } catch (e) {
-      setError(apiErrorMessage(e));
+      const msg = apiErrorMessage(e);
+      setError(msg);
+      toast.error(msg);
     } finally {
       setSaving(false);
     }

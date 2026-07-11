@@ -7,8 +7,8 @@ export const cartApi = {
   get: () => api.get('/cart').then((r) => r.data.data),
   add: (productId, designDocument, quantity = 1) =>
     api.post('/cart', { productId, designDocument, quantity }).then((r) => r.data.data),
-  quickAdd: (productId, quantity = 1) =>
-    api.post('/cart/quick', { productId, quantity }).then((r) => r.data.data),
+  quickAdd: (productId, quantity = 1, color = null) =>
+    api.post('/cart/quick', { productId, quantity, color }).then((r) => r.data.data),
   addNeon: (spec, quantity = 1) =>
     api.post('/cart/neon', { spec, quantity }).then((r) => r.data.data),
   addNameplate: (payload) =>

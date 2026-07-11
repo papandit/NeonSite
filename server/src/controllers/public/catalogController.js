@@ -30,16 +30,21 @@ const NON_MATCHING_ID = '000000000000000000000000';
 // Light list projection: everything a card needs, plus the product's colour
 // panel so we can surface swatches — without the heavy full customizationConfig.
 const CARD_SELECT =
-  'name slug images basePricePaise compareAtPricePaise rating category subCategory status createdAt customizationConfig.color';
+  'name slug images colors basePricePaise compareAtPricePaise rating category subCategory status createdAt customizationConfig.color';
 const COLOR_POPULATE = { path: 'customizationConfig.color.options', match: { status: 'active' }, select: 'name meta' };
 
 // Turn a populated product into a card payload: derive colour swatches and drop
-// the config so the response stays small.
+// the config so the response stays small. Prefer the product's own `colors`
+// (the simple store field); fall back to the customizationConfig colour panel.
 function toCard(p) {
-  const opts = p.customizationConfig?.color?.options || [];
-  const swatches = opts
-    .map((o) => ({ name: o.name, hex: o.meta?.hex }))
+  let swatches = (p.colors || [])
+    .map((c) => ({ name: c.name, hex: c.hex }))
     .filter((s) => s.hex);
+  if (!swatches.length) {
+    swatches = (p.customizationConfig?.color?.options || [])
+      .map((o) => ({ name: o.name, hex: o.meta?.hex }))
+      .filter((s) => s.hex);
+  }
   const { customizationConfig, ...rest } = p;
   return { ...rest, swatches };
 }

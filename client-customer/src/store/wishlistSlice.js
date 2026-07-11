@@ -2,6 +2,7 @@
 
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { api } from '../services/api';
+import { toast } from '../lib/toast';
 
 const initialState = { ids: [], products: [], status: 'idle' };
 
@@ -12,6 +13,7 @@ export const fetchWishlist = createAsyncThunk('wishlist/fetch', async () => {
 
 export const toggleWishlistItem = createAsyncThunk('wishlist/toggle', async (productId) => {
   const { data } = await api.post('/wishlist/toggle', { productId });
+  toast.info(data.data.wishlisted ? 'Added to wishlist' : 'Removed from wishlist');
   return data.data; // { productId, wishlisted, ids }
 });
 

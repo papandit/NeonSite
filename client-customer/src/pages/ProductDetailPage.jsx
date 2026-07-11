@@ -19,6 +19,7 @@ export default function ProductDetailPage() {
   const [related, setRelated] = useState([]);
   const [recommended, setRecommended] = useState([]);
   const [activeImage, setActiveImage] = useState(0);
+  const [selectedColor, setSelectedColor] = useState(null);
   const [qty, setQty] = useState(1);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -29,7 +30,7 @@ export default function ProductDetailPage() {
     setNotFound(false);
     setActiveImage(0);
     getProductBySlug(slug)
-      .then((p) => setProduct(p))
+      .then((p) => { setProduct(p); setSelectedColor(p.colors?.[0] || null); })
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
     getRelatedProducts(slug).then(setRelated).catch(() => setRelated([]));
@@ -43,7 +44,7 @@ export default function ProductDetailPage() {
     }
     setAddState('adding');
     try {
-      await dispatch(quickAddToCart({ productId: product._id, quantity: qty })).unwrap();
+      await dispatch(quickAddToCart({ productId: product._id, quantity: qty, color: selectedColor })).unwrap();
       navigate('/cart');
     } catch {
       setAddState('idle');
@@ -125,6 +126,32 @@ export default function ProductDetailPage() {
             )}
           </div>
           {product.description && <p className="mt-4 text-gray-600">{product.description}</p>}
+
+          {/* Colour selection */}
+          {product.colors?.length > 0 && (
+            <div className="mt-6">
+              <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                Colour
+                {selectedColor && <span className="font-normal text-gray-500">— {selectedColor.name || selectedColor.hex}</span>}
+              </div>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {product.colors.map((c, i) => {
+                  const active = selectedColor?.hex?.toLowerCase() === c.hex?.toLowerCase();
+                  return (
+                    <button
+                      key={`${c.hex}-${i}`}
+                      type="button"
+                      onClick={() => setSelectedColor(c)}
+                      title={c.name || c.hex}
+                      aria-label={c.name || c.hex}
+                      className={`h-9 w-9 rounded-full border shadow-sm transition ${active ? 'border-indigo-600 ring-2 ring-indigo-300 ring-offset-1' : 'border-black/10 hover:scale-105'}`}
+                      style={{ background: c.hex }}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <div className="inline-flex items-center rounded-full border border-gray-300">

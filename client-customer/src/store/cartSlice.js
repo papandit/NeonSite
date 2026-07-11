@@ -4,6 +4,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { cartApi } from '../services/commerce';
 import { apiErrorMessage } from '../services/api';
+import { toast } from '../lib/toast';
 
 const initialState = {
   items: [],
@@ -32,18 +33,26 @@ export const fetchCart = createAsyncThunk('cart/fetch', async (_, { rejectWithVa
 
 export const addToCart = createAsyncThunk('cart/add', async ({ productId, designDocument, quantity }, { rejectWithValue }) => {
   try {
-    return await cartApi.add(productId, designDocument, quantity);
+    const res = await cartApi.add(productId, designDocument, quantity);
+    toast.success('Added to cart');
+    return res;
   } catch (e) {
-    return rejectWithValue(apiErrorMessage(e));
+    const msg = apiErrorMessage(e);
+    toast.error(msg);
+    return rejectWithValue(msg);
   }
 });
 
 // Buy as-is: add with a server-built default design.
-export const quickAddToCart = createAsyncThunk('cart/quickAdd', async ({ productId, quantity = 1 }, { rejectWithValue }) => {
+export const quickAddToCart = createAsyncThunk('cart/quickAdd', async ({ productId, quantity = 1, color }, { rejectWithValue }) => {
   try {
-    return await cartApi.quickAdd(productId, quantity);
+    const res = await cartApi.quickAdd(productId, quantity, color);
+    toast.success('Added to cart');
+    return res;
   } catch (e) {
-    return rejectWithValue(apiErrorMessage(e));
+    const msg = apiErrorMessage(e);
+    toast.error(msg);
+    return rejectWithValue(msg);
   }
 });
 
@@ -57,9 +66,13 @@ export const updateCartItem = createAsyncThunk('cart/update', async ({ itemId, p
 
 export const removeCartItem = createAsyncThunk('cart/remove', async (itemId, { rejectWithValue }) => {
   try {
-    return await cartApi.remove(itemId);
+    const res = await cartApi.remove(itemId);
+    toast.info('Removed from cart');
+    return res;
   } catch (e) {
-    return rejectWithValue(apiErrorMessage(e));
+    const msg = apiErrorMessage(e);
+    toast.error(msg);
+    return rejectWithValue(msg);
   }
 });
 
@@ -74,18 +87,26 @@ export const clearCart = createAsyncThunk('cart/clear', async (_, { rejectWithVa
 // Add a neon sign (server prices it from the live NeonConfig).
 export const addNeonToCart = createAsyncThunk('cart/addNeon', async ({ spec, quantity = 1 }, { rejectWithValue }) => {
   try {
-    return await cartApi.addNeon(spec, quantity);
+    const res = await cartApi.addNeon(spec, quantity);
+    toast.success('Neon sign added to cart');
+    return res;
   } catch (e) {
-    return rejectWithValue(apiErrorMessage(e));
+    const msg = apiErrorMessage(e);
+    toast.error(msg);
+    return rejectWithValue(msg);
   }
 });
 
 // Add a custom name plate (server prices it from the template + price rules).
 export const addNameplateToCart = createAsyncThunk('cart/addNameplate', async (payload, { rejectWithValue }) => {
   try {
-    return await cartApi.addNameplate(payload);
+    const res = await cartApi.addNameplate(payload);
+    toast.success('Name plate added to cart');
+    return res;
   } catch (e) {
-    return rejectWithValue(apiErrorMessage(e));
+    const msg = apiErrorMessage(e);
+    toast.error(msg);
+    return rejectWithValue(msg);
   }
 });
 

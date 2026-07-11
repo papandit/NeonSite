@@ -7,6 +7,7 @@
 import { useEffect, useState } from 'react';
 import { neonApi } from '../services/ops';
 import { apiErrorMessage } from '../services/api';
+import { toast } from '../lib/toast';
 import { paiseToRupees, rupeesToPaise } from '../utils/money';
 import PageHeader from '../components/PageHeader';
 import FileUpload from '../components/FileUpload';
@@ -216,8 +217,11 @@ export default function NeonPage() {
     try {
       await neonApi.update(cfg);
       setSaved(true);
+      toast.success('Neon Studio saved');
     } catch (e) {
-      setError(apiErrorMessage(e));
+      const msg = apiErrorMessage(e);
+      setError(msg);
+      toast.error(msg);
     } finally {
       setSaving(false);
     }

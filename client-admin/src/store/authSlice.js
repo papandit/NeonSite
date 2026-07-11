@@ -3,6 +3,7 @@
 
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { api, apiErrorMessage, TOKEN_KEY, USER_KEY } from '../services/api';
+import { toast } from '../lib/toast';
 
 function loadInitialState() {
   let user = null;
@@ -37,11 +38,15 @@ export const login = createAsyncThunk(
       const { data } = await api.post('/auth/login', credentials);
       // Enforce admin-only access at the door.
       if (data.data.user?.role !== 'admin') {
+        toast.error('This account does not have admin access.');
         return rejectWithValue('This account does not have admin access.');
       }
+      toast.success('Signed in');
       return data.data; // { token, user }
     } catch (error) {
-      return rejectWithValue(apiErrorMessage(error, 'Login failed'));
+      const msg = apiErrorMessage(error, 'Login failed');
+      toast.error(msg);
+      return rejectWithValue(msg);
     }
   }
 );

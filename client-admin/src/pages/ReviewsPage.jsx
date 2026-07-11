@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { reviewsApi } from '../services/ops';
 import { apiErrorMessage } from '../services/api';
+import { toast } from '../lib/toast';
 import PageHeader from '../components/PageHeader';
 
 const STAR = (n) => '★'.repeat(n) + '☆'.repeat(5 - n);
@@ -25,8 +26,8 @@ export default function ReviewsPage() {
   useEffect(() => { load(); }, [load]);
 
   const moderate = async (id, newStatus) => {
-    try { await reviewsApi.moderate(id, newStatus); await load(); }
-    catch (e) { setError(apiErrorMessage(e)); }
+    try { await reviewsApi.moderate(id, newStatus); toast.success(`Review ${newStatus}`); await load(); }
+    catch (e) { const msg = apiErrorMessage(e); setError(msg); toast.error(msg); }
   };
 
   return (

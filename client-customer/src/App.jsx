@@ -6,6 +6,7 @@ import StorefrontLayout from './layouts/StorefrontLayout';
 import AccountLayout from './layouts/AccountLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import ScrollToTop from './components/ScrollToTop';
+import { Toaster } from './lib/toast';
 import HomePage from './pages/HomePage';
 import ProductsPage from './pages/ProductsPage';
 import ProductDetailPage from './pages/ProductDetailPage';
@@ -73,6 +74,7 @@ export default function App() {
   return (
     <>
       <ScrollToTop />
+      <Toaster />
       <Routes>
       <Route element={<StorefrontLayout />}>
         <Route index element={<HomePage />} />

@@ -38,7 +38,7 @@ function StatusStepper({ statusHistory }) {
 function itemSummary(design) {
   const options = Object.values(design?.selections || {}).map((s) => s?.snapshot?.name).filter(Boolean).join(', ');
   const text = (design?.text || []).map((t) => t.value).filter(Boolean).join(' · ');
-  return { options, text };
+  return { options, text, color: design?.selectedColor || null };
 }
 
 export default function OrderDetailPage() {
@@ -108,6 +108,12 @@ export default function OrderDetailPage() {
                 <div className="font-medium">{it.productNameSnapshot}</div>
                 {s.text && <div className="text-sm text-gray-600">“{s.text}”</div>}
                 {s.options && <div className="text-xs text-gray-400">{s.options}</div>}
+                {s.color && (
+                  <div className="mt-1 flex items-center gap-1.5 text-xs text-gray-500">
+                    <span className="inline-block h-3.5 w-3.5 rounded-full border border-black/10" style={{ background: s.color.hex }} />
+                    {s.color.name || s.color.hex}
+                  </div>
+                )}
                 <div className="mt-1 text-xs text-gray-500">Qty {it.quantity}</div>
               </div>
               <div className="text-right font-semibold">{formatPaise(it.lineTotalPaise)}</div>

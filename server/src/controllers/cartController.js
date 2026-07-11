@@ -30,6 +30,18 @@ async function repriceOrThrow(productId, designDocument) {
 // Panels selected by default when buying "as-is".
 const SINGLE_PANELS = ['material', 'size', 'color', 'border', 'background', 'mountType', 'font'];
 
+// Server-authoritative colour choice: only a colour the product actually offers
+// can be attached to the design. Accepts a hex string or a { hex } object; when
+// the product has colours but none is chosen, defaults to the first offered.
+function resolveProductColor(product, color) {
+  const list = product.colors || [];
+  if (!list.length) return null;
+  const wanted = (typeof color === 'string' ? color : color?.hex || '').trim().toLowerCase();
+  const match = wanted ? list.find((c) => (c.hex || '').trim().toLowerCase() === wanted) : null;
+  const chosen = match || list[0];
+  return { name: chosen.name || '', hex: chosen.hex };
+}
+
 // A valid default design so a product can be added to the cart without opening
 // the editor (buy as-is): first allowed option per enabled panel; required text
 // gets a placeholder the buyer can edit later.
@@ -87,9 +99,9 @@ export const addItem = asyncHandler(async (req, res) => {
   return sendSuccess(res, await serializeCart(cart), 201);
 });
 
-// POST /api/cart/quick  { productId, quantity } — add with a default design (buy as-is)
+// POST /api/cart/quick  { productId, quantity, color } — add with a default design (buy as-is)
 export const quickAdd = asyncHandler(async (req, res) => {
-  const { productId, quantity = 1 } = req.body || {};
+  const { productId, quantity = 1, color } = req.body || {};
   if (!productId || !mongoose.isValidObjectId(productId)) {
     throw ApiError.badRequest('A valid productId is required');
   }
@@ -102,6 +114,11 @@ export const quickAdd = asyncHandler(async (req, res) => {
   if (errors.length > 0) {
     throw ApiError.badRequest('Could not build a default design for this product', { code: 'DESIGN_INVALID', details: errors });
   }
+
+  // Freeze the buyer's colour choice onto the design (no price impact) so it
+  // travels through the cart and is snapshotted onto the order.
+  const chosenColor = resolveProductColor(product, color);
+  if (chosenColor) corrected.selectedColor = chosenColor;
 
   const cart = await getOrCreateCart(req.user.id);
   cart.items.push({

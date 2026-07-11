@@ -7,6 +7,7 @@
 import { useEffect, useState } from 'react';
 import { settingsApi } from '../services/ops';
 import { apiErrorMessage } from '../services/api';
+import { toast } from '../lib/toast';
 
 const EMPTY = {
   razorpay: { keyId: '', keySecret: '' },
@@ -72,7 +73,8 @@ export default function IntegrationsEditor() {
       // clear secret inputs (they're saved now)
       setIt((s) => ({ ...s, razorpay: { ...s.razorpay, keySecret: '' }, smtp: { ...s.smtp, pass: '' }, gemini: { ...s.gemini, apiKey: '' }, googleFonts: { apiKey: '' } }));
       setSaved(true);
-    } catch (e) { setError(apiErrorMessage(e)); }
+      toast.success('Integrations saved');
+    } catch (e) { const msg = apiErrorMessage(e); setError(msg); toast.error(msg); }
     finally { setSaving(false); }
   };
 
