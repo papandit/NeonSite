@@ -2,9 +2,9 @@
 // SDK). If no GEMINI_API_KEY is configured, the controller falls back to a
 // canned reply so the widget still works.
 
-import config from '../../config/index.js';
+import { getIntegrations } from '../settings/integrations.js';
 
-const SYSTEM_PROMPT = `You are the friendly, concise shopping assistant for "OWM NameCraft Ecom",
+const DEFAULT_PROMPT = `You are the friendly, concise shopping assistant for "OWM NameCraft Ecom",
 a custom name-plate store (Onewebmart). Help customers with:
 - products (wood, brass, steel, acrylic, LED, resin name plates)
 - customizing in the live editor (material, size, font, colour, background, border, mount, icons, and their name/subtitle text)
@@ -12,8 +12,8 @@ a custom name-plate store (Onewebmart). Help customers with:
 - coupons (e.g. WELCOME10, FLAT200, FESTIVE15), shipping (free over Rs.2000, made to order, 5-7 business days), orders and design review.
 Keep replies short, warm and helpful. If you are unsure, suggest browsing /products or emailing support@namecraft.local. Prices are in Indian Rupees.`;
 
-export function isChatConfigured() {
-  return Boolean(config.gemini.apiKey);
+export async function isChatConfigured() {
+  return Boolean((await getIntegrations()).gemini.apiKey);
 }
 
 /**
@@ -21,18 +21,21 @@ export function isChatConfigured() {
  * @returns {Promise<string>}
  */
 export async function chatWithGemini(messages) {
+  const g = (await getIntegrations()).gemini;
+  const systemPrompt = g.prompt?.trim() || DEFAULT_PROMPT;
+
   const contents = messages.map((m) => ({
     role: m.role === 'assistant' ? 'model' : 'user',
     parts: [{ text: m.content }],
   }));
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${config.gemini.model}:generateContent?key=${config.gemini.apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${g.model}:generateContent?key=${g.apiKey}`;
 
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+      system_instruction: { parts: [{ text: systemPrompt }] },
       contents,
       generationConfig: { temperature: 0.6, maxOutputTokens: 500 },
     }),

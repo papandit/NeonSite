@@ -6,6 +6,7 @@ import { paiseToRupees, rupeesToPaise } from '../utils/money';
 import PageHeader from '../components/PageHeader';
 import FileUpload from '../components/FileUpload';
 import ContentEditor from '../components/ContentEditor';
+import IntegrationsEditor from '../components/IntegrationsEditor';
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
@@ -115,6 +116,11 @@ export default function SettingsPage() {
           {saving ? 'Saving…' : 'Save settings'}
         </button>
       </form>
+
+      {/* Integrations — keys/config applied to the live site. */}
+      <div className="mt-10 border-t border-slate-200 pt-8">
+        <IntegrationsEditor />
+      </div>
 
       {/* Storefront content — all editable copy shown on the customer site. */}
       <div className="mt-10 border-t border-slate-200 pt-8">

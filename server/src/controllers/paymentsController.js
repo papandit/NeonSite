@@ -28,7 +28,7 @@ export const createRazorpayOrder = asyncHandler(async (req, res) => {
   return sendSuccess(res, {
     order: rzpOrder, // { id, amount, currency, keyId, mock }
     totals,
-    mode: paymentsMode(),
+    mode: await paymentsMode(),
   });
 });
 
@@ -51,14 +51,14 @@ export const verifyPayment = asyncHandler(async (req, res) => {
   // In mock mode the client can't produce a signature — synthesize a valid one.
   let paymentId = razorpayPaymentId;
   let signature = razorpaySignature;
-  const isMock = paymentsMode() === 'mock' && mock;
+  const isMock = (await paymentsMode()) === 'mock' && mock;
   if (isMock) {
     const m = mockPayment(razorpayOrderId);
     paymentId = m.paymentId;
     signature = m.signature;
   }
 
-  if (!verifySignature({ orderId: razorpayOrderId, paymentId, signature })) {
+  if (!(await verifySignature({ orderId: razorpayOrderId, paymentId, signature }))) {
     throw ApiError.badRequest('Payment signature verification failed', { code: 'SIGNATURE_INVALID' });
   }
 

@@ -20,6 +20,18 @@ const SettingsSchema = new Schema(
     // Defaults mirror the built-in customer content; see siteContentDefaults.js.
     content: { type: Schema.Types.Mixed, default: () => ({ ...DEFAULT_SITE_CONTENT }) },
 
+    // Admin-editable integration credentials/config. Override the server .env at
+    // runtime (see services/settings/integrations.js). Blank = fall back to env.
+    integrations: {
+      razorpay: { keyId: { type: String, default: '' }, keySecret: { type: String, default: '' } },
+      smtp: {
+        host: { type: String, default: '' }, port: { type: Number, default: 587 },
+        user: { type: String, default: '' }, pass: { type: String, default: '' }, from: { type: String, default: '' },
+      },
+      gemini: { apiKey: { type: String, default: '' }, model: { type: String, default: '' }, prompt: { type: String, default: '' } },
+      googleFonts: { apiKey: { type: String, default: '' } },
+    },
+
     // GST as a whole/decimal percent (e.g. 18 = 18%). tax = round(taxable * rate/100).
     gstRatePercent: { type: Number, default: 18, min: 0, max: 100 },
 

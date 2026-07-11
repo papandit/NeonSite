@@ -6,24 +6,17 @@
 
 import crypto from 'node:crypto';
 import Razorpay from 'razorpay';
-import config from '../../config/index.js';
+import { getIntegrations } from '../settings/integrations.js';
 
 const MOCK_SECRET = 'nc_mock_secret';
 
-function isConfigured() {
-  return Boolean(config.razorpay.keyId && config.razorpay.keySecret);
+async function rzp() {
+  return (await getIntegrations()).razorpay;
 }
+const isLive = (r) => Boolean(r.keyId && r.keySecret);
 
-export function paymentsMode() {
-  return isConfigured() ? 'live' : 'mock';
-}
-
-let client = null;
-function getClient() {
-  if (!client) {
-    client = new Razorpay({ key_id: config.razorpay.keyId, key_secret: config.razorpay.keySecret });
-  }
-  return client;
+export async function paymentsMode() {
+  return isLive(await rzp()) ? 'live' : 'mock';
 }
 
 /**
@@ -31,9 +24,11 @@ function getClient() {
  * @returns {Promise<{ id, amount, currency, keyId, mock }>}
  */
 export async function createPaymentOrder(amountPaise, receipt) {
-  if (isConfigured()) {
-    const order = await getClient().orders.create({ amount: amountPaise, currency: 'INR', receipt });
-    return { id: order.id, amount: order.amount, currency: order.currency, keyId: config.razorpay.keyId, mock: false };
+  const r = await rzp();
+  if (isLive(r)) {
+    const client = new Razorpay({ key_id: r.keyId, key_secret: r.keySecret });
+    const order = await client.orders.create({ amount: amountPaise, currency: 'INR', receipt });
+    return { id: order.id, amount: order.amount, currency: order.currency, keyId: r.keyId, mock: false };
   }
   const id = `order_mock_${crypto.randomBytes(8).toString('hex')}`;
   return { id, amount: amountPaise, currency: 'INR', keyId: 'rzp_test_mock', mock: true };
@@ -44,9 +39,10 @@ function sign(orderId, paymentId, secret) {
 }
 
 /** Constant-time signature verification. */
-export function verifySignature({ orderId, paymentId, signature }) {
+export async function verifySignature({ orderId, paymentId, signature }) {
   if (!orderId || !paymentId || !signature) return false;
-  const secret = isConfigured() ? config.razorpay.keySecret : MOCK_SECRET;
+  const r = await rzp();
+  const secret = isLive(r) ? r.keySecret : MOCK_SECRET;
   const expected = sign(orderId, paymentId, secret);
   const a = Buffer.from(expected);
   const b = Buffer.from(String(signature));

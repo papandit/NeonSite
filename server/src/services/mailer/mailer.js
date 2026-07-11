@@ -3,36 +3,25 @@
 // Sends are best-effort: a mail failure never breaks the request that triggered it.
 
 import nodemailer from 'nodemailer';
-import config from '../../config/index.js';
+import { getIntegrations } from '../settings/integrations.js';
 import User from '../../models/User.js';
 import { orderConfirmation, statusUpdate } from './templates.js';
 
-let transporter = null;
-
-function isConfigured() {
-  return Boolean(config.smtp.host && config.smtp.user);
-}
-
-function getTransporter() {
-  if (!transporter && isConfigured()) {
-    transporter = nodemailer.createTransport({
-      host: config.smtp.host,
-      port: config.smtp.port,
-      secure: config.smtp.port === 465,
-      auth: { user: config.smtp.user, pass: config.smtp.pass },
-    });
-  }
-  return transporter;
-}
-
 async function sendMail({ to, subject, html, text }) {
   if (!to) return;
-  if (!isConfigured()) {
+  const smtp = (await getIntegrations()).smtp;
+  if (!smtp.host || !smtp.user) {
     console.log(`📧  [mail:log] to=${to} subject="${subject}" (SMTP not configured — not sent)`);
     return;
   }
   try {
-    await getTransporter().sendMail({ from: config.smtp.from, to, subject, html, text });
+    const transporter = nodemailer.createTransport({
+      host: smtp.host,
+      port: smtp.port,
+      secure: smtp.port === 465,
+      auth: { user: smtp.user, pass: smtp.pass },
+    });
+    await transporter.sendMail({ from: smtp.from, to, subject, html, text });
     console.log(`📧  Sent "${subject}" to ${to}`);
   } catch (err) {
     console.error(`📧  Failed to send "${subject}" to ${to}:`, err.message);

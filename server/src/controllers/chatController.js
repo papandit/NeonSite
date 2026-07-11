@@ -26,7 +26,7 @@ export const chat = asyncHandler(async (req, res) => {
     }))
     .filter((m) => m.content.trim());
 
-  if (!isChatConfigured()) {
+  if (!(await isChatConfigured())) {
     return sendSuccess(res, { reply: FALLBACK, configured: false });
   }
 

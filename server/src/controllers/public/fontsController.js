@@ -5,13 +5,13 @@
 
 import asyncHandler from '../../utils/asyncHandler.js';
 import { sendSuccess } from '../../utils/apiResponse.js';
-import config from '../../config/index.js';
+import { getIntegrations } from '../../services/settings/integrations.js';
 
 let cache = { at: 0, families: [] };
 const TTL_MS = 24 * 60 * 60 * 1000; // 1 day (in-memory)
 
 export const getFonts = asyncHandler(async (req, res) => {
-  const key = config.googleFonts.apiKey;
+  const key = (await getIntegrations()).googleFonts.apiKey;
   if (!key) return sendSuccess(res, { source: 'none', families: [] });
 
   const fresh = Date.now() - cache.at < TTL_MS && cache.families.length > 0;
