@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getCategories, getProducts, getRecommendedProducts, getBanners } from '../services/catalog';
 import ProductGrid from '../components/ProductGrid';
 import HeroBanner from '../components/HeroBanner';
@@ -8,6 +8,10 @@ import Reveal from '../components/Reveal';
 import Seo from '../components/Seo';
 import { useLiveCatalog } from '../hooks/useLiveCatalog';
 import { useSiteSettings } from '../context/SiteSettings';
+
+// Staggered entrance animation for card grids.
+const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
+const rise = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } } };
 
 // Presentation-only accent gradients for the feature cards, applied by position.
 const FEATURE_TINTS = [
@@ -43,6 +47,7 @@ export default function HomePage() {
   const [banners, setBanners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [subscribed, setSubscribed] = useState(false);
+  const [openFaq, setOpenFaq] = useState(0);
   const catScroll = useRef(null);
 
   const load = useCallback(() => {
@@ -190,77 +195,115 @@ export default function HomePage() {
         </Section>
       )}
 
-      {/* Promo band */}
-      <section className="overflow-hidden bg-linear-to-br from-indigo-600 to-indigo-500">
-        <div className="mx-auto max-w-6xl px-4 py-14 text-center text-white">
-          <Reveal>
-            <h2 className="font-display text-3xl font-medium text-white sm:text-4xl">{c.promo.heading}</h2>
-            <p className="mx-auto mt-3 max-w-xl text-indigo-50">{c.promo.subheading}</p>
-            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="mt-6 inline-block">
-              <Link to="/products" className="inline-block rounded-full bg-white px-6 py-3 text-sm font-semibold text-indigo-700 shadow-lg hover:bg-indigo-50">
-                {c.promo.ctaText}
-              </Link>
-            </motion.div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* How it works */}
-      <section id="how" className="bg-gray-50">
-        <div className="mx-auto max-w-6xl px-4 py-12">
-          <h2 className="text-center text-2xl font-bold">How it works</h2>
-          <div className="mt-8 grid gap-6 sm:grid-cols-3">
-            {c.howItWorks.map((s, i) => (
-              <div key={`${s.step}-${i}`} className="rounded-xl border border-gray-200 bg-white p-6 text-center">
-                <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 font-bold text-white">{s.step}</div>
-                <h3 className="mt-3 font-semibold">{s.title}</h3>
-                <p className="mt-1 text-sm text-gray-600">{s.desc}</p>
-              </div>
-            ))}
+      {/* Promo — light, modern, animated */}
+      <section className="bg-linear-to-b from-white to-[#f4ece1] px-4 py-16">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+          className="relative mx-auto max-w-5xl overflow-hidden rounded-3xl border border-indigo-100 bg-white p-10 shadow-xl sm:p-14"
+        >
+          <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-indigo-100 opacity-70 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-28 -left-24 h-64 w-64 rounded-full bg-amber-100 opacity-70 blur-3xl" />
+          <div className="relative text-center">
+            <motion.span
+              initial={{ opacity: 0, scale: 0.85 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: 0.15 }}
+              className="inline-flex items-center gap-1.5 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700"
+            >
+              ✨ Custom · Made to order
+            </motion.span>
+            <h2 className="mt-4 font-display text-3xl font-semibold text-gray-900 sm:text-4xl">{c.promo.heading}</h2>
+            <p className="mx-auto mt-3 max-w-xl text-gray-600">{c.promo.subheading}</p>
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }}>
+                <Link to="/nameplates" className="inline-block rounded-full bg-indigo-600 px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/25 hover:bg-indigo-700">{c.promo.ctaText}</Link>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }}>
+                <Link to="/neon" className="inline-block rounded-full border border-gray-300 px-7 py-3 text-sm font-semibold text-gray-700 transition hover:border-indigo-300 hover:bg-indigo-50">Neon signs ✨</Link>
+              </motion.div>
+            </div>
           </div>
+        </motion.div>
+      </section>
+
+      {/* How it works — modern step cards, staggered */}
+      <section id="how" className="bg-linear-to-b from-[#f4ece1] to-[#fffdf9]">
+        <div className="mx-auto max-w-6xl px-4 py-16">
+          <Reveal><h2 className="text-center font-display text-3xl font-semibold text-gray-900">How it works</h2></Reveal>
+          <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} className="mt-10 grid gap-6 sm:grid-cols-3">
+            {c.howItWorks.map((s, i) => (
+              <motion.div key={`${s.step}-${i}`} variants={rise} whileHover={{ y: -6 }} className="rounded-2xl border border-gray-100 bg-white p-7 text-center shadow-sm transition hover:shadow-lg">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-linear-to-br from-indigo-500 to-indigo-700 text-lg font-bold text-white shadow-md shadow-indigo-600/25">{s.step}</div>
+                <h3 className="mt-4 font-display text-lg font-semibold text-gray-900">{s.title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-gray-500">{s.desc}</p>
+              </motion.div>
+            ))}
+          </motion.div>
         </div>
       </section>
 
-      {/* Reviews */}
+      {/* Reviews — modern cards, staggered + hover */}
       <Section title="What customers say">
-        <div className="grid gap-4 sm:grid-cols-3">
+        <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.15 }} className="grid gap-5 sm:grid-cols-3">
           {c.testimonials.map((t, i) => (
-            <figure key={`${t.name}-${i}`} className="rounded-xl border border-gray-200 bg-white p-6">
+            <motion.figure key={`${t.name}-${i}`} variants={rise} whileHover={{ y: -6 }} className="relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition hover:shadow-lg">
+              <span className="absolute right-4 top-1 font-display text-5xl leading-none text-indigo-100 select-none">”</span>
               <div className="text-amber-400">★★★★★</div>
-              <blockquote className="mt-2 text-sm text-gray-700">“{t.quote}”</blockquote>
-              <figcaption className="mt-3 text-xs font-medium text-gray-500">{t.name}</figcaption>
-            </figure>
+              <blockquote className="relative mt-2 text-sm leading-relaxed text-gray-700">“{t.quote}”</blockquote>
+              <figcaption className="mt-4 flex items-center gap-2.5">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-700">{t.name?.charAt(0)}</span>
+                <span className="text-xs font-medium text-gray-500">{t.name}</span>
+              </figcaption>
+            </motion.figure>
           ))}
-        </div>
+        </motion.div>
       </Section>
 
-      {/* Newsletter */}
-      <section className="bg-white">
-        <div className="mx-auto max-w-2xl px-4 py-14 text-center">
-          <h2 className="font-display text-2xl font-medium text-gray-900">{c.newsletter.heading}</h2>
-          <p className="mt-2 text-sm text-gray-500">{c.newsletter.subheading}</p>
+      {/* Newsletter — light modern card */}
+      <section className="bg-[#fffdf9] px-4 py-16">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.5 }}
+          className="mx-auto max-w-3xl overflow-hidden rounded-3xl border border-indigo-100 bg-linear-to-br from-indigo-50 to-white p-10 text-center shadow-sm"
+        >
+          <h2 className="font-display text-2xl font-semibold text-gray-900">{c.newsletter.heading}</h2>
+          <p className="mx-auto mt-2 max-w-md text-sm text-gray-500">{c.newsletter.subheading}</p>
           {subscribed ? (
-            <p className="mt-6 rounded-full bg-green-50 px-4 py-2.5 text-sm font-medium text-green-700">
+            <motion.p initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="mt-6 inline-block rounded-full bg-green-50 px-4 py-2.5 text-sm font-medium text-green-700">
               Thanks for subscribing! 🎉
-            </p>
+            </motion.p>
           ) : (
             <form onSubmit={(e) => { e.preventDefault(); setSubscribed(true); }} className="mx-auto mt-6 flex max-w-md gap-2">
-              <input type="email" required placeholder="you@email.com" className="flex-1 rounded-full border border-gray-300 px-4 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-              <button type="submit" className="rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700">Subscribe</button>
+              <input type="email" required placeholder="you@email.com" className="flex-1 rounded-full border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+              <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} type="submit" className="rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700">Subscribe</motion.button>
             </form>
           )}
-        </div>
+        </motion.div>
       </section>
 
-      {/* FAQ */}
+      {/* FAQ — smooth animated accordion */}
       <Section title="Frequently asked questions">
-        <div className="mx-auto max-w-3xl divide-y divide-gray-200 rounded-xl border border-gray-200 bg-white">
-          {c.faqs.map((f, i) => (
-            <details key={`${f.q}-${i}`} className="group px-6 py-4">
-              <summary className="cursor-pointer list-none font-medium text-gray-900">{f.q}</summary>
-              <p className="mt-2 text-sm text-gray-600">{f.a}</p>
-            </details>
-          ))}
+        <div className="mx-auto max-w-3xl space-y-3">
+          {c.faqs.map((f, i) => {
+            const open = openFaq === i;
+            return (
+              <motion.div key={`${f.q}-${i}`} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.04 }} className={`overflow-hidden rounded-2xl border bg-white transition ${open ? 'border-indigo-200 shadow-md' : 'border-gray-200'}`}>
+                <button onClick={() => setOpenFaq(open ? null : i)} className="flex w-full items-center justify-between gap-4 px-6 py-4 text-left">
+                  <span className="font-medium text-gray-900">{f.q}</span>
+                  <motion.span animate={{ rotate: open ? 180 : 0 }} className="shrink-0 text-indigo-500">
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M6 9l6 6 6-6" /></svg>
+                  </motion.span>
+                </button>
+                <AnimatePresence initial={false}>
+                  {open && (
+                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.25, ease: 'easeInOut' }} className="overflow-hidden">
+                      <p className="px-6 pb-4 text-sm leading-relaxed text-gray-600">{f.a}</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            );
+          })}
         </div>
       </Section>
     </div>
