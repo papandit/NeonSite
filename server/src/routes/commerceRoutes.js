@@ -7,7 +7,7 @@ import { requireAuth } from '../middleware/auth.js';
 import { couponLimiter } from '../middleware/rateLimit.js';
 import { applyCoupon } from '../controllers/couponController.js';
 import { checkoutQuote } from '../controllers/checkoutController.js';
-import { createRazorpayOrder, verifyPayment } from '../controllers/paymentsController.js';
+import { createRazorpayOrder, verifyPayment, placeCodOrder } from '../controllers/paymentsController.js';
 import { listMyOrders, getMyOrder, getMyInvoice } from '../controllers/ordersController.js';
 
 const router = Router();
@@ -16,6 +16,7 @@ router.post('/coupons/apply', requireAuth, couponLimiter, applyCoupon);
 router.post('/checkout/quote', requireAuth, checkoutQuote);
 router.post('/payments/razorpay/order', requireAuth, createRazorpayOrder);
 router.post('/payments/razorpay/verify', requireAuth, verifyPayment);
+router.post('/payments/cod', requireAuth, placeCodOrder);
 router.get('/orders', requireAuth, listMyOrders);
 router.get('/orders/:id', requireAuth, getMyOrder);
 router.get('/orders/:id/invoice', requireAuth, getMyInvoice);

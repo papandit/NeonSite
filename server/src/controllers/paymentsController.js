@@ -87,3 +87,28 @@ export const verifyPayment = asyncHandler(async (req, res) => {
 
   return sendSuccess(res, { order }, 201);
 });
+
+// POST /api/payments/cod  { address, giftWrap?, couponCode? }
+// Cash-on-delivery: no gateway; the order is placed against the server total.
+export const placeCodOrder = asyncHandler(async (req, res) => {
+  const { address, giftWrap = false, couponCode } = req.body || {};
+  if (!address || typeof address !== 'object') throw ApiError.badRequest('A shipping address is required');
+
+  const { cart, invalidItems, totals, coupon } = await buildQuote(req.user.id, { couponCode });
+  if (cart.items.length === 0) throw ApiError.badRequest('Your cart is empty', { code: 'CART_EMPTY' });
+  if (invalidItems.length > 0) {
+    throw ApiError.badRequest('Some cart items need attention', { code: 'CART_INVALID', details: invalidItems });
+  }
+
+  const order = await createOrderFromQuote({
+    userId: req.user.id,
+    cart,
+    totals,
+    coupon: totals.coupon.applied ? coupon : null,
+    address,
+    giftWrap,
+    payment: { provider: 'cod', method: 'cod', verified: false, codPending: true },
+  });
+
+  return sendSuccess(res, { order }, 201);
+});

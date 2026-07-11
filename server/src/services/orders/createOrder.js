@@ -27,6 +27,7 @@ export async function createOrderFromQuote({ userId, cart, totals, coupon, addre
   }));
 
   const now = new Date();
+  const isCod = payment?.method === 'cod' || payment?.provider === 'cod';
   const order = await Order.create({
     orderNumber,
     user: userId,
@@ -42,7 +43,7 @@ export async function createOrderFromQuote({ userId, cart, totals, coupon, addre
     payment,
     statusHistory: [
       { status: 'pending', by: userId, at: now, note: 'Order placed' },
-      { status: 'confirmed', by: userId, at: now, note: 'Payment verified' },
+      { status: 'confirmed', by: userId, at: now, note: isCod ? 'COD order confirmed — pay on delivery' : 'Payment verified' },
     ],
   });
 

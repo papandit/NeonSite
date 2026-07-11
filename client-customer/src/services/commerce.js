@@ -33,6 +33,10 @@ export const createPaymentOrder = (couponCode) =>
 export const verifyPayment = (payload) =>
   api.post('/payments/razorpay/verify', payload).then((r) => r.data.data);
 
+// Cash on delivery — places the order without a gateway (server-computed total).
+export const placeCodOrder = (payload) =>
+  api.post('/payments/cod', payload).then((r) => r.data.data);
+
 // --- Orders ---
 export const ordersApi = {
   list: () => api.get('/orders').then((r) => r.data.data),

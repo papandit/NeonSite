@@ -3,11 +3,13 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectCart, fetchCart } from '../store/cartSlice';
-import { checkoutQuote, createPaymentOrder, verifyPayment } from '../services/commerce';
+import { checkoutQuote, createPaymentOrder, verifyPayment, placeCodOrder } from '../services/commerce';
 import { payAndVerify } from '../services/razorpay';
 import { useAddresses } from '../hooks/useAddresses';
 import { apiErrorMessage } from '../services/api';
 import { formatPaise } from '../utils/money';
+
+const PAY_KEY = 'nc_payment_method'; // remember the last-used method
 
 export default function CheckoutPage() {
   const dispatch = useDispatch();
@@ -17,9 +19,13 @@ export default function CheckoutPage() {
 
   const [totals, setTotals] = useState(null);
   const [giftWrap, setGiftWrap] = useState(false);
+  const [method, setMethod] = useState(() => localStorage.getItem(PAY_KEY) || 'online');
+  const [confirm, setConfirm] = useState(null); // pending address awaiting confirmation
   const [loadingQuote, setLoadingQuote] = useState(true);
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState(null);
+
+  const chooseMethod = (m) => { setMethod(m); localStorage.setItem(PAY_KEY, m); };
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
     defaultValues: { name: '', phone: '', line1: '', line2: '', city: '', state: '', pincode: '' },
@@ -46,23 +52,30 @@ export default function CheckoutPage() {
     }
   }, [addresses, reset]);
 
-  const onSubmit = async (address) => {
+  // Address validated → ask for confirmation before charging / placing.
+  const onSubmit = (address) => {
+    setError(null);
+    saveAddress(address);
+    setConfirm(address);
+  };
+
+  const confirmOrder = async () => {
+    const address = confirm;
+    setConfirm(null);
     setPaying(true);
     setError(null);
     try {
-      saveAddress(address);
-      const orderResp = await createPaymentOrder(cart.couponCode);
-      const result = await payAndVerify({
-        orderResp,
-        address,
-        giftWrap,
-        couponCode: cart.couponCode,
-        onVerify: verifyPayment,
-      });
+      let result;
+      if (method === 'cod') {
+        result = await placeCodOrder({ address, giftWrap, couponCode: cart.couponCode });
+      } else {
+        const orderResp = await createPaymentOrder(cart.couponCode);
+        result = await payAndVerify({ orderResp, address, giftWrap, couponCode: cart.couponCode, onVerify: verifyPayment });
+      }
       await dispatch(fetchCart()); // server cleared the cart
       navigate(`/account/orders/${result.order._id}?new=1`);
     } catch (e) {
-      setError(apiErrorMessage(e, 'Payment could not be completed'));
+      setError(apiErrorMessage(e, method === 'cod' ? 'Could not place your order' : 'Payment could not be completed'));
     } finally {
       setPaying(false);
     }
@@ -109,6 +122,30 @@ export default function CheckoutPage() {
             <input type="checkbox" checked={giftWrap} onChange={(e) => setGiftWrap(e.target.checked)} />
             Add gift wrapping
           </label>
+
+          {/* Payment method */}
+          <div className="border-t border-gray-100 pt-4">
+            <h2 className="font-semibold">Payment method</h2>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              {[
+                ['online', 'Pay online', 'Card / UPI / Netbanking via Razorpay'],
+                ['cod', 'Cash on Delivery', 'Pay in cash when it arrives'],
+              ].map(([m, title, desc]) => (
+                <button
+                  key={m} type="button" onClick={() => chooseMethod(m)}
+                  className={`flex items-start gap-3 rounded-xl border p-4 text-left transition ${method === m ? 'border-indigo-600 bg-indigo-50' : 'border-gray-200 hover:border-gray-300'}`}
+                >
+                  <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${method === m ? 'border-indigo-600' : 'border-gray-300'}`}>
+                    {method === m && <span className="h-2.5 w-2.5 rounded-full bg-indigo-600" />}
+                  </span>
+                  <span>
+                    <span className="block text-sm font-semibold text-gray-900">{title}</span>
+                    <span className="block text-xs text-gray-500">{desc}</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Summary */}
@@ -128,11 +165,31 @@ export default function CheckoutPage() {
             </dl>
           )}
           <button type="submit" disabled={paying || loadingQuote} className="mt-5 w-full rounded-full bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60">
-            {paying ? 'Processing…' : totals ? `Pay ${formatPaise(totals.totalPaise)}` : 'Pay'}
+            {paying ? 'Processing…' : method === 'cod' ? 'Place order' : totals ? `Pay ${formatPaise(totals.totalPaise)}` : 'Pay'}
           </button>
-          <p className="mt-2 text-center text-xs text-gray-400">Secured by Razorpay</p>
+          <p className="mt-2 text-center text-xs text-gray-400">{method === 'cod' ? 'Pay in cash on delivery' : 'Secured by Razorpay'}</p>
         </div>
       </form>
+
+      {/* Confirmation */}
+      {confirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setConfirm(null)}>
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-gray-900">Confirm your order</h3>
+            <dl className="mt-4 space-y-1.5 text-sm">
+              <div className="flex justify-between"><dt className="text-gray-500">Payment</dt><dd className="font-medium">{method === 'cod' ? 'Cash on Delivery' : 'Pay online (Razorpay)'}</dd></div>
+              <div className="flex justify-between"><dt className="text-gray-500">Deliver to</dt><dd className="max-w-[60%] truncate text-right font-medium">{confirm.name}, {confirm.city}</dd></div>
+              <div className="flex justify-between border-t border-gray-100 pt-2 text-base"><dt className="font-semibold">Total</dt><dd className="font-semibold">{totals ? formatPaise(totals.totalPaise) : '—'}</dd></div>
+            </dl>
+            <div className="mt-5 flex gap-3">
+              <button onClick={() => setConfirm(null)} className="flex-1 rounded-full border border-gray-300 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50">Cancel</button>
+              <button onClick={confirmOrder} className="flex-1 rounded-full bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700">
+                {method === 'cod' ? 'Place order' : `Pay ${totals ? formatPaise(totals.totalPaise) : ''}`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
