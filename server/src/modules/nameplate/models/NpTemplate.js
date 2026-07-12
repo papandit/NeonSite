@@ -75,7 +75,7 @@ const NpTemplateSchema = new Schema(
     // symbolScale = symbol box as a fraction of plate width (aspect preserved).
     symbolScale: { type: Number, default: 0.2, min: 0.02, max: 1 },
     symbolX: { type: Number, default: 0.5, min: 0, max: 1 },
-    symbolY: { type: Number, default: 0.16, min: 0, max: 1 },
+    symbolY: { type: Number, default: 0.2, min: 0, max: 1 },
 
     // Dynamic customer inputs + the admin's canvas layout.
     textFields: { type: [TextFieldSchema], default: [] },

@@ -149,14 +149,20 @@ export default function NamePlateDesignerPage() {
     // Position: admin template fields, else a legacy layout slot, else top-centre.
     const slot = (t.layout || []).find((l) => l.type === 'element' || l.type === 'icon');
     const sx = (t.symbolX ?? slot?.x ?? 0.5) * CANVAS_W;
-    const sy = (t.symbolY ?? slot?.y ?? 0.16) * CANVAS_H;
+    const sy = (t.symbolY ?? slot?.y ?? 0.2) * CANVAS_H;
     // Size: template symbolScale × the symbol's own scale multiplier (meta.scale).
     const perSymbol = Number(opt?.meta?.scale) > 0 ? Number(opt.meta.scale) : 1;
     const box = CANVAS_W * (t.symbolScale ?? 0.2) * perSymbol;
     fabric.FabricImage.fromURL(url, { crossOrigin: 'anonymous' }).then((img) => {
       // Fit the whole symbol inside the box, preserving its aspect ratio.
       const s = box / Math.max(img.width || 100, img.height || 100);
-      img.set({ left: sx, top: sy, originX: 'center', originY: 'center', scaleX: s, scaleY: s, selectable: false, evented: false });
+      const halfW = ((img.width || 100) * s) / 2;
+      const halfH = ((img.height || 100) * s) / 2;
+      const m = 4; // keep a small margin from the plate edges
+      // Clamp the centre so the symbol is NEVER cut off by the canvas edges.
+      const cx = Math.min(Math.max(sx, halfW + m), CANVAS_W - halfW - m);
+      const cy = Math.min(Math.max(sy, halfH + m), CANVAS_H - halfH - m);
+      img.set({ left: cx, top: cy, originX: 'center', originY: 'center', scaleX: s, scaleY: s, selectable: false, evented: false });
       symbolRef.current = img;
       fc.add(img);
       img.bringToFront?.();

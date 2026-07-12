@@ -42,7 +42,7 @@ const empty = () => ({
   name: '', category: '', status: 'draft',
   previewImageUrl: '', basePlateImageUrl: '', transparentPngUrl: '',
   widthMm: 300, heightMm: 150, baseRupees: 0,
-  symbolScale: 0.2, symbolX: 0.5, symbolY: 0.16,
+  symbolScale: 0.2, symbolX: 0.5, symbolY: 0.2,
   textFields: [], ...Object.fromEntries(ALLOW_KINDS.map(([, a]) => [a, []])),
 });
 
@@ -76,7 +76,7 @@ export default function NpTemplateEditPage() {
           name: t.name, category: t.category?._id || t.category || '', status: t.status,
           previewImageUrl: t.previewImageUrl || '', basePlateImageUrl: t.basePlateImageUrl || '', transparentPngUrl: t.transparentPngUrl || '',
           widthMm: t.widthMm, heightMm: t.heightMm, baseRupees: paiseToRupees(t.basePricePaise),
-          symbolScale: t.symbolScale ?? 0.2, symbolX: t.symbolX ?? 0.5, symbolY: t.symbolY ?? 0.16,
+          symbolScale: t.symbolScale ?? 0.2, symbolX: t.symbolX ?? 0.5, symbolY: t.symbolY ?? 0.2,
           textFields: (t.textFields || []).map((f) => ({ ...emptyField(), ...f })),
           ...Object.fromEntries(ALLOW_KINDS.map(([, a]) => [a, (t[a] || []).map(String)])),
         });
