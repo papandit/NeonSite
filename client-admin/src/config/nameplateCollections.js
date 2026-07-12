@@ -17,10 +17,13 @@ export const NP_COLLECTIONS = [
   { key: 'elements', label: 'Elements', metaFields: [
     { key: 'image', label: 'Image (PNG)', input: 'file', kind: 'image' },
     { key: 'svg', label: 'SVG', input: 'file', kind: 'svg' },
+    { key: 'scale', label: 'Size × (1 = normal, 1.5 = bigger)', input: 'number' },
     { key: 'group', label: 'Group', input: 'text' },
   ] },
   { key: 'icons', label: 'Icons', metaFields: [
     { key: 'svg', label: 'SVG', input: 'file', kind: 'svg' },
+    { key: 'image', label: 'Image (PNG)', input: 'file', kind: 'image' },
+    { key: 'scale', label: 'Size × (1 = normal, 1.5 = bigger)', input: 'number' },
     { key: 'group', label: 'Group', input: 'text' },
   ] },
   { key: 'shapes', label: 'Shapes', metaFields: [

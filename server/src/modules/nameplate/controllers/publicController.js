@@ -10,7 +10,7 @@ import NpTemplate from '../models/NpTemplate.js';
 import NpDesign from '../models/NpDesign.js';
 import { quoteNpDesign } from '../services/quoteDesign.js';
 import {
-  NpCategory, NpFont, NpColor, NpElement, NpShape, NpMaterial, NpSize, NpBackground,
+  NpCategory, NpFont, NpColor, NpElement, NpIcon, NpShape, NpMaterial, NpSize, NpBackground,
 } from '../registry.js';
 
 // Return the template's allowed option ids, or ALL active options when the admin
@@ -49,10 +49,11 @@ export const getTemplate = asyncHandler(async (req, res) => {
   if (!template) throw ApiError.notFound('Template not found');
 
   // Resolve the option lists the designer needs.
-  const [fonts, colors, elements, shapes, materials, sizes, backgrounds] = await Promise.all([
+  const [fonts, colors, elements, icons, shapes, materials, sizes, backgrounds] = await Promise.all([
     resolveOptions(NpFont, template.allowedFonts),
     resolveOptions(NpColor, template.allowedColors),
     resolveOptions(NpElement, template.allowedElements),
+    resolveOptions(NpIcon, null), // icons: always all active (no per-template allow-list)
     resolveOptions(NpShape, template.allowedShapes),
     resolveOptions(NpMaterial, template.allowedMaterials),
     resolveOptions(NpSize, template.allowedSizes),
@@ -61,7 +62,8 @@ export const getTemplate = asyncHandler(async (req, res) => {
 
   return sendSuccess(res, {
     template,
-    options: { fonts, colors, elements, shapes, materials, sizes, backgrounds },
+    // `elements` + `icons` together are the customer's "symbols".
+    options: { fonts, colors, elements, icons, shapes, materials, sizes, backgrounds },
   });
 });
 

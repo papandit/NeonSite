@@ -4,7 +4,7 @@
 
 import { getNpPriceRules } from '../models/NpPriceRules.js';
 import {
-  NpFont, NpColor, NpElement, NpMaterial, NpSize, NpBackground,
+  NpFont, NpColor, NpElement, NpIcon, NpMaterial, NpSize, NpBackground,
 } from '../registry.js';
 
 const OPTION_MODELS = {
@@ -65,9 +65,10 @@ export async function quoteNpDesign(template, design = {}) {
     }
   }
 
-  // 4. Elements — each element's own delta (+ premium element surcharge).
+  // 4. Symbols (elements or icons) — each one's own delta (+ premium surcharge).
   for (const el of design.elements || []) {
-    const opt = await findOption(NpElement, el.id || el._id);
+    const id = el.id || el._id;
+    const opt = (await findOption(NpElement, id)) || (await findOption(NpIcon, id));
     if (!opt) continue;
     if (rules.applyOptionDeltas && opt.priceDeltaPaise) {
       pricePaise += opt.priceDeltaPaise;

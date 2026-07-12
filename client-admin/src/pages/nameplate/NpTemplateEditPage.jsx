@@ -42,6 +42,7 @@ const empty = () => ({
   name: '', category: '', status: 'draft',
   previewImageUrl: '', basePlateImageUrl: '', transparentPngUrl: '',
   widthMm: 300, heightMm: 150, baseRupees: 0,
+  symbolScale: 0.2, symbolX: 0.5, symbolY: 0.16,
   textFields: [], ...Object.fromEntries(ALLOW_KINDS.map(([, a]) => [a, []])),
 });
 
@@ -75,6 +76,7 @@ export default function NpTemplateEditPage() {
           name: t.name, category: t.category?._id || t.category || '', status: t.status,
           previewImageUrl: t.previewImageUrl || '', basePlateImageUrl: t.basePlateImageUrl || '', transparentPngUrl: t.transparentPngUrl || '',
           widthMm: t.widthMm, heightMm: t.heightMm, baseRupees: paiseToRupees(t.basePricePaise),
+          symbolScale: t.symbolScale ?? 0.2, symbolX: t.symbolX ?? 0.5, symbolY: t.symbolY ?? 0.16,
           textFields: (t.textFields || []).map((f) => ({ ...emptyField(), ...f })),
           ...Object.fromEntries(ALLOW_KINDS.map(([, a]) => [a, (t[a] || []).map(String)])),
         });
@@ -106,6 +108,7 @@ export default function NpTemplateEditPage() {
         previewImageUrl: tpl.previewImageUrl, basePlateImageUrl: tpl.basePlateImageUrl, transparentPngUrl: tpl.transparentPngUrl,
         widthMm: Number(tpl.widthMm), heightMm: Number(tpl.heightMm),
         basePricePaise: rupeesToPaise(tpl.baseRupees || 0),
+        symbolScale: Number(tpl.symbolScale) || 0.2, symbolX: Number(tpl.symbolX), symbolY: Number(tpl.symbolY),
         textFields: tpl.textFields.filter((f) => f.key && f.label),
         ...Object.fromEntries(ALLOW_KINDS.map(([, a]) => [a, tpl[a]])),
       };
@@ -174,6 +177,26 @@ export default function NpTemplateEditPage() {
             fields={tpl.textFields}
             onMove={(i, x, y) => updField(i, { x, y })}
           />
+        </section>
+
+        {/* Symbol placement */}
+        <section className="rounded-xl border border-slate-200 bg-white p-5">
+          <h3 className="mb-1 font-semibold">Symbol placement</h3>
+          <p className="mb-4 text-xs text-slate-400">Controls how the customer-chosen symbol sits on this plate — it always fits its box keeping its shape. Manage the symbols themselves under <span className="font-medium text-slate-500">Name Plate Studio → Elements / Icons</span>.</p>
+          <div className="grid gap-5 sm:grid-cols-3">
+            <div>
+              <label className="flex items-center justify-between text-sm font-medium text-slate-700">Size <span className="text-xs text-slate-400">{Math.round((Number(tpl.symbolScale) || 0.2) * 100)}% of width</span></label>
+              <input type="range" min="0.05" max="0.6" step="0.01" value={tpl.symbolScale} onChange={(e) => set('symbolScale', Number(e.target.value))} className="mt-2 w-full accent-indigo-600" />
+            </div>
+            <div>
+              <label className="flex items-center justify-between text-sm font-medium text-slate-700">Horizontal <span className="text-xs text-slate-400">{Math.round((Number(tpl.symbolX) || 0) * 100)}%</span></label>
+              <input type="range" min="0" max="1" step="0.01" value={tpl.symbolX} onChange={(e) => set('symbolX', Number(e.target.value))} className="mt-2 w-full accent-indigo-600" />
+            </div>
+            <div>
+              <label className="flex items-center justify-between text-sm font-medium text-slate-700">Vertical <span className="text-xs text-slate-400">{Math.round((Number(tpl.symbolY) || 0) * 100)}%</span></label>
+              <input type="range" min="0" max="1" step="0.01" value={tpl.symbolY} onChange={(e) => set('symbolY', Number(e.target.value))} className="mt-2 w-full accent-indigo-600" />
+            </div>
+          </div>
         </section>
 
         {/* Text fields */}

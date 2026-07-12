@@ -62,7 +62,11 @@ export default function NamePlateDesignerPage() {
 
   const fonts = data?.options.fonts || [];
   const colors = data?.options.colors || [];
-  const elements = data?.options.elements || [];
+  // "Symbols" = the admin's elements + icons, shown together in one picker.
+  const symbols = useMemo(
+    () => [...(data?.options.elements || []), ...(data?.options.icons || [])],
+    [data]
+  );
 
   // Load all offered fonts so the grid + canvas render them.
   useEffect(() => {
@@ -133,27 +137,33 @@ export default function NamePlateDesignerPage() {
 
   useEffect(() => { reflow(); }, [reflow]);
 
-  // ---- symbol element ----
+  // ---- symbol (element/icon) — sized + positioned by the admin template ----
   useEffect(() => {
     const fc = fcRef.current;
     if (!fc) return;
     if (symbolRef.current) { fc.remove(symbolRef.current); symbolRef.current = null; }
-    const opt = elements.find((e) => e._id === symbolId);
+    const opt = symbols.find((e) => e._id === symbolId);
     const url = elImg(opt);
     if (!url) { fc.requestRenderAll(); return; }
-    // Admin-defined symbol slot (first element/icon layout item) or top-centre.
-    const slot = (template?.layout || []).find((l) => l.type === 'element' || l.type === 'icon');
-    const sx = (slot?.x ?? 0.5) * CANVAS_W;
-    const sy = (slot?.y ?? 0.16) * CANVAS_H;
+    const t = template || {};
+    // Position: admin template fields, else a legacy layout slot, else top-centre.
+    const slot = (t.layout || []).find((l) => l.type === 'element' || l.type === 'icon');
+    const sx = (t.symbolX ?? slot?.x ?? 0.5) * CANVAS_W;
+    const sy = (t.symbolY ?? slot?.y ?? 0.16) * CANVAS_H;
+    // Size: template symbolScale × the symbol's own scale multiplier (meta.scale).
+    const perSymbol = Number(opt?.meta?.scale) > 0 ? Number(opt.meta.scale) : 1;
+    const box = CANVAS_W * (t.symbolScale ?? 0.2) * perSymbol;
     fabric.FabricImage.fromURL(url, { crossOrigin: 'anonymous' }).then((img) => {
-      const s = (CANVAS_W * 0.14) / (img.width || 100);
+      // Fit the whole symbol inside the box, preserving its aspect ratio.
+      const s = box / Math.max(img.width || 100, img.height || 100);
       img.set({ left: sx, top: sy, originX: 'center', originY: 'center', scaleX: s, scaleY: s, selectable: false, evented: false });
       symbolRef.current = img;
       fc.add(img);
+      img.bringToFront?.();
       fc.requestRenderAll();
     }).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [symbolId, elements]);
+  }, [symbolId, symbols, template]);
 
   // ---- live server price ----
   useEffect(() => {
@@ -265,16 +275,16 @@ export default function NamePlateDesignerPage() {
             </div>
           )}
 
-          {/* Choose Symbol */}
-          {elements.length > 0 && (
+          {/* Choose Symbol (elements + icons) */}
+          {symbols.length > 0 && (
             <div className="rounded-2xl border border-gray-200 bg-white p-5">
               <h3 className="text-xs font-semibold uppercase tracking-wide text-indigo-600">Choose symbol</h3>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <button onClick={() => setSymbolId(null)} className={`flex h-14 w-14 items-center justify-center rounded-lg border text-xs ${!symbolId ? 'border-indigo-500 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-400'}`}>None</button>
-                {elements.map((el) => (
+              <div className="mt-3 grid grid-cols-5 gap-2 sm:grid-cols-6">
+                <button onClick={() => setSymbolId(null)} className={`flex h-14 items-center justify-center rounded-lg border text-xs ${!symbolId ? 'border-indigo-500 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-400'}`}>None</button>
+                {symbols.map((el) => (
                   <button key={el._id} onClick={() => setSymbolId(el._id)} title={el.name}
-                    className={`flex h-14 w-14 items-center justify-center rounded-lg border transition ${symbolId === el._id ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-indigo-300'}`}>
-                    {elImg(el) ? <img src={elImg(el)} alt={el.name} className="max-h-10 max-w-10 object-contain" /> : <span className="text-xs text-gray-400">{el.name}</span>}
+                    className={`flex h-14 items-center justify-center rounded-lg border p-1.5 transition ${symbolId === el._id ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-indigo-300'}`}>
+                    {elImg(el) ? <img src={elImg(el)} alt={el.name} className="max-h-full max-w-full object-contain" /> : <span className="truncate text-[10px] text-gray-400">{el.name}</span>}
                   </button>
                 ))}
               </div>
