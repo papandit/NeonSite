@@ -85,13 +85,15 @@ export default function CartPage() {
         <div className="space-y-4">
           {cart.items.map((it) => {
             const s = itemSummary(it.designDocument);
+            // Custom-design preview (name plate / neon) first, else the product's own image.
+            const img = it.previewImageUrl || it.product?.images?.[0] || null;
             return (
               <div key={it._id} className="flex gap-4 rounded-xl border border-gray-200 bg-white p-4">
                 <div className="h-24 w-24 shrink-0 overflow-hidden rounded-lg border border-gray-100 bg-slate-50">
-                  {it.previewImageUrl ? (
-                    <img src={it.previewImageUrl} alt="" className="h-full w-full object-cover" />
+                  {img ? (
+                    <img src={img} alt={it.product?.name || ''} className="h-full w-full object-cover" />
                   ) : (
-                    <div className="flex h-full items-center justify-center text-xs text-gray-400">No preview</div>
+                    <div className="flex h-full items-center justify-center text-xs text-gray-400">No image</div>
                   )}
                 </div>
                 <div className="flex flex-1 flex-col">
