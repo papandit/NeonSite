@@ -60,7 +60,18 @@ export default function NamePlatesPage() {
                 <div className="p-4">
                   {t.category?.name && <span className="text-xs text-gray-400">{t.category.name}</span>}
                   <div className="mt-0.5 font-medium text-gray-900 group-hover:text-indigo-600">{t.name}</div>
-                  <div className="mt-2 text-sm"><span className="text-gray-400">from </span><span className="font-semibold">{formatPaise(t.basePricePaise)}</span></div>
+                  <div className="mt-2 flex items-baseline gap-2 text-sm">
+                    <span className="text-gray-400">from </span>
+                    <span className="font-semibold text-gray-900">{formatPaise(t.basePricePaise)}</span>
+                    {t.compareAtPricePaise > t.basePricePaise && (
+                      <>
+                        <span className="text-gray-400 line-through">{formatPaise(t.compareAtPricePaise)}</span>
+                        <span className="rounded-full bg-green-600 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                          {Math.round(((t.compareAtPricePaise - t.basePricePaise) / t.compareAtPricePaise) * 100)}% OFF
+                        </span>
+                      </>
+                    )}
+                  </div>
                   <span className="mt-3 inline-block rounded-full bg-indigo-600 px-4 py-1.5 text-sm font-semibold text-white">Customize →</span>
                 </div>
               </Link>

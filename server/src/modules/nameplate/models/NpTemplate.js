@@ -69,6 +69,9 @@ const NpTemplateSchema = new Schema(
     widthMm: { type: Number, default: 300 },
     heightMm: { type: Number, default: 150 },
     basePricePaise: paiseField({ required: true }),
+    // Optional "original" / MRP price shown struck-through when higher than the
+    // selling price (basePricePaise). 0 = no compare-at price.
+    compareAtPricePaise: paiseField({ default: 0 }),
     status: { type: String, enum: ['active', 'draft', 'hidden'], default: 'draft', index: true },
 
     // Placement of the customer-chosen symbol on the plate (normalized 0..1).

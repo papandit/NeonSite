@@ -8,9 +8,14 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { resource } from '../../services/resourceApi';
 import { apiErrorMessage } from '../../services/api';
 import { paiseToRupees, rupeesToPaise } from '../../utils/money';
+import { ensureGoogleFont } from '../../lib/loadFont';
 import PageHeader from '../../components/PageHeader';
 import FileUpload from '../../components/FileUpload';
 import TemplateCanvasBuilder from './TemplateCanvasBuilder';
+
+// Image/thumbnail URL for a symbol-like option (element / icon / shape).
+const optionImg = (o) => o?.meta?.image || o?.meta?.svg || o?.imageUrl || o?.svg || o?.meta?.thumbnail || '';
+const SYMBOL_KINDS = ['elements', 'icons', 'shapes'];
 
 const templates = resource('nameplate/templates');
 const ALLOW_KINDS = [
@@ -41,7 +46,7 @@ const emptyField = () => ({
 const empty = () => ({
   name: '', category: '', status: 'draft',
   previewImageUrl: '', basePlateImageUrl: '', transparentPngUrl: '',
-  widthMm: 300, heightMm: 150, baseRupees: 0,
+  widthMm: 300, heightMm: 150, baseRupees: 0, compareRupees: '',
   symbolScale: 0.2, symbolX: 0.5, symbolY: 0.2,
   textFields: [], ...Object.fromEntries(ALLOW_KINDS.map(([, a]) => [a, []])),
 });
@@ -76,6 +81,7 @@ export default function NpTemplateEditPage() {
           name: t.name, category: t.category?._id || t.category || '', status: t.status,
           previewImageUrl: t.previewImageUrl || '', basePlateImageUrl: t.basePlateImageUrl || '', transparentPngUrl: t.transparentPngUrl || '',
           widthMm: t.widthMm, heightMm: t.heightMm, baseRupees: paiseToRupees(t.basePricePaise),
+          compareRupees: t.compareAtPricePaise ? paiseToRupees(t.compareAtPricePaise) : '',
           symbolScale: t.symbolScale ?? 0.2, symbolX: t.symbolX ?? 0.5, symbolY: t.symbolY ?? 0.2,
           textFields: (t.textFields || []).map((f) => ({ ...emptyField(), ...f })),
           ...Object.fromEntries(ALLOW_KINDS.map(([, a]) => [a, (t[a] || []).map(String)])),
@@ -87,6 +93,11 @@ export default function NpTemplateEditPage() {
   }, [id, isEdit]);
 
   useEffect(() => { load(); }, [load]);
+
+  // Preview each font in its own typeface (load the family once it's known).
+  useEffect(() => {
+    (options.fonts || []).forEach((f) => ensureGoogleFont(f.meta?.family || f.name));
+  }, [options.fonts]);
 
   const set = (k, v) => setTpl((t) => ({ ...t, [k]: v }));
   const toggleAllowed = (arrKey, optId) => setTpl((t) => {
@@ -108,6 +119,7 @@ export default function NpTemplateEditPage() {
         previewImageUrl: tpl.previewImageUrl, basePlateImageUrl: tpl.basePlateImageUrl, transparentPngUrl: tpl.transparentPngUrl,
         widthMm: Number(tpl.widthMm), heightMm: Number(tpl.heightMm),
         basePricePaise: rupeesToPaise(tpl.baseRupees || 0),
+        compareAtPricePaise: tpl.compareRupees ? rupeesToPaise(tpl.compareRupees) : 0,
         symbolScale: Number(tpl.symbolScale) || 0.2, symbolX: Number(tpl.symbolX), symbolY: Number(tpl.symbolY),
         textFields: tpl.textFields.filter((f) => f.key && f.label),
         ...Object.fromEntries(ALLOW_KINDS.map(([, a]) => [a, tpl[a]])),
@@ -150,7 +162,10 @@ export default function NpTemplateEditPage() {
                 <option value="draft">draft</option><option value="active">active</option><option value="hidden">hidden</option>
               </select>
             </div>
-            <div><label className="block text-sm font-medium text-slate-700">Base price (₹)</label><input type="number" step="0.01" min="0" className={input} value={tpl.baseRupees} onChange={(e) => set('baseRupees', e.target.value)} /></div>
+            <div className="grid grid-cols-2 gap-2">
+              <div><label className="block text-sm font-medium text-slate-700">Selling price (₹)</label><input type="number" step="0.01" min="0" className={input} value={tpl.baseRupees} onChange={(e) => set('baseRupees', e.target.value)} /></div>
+              <div><label className="block text-sm font-medium text-slate-700">Original / MRP (₹)</label><input type="number" step="0.01" min="0" placeholder="optional" title="Shows a struck-through price when higher than selling price" className={input} value={tpl.compareRupees} onChange={(e) => set('compareRupees', e.target.value)} /></div>
+            </div>
             <div className="grid grid-cols-2 gap-2">
               <div><label className="block text-sm font-medium text-slate-700">Width (mm)</label><input type="number" className={input} value={tpl.widthMm} onChange={(e) => set('widthMm', e.target.value)} /></div>
               <div><label className="block text-sm font-medium text-slate-700">Height (mm)</label><input type="number" className={input} value={tpl.heightMm} onChange={(e) => set('heightMm', e.target.value)} /></div>
@@ -168,14 +183,18 @@ export default function NpTemplateEditPage() {
           </div>
         </section>
 
-        {/* Visual builder — drag fields onto the plate */}
+        {/* Visual builder — drag / resize / rotate fields + symbol on the plate */}
         <section className="rounded-xl border border-slate-200 bg-white p-5">
-          <h3 className="mb-3 font-semibold">Visual builder</h3>
+          <h3 className="mb-1 font-semibold">Visual builder</h3>
+          <p className="mb-3 text-xs text-slate-400">Drag to move, use the corner handles to resize (text = font size), and the top handle to rotate. Changes save straight to the template and the storefront renders the exact same layout.</p>
           <TemplateCanvasBuilder
             baseImageUrl={tpl.basePlateImageUrl}
             aspect={(Number(tpl.heightMm) || 150) / (Number(tpl.widthMm) || 300)}
             fields={tpl.textFields}
-            onMove={(i, x, y) => updField(i, { x, y })}
+            onFieldChange={(i, patch) => updField(i, patch)}
+            symbol={{ x: Number(tpl.symbolX), y: Number(tpl.symbolY), scale: Number(tpl.symbolScale) }}
+            onSymbolChange={(p) => setTpl((t) => ({ ...t, symbolX: p.x ?? t.symbolX, symbolY: p.y ?? t.symbolY, symbolScale: p.scale ?? t.symbolScale }))}
+            symbolPreviewUrl={optionImg((options.elements || [])[0]) || optionImg((options.shapes || [])[0])}
           />
         </section>
 
@@ -248,9 +267,14 @@ export default function NpTemplateEditPage() {
                   {(options[k] || []).length === 0 && <span className="text-xs text-slate-400">No {label.toLowerCase()} yet.</span>}
                   {(options[k] || []).map((o) => {
                     const sel = (tpl[arrKey] || []).includes(String(o._id));
+                    const isFont = k === 'fonts';
+                    const fam = o.meta?.family || o.name;
+                    const img = SYMBOL_KINDS.includes(k) ? optionImg(o) : '';
                     return (
-                      <button key={o._id} type="button" onClick={() => toggleAllowed(arrKey, String(o._id))} className={`rounded-full border px-3 py-1 text-sm ${sel ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}>
-                        {o.meta?.hex && <span className="mr-1 inline-block h-2.5 w-2.5 rounded-full align-middle" style={{ background: o.meta.hex }} />}{o.name}
+                      <button key={o._id} type="button" onClick={() => toggleAllowed(arrKey, String(o._id))} className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm ${sel ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}>
+                        {o.meta?.hex && <span className="inline-block h-3.5 w-3.5 rounded-full border border-black/10" style={{ background: o.meta.hex }} />}
+                        {img && <span className="flex h-6 w-6 items-center justify-center rounded bg-white p-0.5 shadow-sm"><img src={img} alt="" className="max-h-full max-w-full object-contain" /></span>}
+                        <span style={isFont ? { fontFamily: fam, fontSize: '15px' } : undefined}>{o.name}</span>
                       </button>
                     );
                   })}

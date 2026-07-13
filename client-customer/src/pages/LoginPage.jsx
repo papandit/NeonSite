@@ -17,7 +17,8 @@ export default function LoginPage() {
   const { status, error } = useSelector(selectAuth);
   const isAuthed = useSelector(selectIsAuthenticated);
 
-  const from = location.state?.from?.pathname || '/account';
+  // Land on the page the user was sent from (e.g. via "add to cart"), else home.
+  const from = location.state?.from?.pathname || '/';
 
   const {
     register: field,

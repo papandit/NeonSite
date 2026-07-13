@@ -34,7 +34,7 @@ export const listTemplates = asyncHandler(async (req, res) => {
     filter.category = cat ? cat._id : '000000000000000000000000';
   }
   const items = await NpTemplate.find(filter)
-    .select('name slug category previewImageUrl basePlateImageUrl widthMm heightMm basePricePaise')
+    .select('name slug category previewImageUrl basePlateImageUrl widthMm heightMm basePricePaise compareAtPricePaise')
     .populate('category', 'name slug')
     .sort('sortOrder -createdAt')
     .lean();

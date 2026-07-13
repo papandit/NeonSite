@@ -94,20 +94,22 @@ export default function NamePlateDesignerPage() {
       }).catch(() => {});
     }
 
-    // One locked, auto-fitting Textbox per active field.
+    // One locked, auto-width IText per active field — placed at the admin's exact
+    // position, size and rotation so the storefront mirrors the template builder.
     const d = dataRef.current;
     (d.template.textFields || []).filter((f) => f.status !== 'inactive').forEach((f) => {
-      const t = new fabric.Textbox(f.defaultValue || f.placeholder || f.label, {
+      const t = new fabric.IText(f.defaultValue || f.placeholder || f.label || 'Text', {
         left: (f.x ?? 0.5) * CANVAS_W, top: (f.y ?? 0.5) * CANVAS_H,
-        width: CANVAS_W * 0.8,
         originX: 'center', originY: 'center',
         textAlign: f.align || 'center',
         fontSize: f.defaultSizePx || 40, fill: f.defaultColorHex || '#1a1a1a',
         fontFamily: f.defaultFontFamily || 'Georgia, serif',
-        selectable: false, evented: false, editable: false, splitByGrapheme: false,
+        angle: f.rotation || 0,
+        selectable: false, evented: false, editable: false,
       });
       t.fieldKey = f.key;
       t.baseSize = f.defaultSizePx || 40;
+      t.baseAngle = f.rotation || 0;
       textRefs.current[f.key] = t;
       fc.add(t);
     });
@@ -125,11 +127,11 @@ export default function NamePlateDesignerPage() {
     for (const [key, t] of Object.entries(textRefs.current)) {
       const f = tfs.find((x) => x.key === key);
       const val = fields[key] || f?.placeholder || '';
-      const maxW = CANVAS_W * 0.82;
-      t.set({ text: val, fill: color, fontFamily: font, width: maxW, fontSize: t.baseSize });
-      // shrink to fit the frame width
+      const maxW = CANVAS_W * 0.9;
+      t.set({ text: val || ' ', fill: color, fontFamily: font, fontSize: t.baseSize, angle: t.baseAngle || 0 });
+      // shrink only if the text would overflow the plate (auto-width IText)
       let guard = 0;
-      while (t.width > maxW && t.fontSize > 8 && guard < 40) { t.set({ fontSize: t.fontSize - 1 }); guard++; }
+      while (t.width > maxW && t.fontSize > 8 && guard < 60) { t.set({ fontSize: t.fontSize - 1 }); guard++; }
       t.set({ left: (f?.x ?? 0.5) * CANVAS_W, top: (f?.y ?? 0.5) * CANVAS_H });
     }
     fc.requestRenderAll();
@@ -301,8 +303,18 @@ export default function NamePlateDesignerPage() {
           <div className="rounded-2xl border border-gray-200 bg-white p-5">
             <div className="flex items-baseline justify-between">
               <span className="text-xs uppercase tracking-wide text-gray-400">Total</span>
-              <span className="font-display text-2xl font-bold">{formatPaise(price)}</span>
+              <div className="flex items-baseline gap-2">
+                {template.compareAtPricePaise > price && (
+                  <span className="text-sm text-gray-400 line-through">{formatPaise(template.compareAtPricePaise)}</span>
+                )}
+                <span className="font-display text-2xl font-bold">{formatPaise(price)}</span>
+              </div>
             </div>
+            {template.compareAtPricePaise > price && (
+              <p className="mt-0.5 text-right text-xs font-semibold text-green-600">
+                You save {formatPaise(template.compareAtPricePaise - price)}
+              </p>
+            )}
             <p className="mt-1 text-xs text-gray-400">Final price confirmed at checkout.</p>
             {errors.length > 0 && <div className="mt-2 text-xs text-amber-600">{errors[0]}</div>}
             {error && <div className="mt-2 rounded bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}

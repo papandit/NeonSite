@@ -23,7 +23,7 @@ export default function RegisterPage() {
   } = useForm({ defaultValues: { name: '', email: '', password: '' } });
 
   useEffect(() => {
-    if (isAuthed) navigate('/account', { replace: true });
+    if (isAuthed) navigate('/', { replace: true });
   }, [isAuthed, navigate]);
 
   useEffect(() => {

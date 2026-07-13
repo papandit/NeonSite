@@ -1,78 +1,211 @@
-// Visual position builder — drag the admin's text fields onto the base plate
-// (Canva-style), dependency-free. Each field renders as a draggable chip over
-// the plate image; dropping it writes the normalized x/y back to the template.
-// Precise size/colour/capabilities stay in the field form below.
+// Canva-style visual builder for a Name Plate template. The admin drags text
+// fields and the symbol slot onto the base plate, resizes them (corner handles
+// = font size / symbol size) and rotates them. Every change writes normalized
+// coordinates (0..1), font size in px and rotation back to the template — the
+// storefront designer renders the EXACT same layout at the same canvas width.
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
+import * as fabric from 'fabric';
+import { ensureGoogleFont } from '../../lib/loadFont';
 
-export default function TemplateCanvasBuilder({ baseImageUrl, aspect = 0.5, fields = [], onMove }) {
-  const areaRef = useRef(null);
-  const dragging = useRef(null); // { index }
-  const [activeIndex, setActiveIndex] = useState(null);
+const W = 560; // must match the storefront designer's CANVAS_W
 
-  const clamp = (v) => Math.min(1, Math.max(0, v));
+export default function TemplateCanvasBuilder({
+  baseImageUrl,
+  aspect = 0.5,
+  fields = [],
+  onFieldChange,
+  symbol,
+  onSymbolChange,
+  symbolPreviewUrl,
+}) {
+  const elRef = useRef(null);
+  const fcRef = useRef(null);
+  const objsRef = useRef({}); // fieldIndex -> IText
+  const symRef = useRef(null); // symbol object
+  const H = Math.round(W * (aspect || 0.5));
 
-  const pointFromEvent = (e) => {
-    const rect = areaRef.current.getBoundingClientRect();
-    return {
-      x: clamp((e.clientX - rect.left) / rect.width),
-      y: clamp((e.clientY - rect.top) / rect.height),
+  // Latest callbacks, read inside stable fabric handlers.
+  const cbRef = useRef({});
+  cbRef.current = { onFieldChange, onSymbolChange };
+
+  const shown = fields
+    .map((f, i) => ({ f, i }))
+    .filter(({ f }) => f.status !== 'inactive' && f.key);
+
+  // ---- create the canvas once (per size) ----
+  useEffect(() => {
+    const fc = new fabric.Canvas(elRef.current, {
+      selection: false,
+      preserveObjectStacking: true,
+      backgroundColor: '#eef2f7',
+      uniformScaling: true, // corner scaling stays proportional (font scales cleanly)
+    });
+    fcRef.current = fc;
+    fc.setDimensions({ width: W, height: H });
+
+    fc.on('object:modified', (e) => {
+      const o = e.target;
+      if (!o) return;
+      if (o.ncType === 'text') {
+        const size = Math.max(6, Math.round((o.fontSize || 40) * (o.scaleY || 1)));
+        o.set({ fontSize: size, scaleX: 1, scaleY: 1 });
+        cbRef.current.onFieldChange?.(o.ncIndex, {
+          x: +(o.left / W).toFixed(4),
+          y: +(o.top / H).toFixed(4),
+          defaultSizePx: size,
+          rotation: Math.round(o.angle || 0),
+        });
+      } else if (o.ncType === 'symbol') {
+        const scale = +(((o.width || 100) * (o.scaleX || 1)) / W).toFixed(4);
+        cbRef.current.onSymbolChange?.({
+          x: +(o.left / W).toFixed(4),
+          y: +(o.top / H).toFixed(4),
+          scale: Math.min(0.9, Math.max(0.03, scale)),
+        });
+      }
+      fc.requestRenderAll();
+    });
+
+    return () => { fc.dispose(); fcRef.current = null; objsRef.current = {}; symRef.current = null; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [H]);
+
+  // ---- base plate background ----
+  useEffect(() => {
+    const fc = fcRef.current;
+    if (!fc) return;
+    if (!baseImageUrl) { fc.backgroundImage = null; fc.requestRenderAll(); return; }
+    fabric.FabricImage.fromURL(baseImageUrl, { crossOrigin: 'anonymous' })
+      .then((img) => {
+        const s = Math.min(W / img.width, H / img.height);
+        img.set({ scaleX: s, scaleY: s, originX: 'center', originY: 'center', left: W / 2, top: H / 2 });
+        fc.backgroundImage = img;
+        fc.requestRenderAll();
+      })
+      .catch(() => {});
+  }, [baseImageUrl, H]);
+
+  // ---- reconcile text objects when the SET of fields changes (add/remove/rekey) ----
+  const sig = shown.map(({ f, i }) => `${i}:${f.key}`).join('|');
+  useEffect(() => {
+    const fc = fcRef.current;
+    if (!fc) return;
+    Object.values(objsRef.current).forEach((o) => fc.remove(o));
+    objsRef.current = {};
+    shown.forEach(({ f, i }) => {
+      ensureGoogleFont(f.defaultFontFamily);
+      const t = new fabric.IText(f.defaultValue || f.label || f.key, {
+        left: (f.x ?? 0.5) * W,
+        top: (f.y ?? 0.5) * H,
+        originX: 'center',
+        originY: 'center',
+        fontSize: f.defaultSizePx || 40,
+        fill: f.defaultColorHex || '#1a1a1a',
+        fontFamily: f.defaultFontFamily || 'Georgia, serif',
+        textAlign: f.align || 'center',
+        angle: f.rotation || 0,
+        editable: false,
+        borderColor: '#4f46e5',
+        cornerColor: '#4f46e5',
+        cornerStyle: 'circle',
+        cornerSize: 10,
+        transparentCorners: false,
+        padding: 4,
+      });
+      t.ncType = 'text';
+      t.ncIndex = i;
+      t.setControlsVisibility({ ml: false, mr: false, mt: false, mb: false }); // corners + rotate only
+      objsRef.current[i] = t;
+      fc.add(t);
+    });
+    fc.requestRenderAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sig, H]);
+
+  // ---- live-sync every field prop onto the canvas (two-way with the form) ----
+  // Safe against feedback loops: field state only changes on 'object:modified'
+  // (drag/resize end), so re-applying the same value here is a no-op.
+  useEffect(() => {
+    const fc = fcRef.current;
+    if (!fc) return;
+    shown.forEach(({ f, i }) => {
+      const o = objsRef.current[i];
+      if (!o || o === fc.getActiveObject()) return; // don't fight an in-progress edit
+      ensureGoogleFont(f.defaultFontFamily);
+      o.set({
+        text: f.defaultValue || f.label || f.key,
+        fill: f.defaultColorHex || '#1a1a1a',
+        fontFamily: f.defaultFontFamily || 'Georgia, serif',
+        textAlign: f.align || 'center',
+        left: (f.x ?? 0.5) * W,
+        top: (f.y ?? 0.5) * H,
+        fontSize: f.defaultSizePx || 40,
+        angle: f.rotation || 0,
+        scaleX: 1,
+        scaleY: 1,
+      });
+      o.setCoords();
+    });
+    fc.requestRenderAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fields]);
+
+  // ---- symbol slot (draggable + resizable) ----
+  useEffect(() => {
+    const fc = fcRef.current;
+    if (!fc) return;
+    if (symRef.current) { fc.remove(symRef.current); symRef.current = null; }
+    if (!symbol) { fc.requestRenderAll(); return; }
+    const box = (symbol.scale ?? 0.2) * W;
+
+    const place = (obj, baseW) => {
+      const s = box / (baseW || 100);
+      obj.set({
+        left: (symbol.x ?? 0.5) * W,
+        top: (symbol.y ?? 0.2) * H,
+        originX: 'center',
+        originY: 'center',
+        scaleX: s,
+        scaleY: s,
+        borderColor: '#4f46e5',
+        cornerColor: '#4f46e5',
+        cornerStyle: 'circle',
+        cornerSize: 10,
+        transparentCorners: false,
+      });
+      obj.ncType = 'symbol';
+      obj.setControlsVisibility({ ml: false, mr: false, mt: false, mb: false });
+      symRef.current = obj;
+      fc.add(obj);
+      fc.requestRenderAll();
     };
-  };
 
-  const onPointerDown = (e, index) => {
-    e.preventDefault();
-    dragging.current = { index };
-    setActiveIndex(index);
-    try { e.target.setPointerCapture(e.pointerId); } catch { /* ignore */ }
-  };
-  const onPointerMove = (e) => {
-    if (!dragging.current) return;
-    const { x, y } = pointFromEvent(e);
-    onMove(dragging.current.index, x, y);
-  };
-  const onPointerUp = () => { dragging.current = null; };
-
-  // Only active fields are shown; keep their real index for onMove.
-  const shown = fields.map((f, i) => ({ f, i })).filter(({ f }) => f.status !== 'inactive' && f.key);
+    if (symbolPreviewUrl) {
+      fabric.FabricImage.fromURL(symbolPreviewUrl, { crossOrigin: 'anonymous' })
+        .then((img) => place(img, Math.max(img.width || 100, img.height || 100)))
+        .catch(() => {});
+    } else {
+      const rect = new fabric.Rect({
+        width: 100, height: 100, rx: 14, ry: 14,
+        fill: 'rgba(79,70,229,0.10)', stroke: '#4f46e5', strokeDashArray: [6, 4], strokeWidth: 2,
+      });
+      place(rect, 100);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [symbol?.x, symbol?.y, symbol?.scale, symbolPreviewUrl, H]);
 
   return (
     <div>
-      <div
-        ref={areaRef}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerLeave={onPointerUp}
-        className="relative mx-auto w-full max-w-xl select-none overflow-hidden rounded-lg border border-slate-300 bg-slate-100"
-        style={{ aspectRatio: `1 / ${aspect || 0.5}` }}
-      >
-        {baseImageUrl ? (
-          <img src={baseImageUrl} alt="plate" className="pointer-events-none absolute inset-0 h-full w-full object-cover" draggable={false} />
-        ) : (
-          <div className="absolute inset-0 grid place-items-center text-sm text-slate-400">Upload a base plate image to position fields</div>
-        )}
-
-        {shown.map(({ f, i }) => (
-          <button
-            key={i}
-            type="button"
-            onPointerDown={(e) => onPointerDown(e, i)}
-            className={`absolute -translate-x-1/2 -translate-y-1/2 cursor-move whitespace-nowrap rounded px-2 py-0.5 text-center shadow ${activeIndex === i ? 'ring-2 ring-indigo-500' : ''}`}
-            style={{
-              left: `${(f.x ?? 0.5) * 100}%`,
-              top: `${(f.y ?? 0.5) * 100}%`,
-              color: f.defaultColorHex || '#1a1a1a',
-              fontFamily: f.defaultFontFamily || 'inherit',
-              fontSize: `${Math.max(11, Math.min(40, (f.defaultSizePx || 40) * 0.5))}px`,
-              background: 'rgba(255,255,255,0.7)',
-            }}
-            title={`${f.label} — drag to position`}
-          >
-            {f.defaultValue || f.label || f.key}
-          </button>
-        ))}
+      <div className="overflow-x-auto">
+        <div className="mx-auto w-fit rounded-xl border border-slate-300 bg-slate-100 p-2 shadow-inner">
+          <canvas ref={elRef} className="rounded-lg" />
+        </div>
       </div>
-      <p className="mt-2 text-center text-xs text-slate-400">Drag each field onto the plate. Exact size, colour and behaviour are set in the field list below.</p>
+      <p className="mt-2 text-center text-xs text-slate-400">
+        Drag to move · corner handles to resize · top handle to rotate. The storefront renders this exact layout.
+        {!baseImageUrl && ' Upload a base plate image above for a realistic backdrop.'}
+      </p>
     </div>
   );
 }

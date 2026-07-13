@@ -103,8 +103,19 @@ async function run() {
     await NpFont.findOneAndUpdate({ name: family }, { $setOnInsert: { name: family, status: 'active', meta: { family } } }, { upsert: true, setDefaultsOnInsert: true });
   }
 
-  // Colours
-  const colorDefs = [['Black', '#1a1a1a', 0], ['White', '#f8f8f8', 0], ['Gold', '#c8a04d', 5000], ['Cocoa', '#3a2b1d', 0], ['Saffron', '#d4541f', 0], ['Teal', '#0e7490', 0], ['Pink', '#ff5ea8', 3000]];
+  // Colours — a rich palette (admins can add more from the Colors page).
+  const colorDefs = [
+    ['Black', '#1a1a1a', 0], ['White', '#f8f8f8', 0], ['Ivory', '#fffff0', 0],
+    ['Charcoal', '#2b2b2b', 0], ['Graphite', '#36393b', 0], ['Silver', '#c0c0c0', 0],
+    ['Gold', '#c8a04d', 5000], ['Champagne', '#f0e6c8', 3000], ['Rose Gold', '#b76e79', 5000],
+    ['Copper', '#b87333', 3000], ['Bronze', '#8c6a3f', 2000], ['Cocoa', '#3a2b1d', 0],
+    ['Maroon', '#6d1a2e', 0], ['Burgundy', '#7b1e3b', 0], ['Ruby', '#9b1c31', 2000],
+    ['Saffron', '#d4541f', 0], ['Coral', '#ff6b6b', 0], ['Amber', '#f59e0b', 0],
+    ['Pink', '#ff5ea8', 3000], ['Lavender', '#8b7bd8', 0], ['Royal Blue', '#1e3a8a', 0],
+    ['Navy', '#1b2a4a', 0], ['Sky Blue', '#38bdf8', 0], ['Teal', '#0e7490', 0],
+    ['Emerald', '#047857', 0], ['Forest', '#14532d', 0], ['Mint', '#6ee7b7', 0],
+    ['Slate', '#475569', 0],
+  ];
   for (const [name, hex, price] of colorDefs) {
     await NpColor.findOneAndUpdate({ name }, { $setOnInsert: { name, status: 'active', priceDeltaPaise: price, meta: { hex } } }, { upsert: true, setDefaultsOnInsert: true });
   }
