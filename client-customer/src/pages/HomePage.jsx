@@ -149,9 +149,9 @@ export default function HomePage() {
                 <Link
                   key={c._id}
                   to={`/products?category=${c.slug}`}
-                  className="group flex w-40 shrink-0 snap-start flex-col items-center gap-4 text-center sm:w-48"
+                  className="group flex shrink-0 basis-[70%] snap-start flex-col items-center gap-4 text-center sm:basis-[38%] md:basis-[28%] lg:basis-[calc((100%-7.5rem)/5.5)]"
                 >
-                  <div className="h-40 w-40 overflow-hidden rounded-full border border-gray-200 bg-white shadow-sm ring-1 ring-transparent transition group-hover:shadow-lg group-hover:ring-indigo-200 sm:h-48 sm:w-48">
+                  <div className="aspect-square w-full overflow-hidden rounded-full border border-gray-200 bg-white shadow-sm ring-1 ring-transparent transition group-hover:shadow-lg group-hover:ring-indigo-200">
                     {c.banner ? (
                       <img src={c.banner} alt={c.name} className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
                     ) : (

@@ -22,13 +22,13 @@ export default function ProductGrid({ products, columns = 'sm:grid-cols-2 lg:gri
     dispatch(toggleWishlistItem(id));
   };
 
-  // Buy as-is: quick add with a default design, then go to the cart.
-  const onAddToCart = async (product) => {
+  // Buy as-is: quick add with a default design (+ the chosen colour), then cart.
+  const onAddToCart = async (product, color) => {
     if (!isAuthed) {
       navigate('/login', { state: { from: { pathname: '/products' } } });
       return Promise.reject(new Error('login required'));
     }
-    await dispatch(quickAddToCart({ productId: product._id, quantity: 1 })).unwrap();
+    await dispatch(quickAddToCart({ productId: product._id, quantity: 1, color })).unwrap();
     navigate('/cart');
   };
 

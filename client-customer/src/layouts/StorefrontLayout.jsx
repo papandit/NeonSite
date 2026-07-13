@@ -70,7 +70,7 @@ export default function StorefrontLayout() {
   );
 
   return (
-    <div className="min-h-full flex flex-col overflow-x-hidden bg-gray-50 text-gray-900">
+    <div className="flex min-h-screen flex-col overflow-x-hidden bg-gray-50 text-gray-900">
       <ScrollProgress />
       <header className="sticky top-0 z-40 border-b border-gray-200 bg-[#fffdf9]/90 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-4">

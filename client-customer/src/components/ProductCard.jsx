@@ -13,12 +13,14 @@ function Placeholder() {
 
 export default function ProductCard({ product, wishlisted = false, onWishlist, onQuickView, onAddToCart }) {
   const [addState, setAddState] = useState('idle'); // idle | adding | added
+  const swatches = product.swatches || [];
+  const [selectedColor, setSelectedColor] = useState(swatches[0] || null);
 
   const handleAdd = async () => {
     if (!onAddToCart || addState === 'adding') return;
     setAddState('adding');
     try {
-      await onAddToCart(product);
+      await onAddToCart(product, selectedColor);
       setAddState('added');
       setTimeout(() => setAddState('idle'), 1600);
     } catch {
@@ -32,7 +34,6 @@ export default function ProductCard({ product, wishlisted = false, onWishlist, o
   const mrp = product.compareAtPricePaise || 0;
   const hasOffer = mrp > product.basePricePaise;
   const discountPct = hasOffer ? Math.round(((mrp - product.basePricePaise) / mrp) * 100) : 0;
-  const swatches = product.swatches || [];
 
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white transition hover:shadow-md">
@@ -83,17 +84,23 @@ export default function ProductCard({ product, wishlisted = false, onWishlist, o
           <Rating value={product.rating || 0} />
         </div>
 
-        {/* Colour swatches */}
+        {/* Colour swatches — click to pick the colour added to the cart */}
         {swatches.length > 0 && (
           <div className="mt-2 flex items-center gap-1.5">
-            {swatches.slice(0, 6).map((s, i) => (
-              <span
-                key={`${s.hex}-${i}`}
-                title={s.name}
-                className="inline-block h-4 w-4 rounded-full border border-black/10 shadow-sm"
-                style={{ background: s.hex }}
-              />
-            ))}
+            {swatches.slice(0, 6).map((s, i) => {
+              const active = selectedColor?.hex?.toLowerCase() === s.hex?.toLowerCase();
+              return (
+                <button
+                  key={`${s.hex}-${i}`}
+                  type="button"
+                  onClick={() => setSelectedColor(s)}
+                  title={s.name || s.hex}
+                  aria-label={s.name || s.hex}
+                  className={`h-5 w-5 rounded-full border shadow-sm transition ${active ? 'border-indigo-600 ring-2 ring-indigo-300 ring-offset-1' : 'border-black/10 hover:scale-110'}`}
+                  style={{ background: s.hex }}
+                />
+              );
+            })}
             {swatches.length > 6 && <span className="text-xs text-gray-400">+{swatches.length - 6}</span>}
           </div>
         )}
