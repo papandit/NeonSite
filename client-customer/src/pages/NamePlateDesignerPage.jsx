@@ -30,8 +30,8 @@ export default function NamePlateDesignerPage() {
 
   const [data, setData] = useState(null);          // { template, options }
   const [fields, setFields] = useState({});         // { fieldKey: value }
-  const [font, setFont] = useState('');             // global family
-  const [color, setColor] = useState('#c8a04d');    // global colour
+  const [styles, setStyles] = useState({});         // { fieldKey: { font, color } } — per text field
+  const [activeField, setActiveField] = useState(null); // which field the font/colour pickers edit
   const [symbolId, setSymbolId] = useState(null);   // chosen element id
   const [price, setPrice] = useState(0);
   const [errors, setErrors] = useState([]);
@@ -51,8 +51,14 @@ export default function NamePlateDesignerPage() {
       dataRef.current = d;
       const tf = (d.template.textFields || []).filter((f) => f.status !== 'inactive');
       setFields(Object.fromEntries(tf.map((f) => [f.key, f.defaultValue || ''])));
-      setFont(tf[0]?.defaultFontFamily || d.options.fonts?.[0]?.meta?.family || 'Georgia, serif');
-      setColor(tf[0]?.defaultColorHex || d.options.colors?.[0]?.meta?.hex || '#c8a04d');
+      // Each field starts from its admin default font/colour (or the first option).
+      const fFont = d.options.fonts?.[0]?.meta?.family || 'Georgia, serif';
+      const fColor = d.options.colors?.[0]?.meta?.hex || '#c8a04d';
+      setStyles(Object.fromEntries(tf.map((f) => [f.key, {
+        font: f.defaultFontFamily || fFont,
+        color: f.defaultColorHex || fColor,
+      }])));
+      setActiveField(tf[0]?.key || null);
     }).catch(() => setError('Could not load this template.'));
   }, [slug]);
 
@@ -126,16 +132,19 @@ export default function NamePlateDesignerPage() {
     const tfs = dataRef.current.template.textFields || [];
     for (const [key, t] of Object.entries(textRefs.current)) {
       const f = tfs.find((x) => x.key === key);
+      const st = styles[key] || {};
+      const fam = st.font || 'Georgia, serif';
+      ensureGoogleFont(fam);
       const val = fields[key] || f?.placeholder || '';
       const maxW = CANVAS_W * 0.9;
-      t.set({ text: val || ' ', fill: color, fontFamily: font, fontSize: t.baseSize, angle: t.baseAngle || 0 });
+      t.set({ text: val || ' ', fill: st.color || '#1a1a1a', fontFamily: fam, fontSize: t.baseSize, angle: t.baseAngle || 0 });
       // shrink only if the text would overflow the plate (auto-width IText)
       let guard = 0;
       while (t.width > maxW && t.fontSize > 8 && guard < 60) { t.set({ fontSize: t.fontSize - 1 }); guard++; }
       t.set({ left: (f?.x ?? 0.5) * CANVAS_W, top: (f?.y ?? 0.5) * CANVAS_H });
     }
     fc.requestRenderAll();
-  }, [fields, font, color]);
+  }, [fields, styles]);
 
   useEffect(() => { reflow(); }, [reflow]);
 
@@ -173,18 +182,21 @@ export default function NamePlateDesignerPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [symbolId, symbols, template]);
 
+  // Representative style (the first field) — used for the server price selection.
+  const fontIdFor = (fam) => fonts.find((f) => (f.meta?.family || f.name) === fam)?._id;
+  const colorIdFor = (hex) => colors.find((c) => c.meta?.hex === hex)?._id;
+
   // ---- live server price ----
   useEffect(() => {
     if (!template) return;
-    const fontId = fonts.find((f) => (f.meta?.family || f.name) === font)?._id;
-    const colorId = colors.find((c) => c.meta?.hex === color)?._id;
-    const design = { fields, selections: { font: fontId, color: colorId }, elements: symbolId ? [{ id: symbolId }] : [] };
+    const rep = styles[Object.keys(styles)[0]] || {};
+    const design = { fields, selections: { font: fontIdFor(rep.font), color: colorIdFor(rep.color) }, elements: symbolId ? [{ id: symbolId }] : [] };
     const t = setTimeout(() => {
       quoteNpDesign(slug, design).then((qd) => { setPrice(qd.pricePaise); setErrors(qd.errors || []); }).catch(() => {});
     }, 300);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fields, font, color, symbolId, slug, template]);
+  }, [fields, styles, symbolId, slug, template]);
 
   const capturePreview = () => {
     const fc = fcRef.current;
@@ -200,18 +212,30 @@ export default function NamePlateDesignerPage() {
       const dataUrl = capturePreview();
       let previewImageUrl = null;
       if (dataUrl) { try { previewImageUrl = (await uploadPreview(dataUrl)).url; } catch { previewImageUrl = null; } }
-      const fontId = fonts.find((f) => (f.meta?.family || f.name) === font)?._id;
-      const colorId = colors.find((c) => c.meta?.hex === color)?._id;
-      const design = { fields, selections: { font: fontId, color: colorId, fontFamily: font, colorHex: color }, elements: symbolId ? [{ id: symbolId }] : [] };
+      // Per-field styling (font + colour for each text line).
+      const fieldStyles = {};
+      for (const [key, st] of Object.entries(styles)) {
+        fieldStyles[key] = { font: fontIdFor(st.font), color: colorIdFor(st.color), fontFamily: st.font, colorHex: st.color };
+      }
+      const rep = styles[Object.keys(styles)[0]] || {};
+      const design = {
+        fields,
+        selections: { font: fontIdFor(rep.font), color: colorIdFor(rep.color), fontFamily: rep.font, colorHex: rep.color },
+        fieldStyles,
+        elements: symbolId ? [{ id: symbolId }] : [],
+      };
       const payload = { templateSlug: slug, design, canvas: {}, previewImageUrl, quantity: 1 };
       if (isAuthed) { await dispatch(addNameplateToCart(payload)).unwrap(); navigate('/cart'); }
       else { localStorage.setItem(PENDING_NAMEPLATE_KEY, JSON.stringify(payload)); navigate('/login', { state: { from: { pathname: `/nameplates/${slug}` } } }); }
     } catch (err) { setError(apiErrorMessage(err, 'Could not add to cart')); }
     finally { setAdding(false); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [template, fields, font, color, symbolId, slug, isAuthed]);
+  }, [template, fields, styles, symbolId, slug, isAuthed]);
 
   const activeFields = useMemo(() => (template?.textFields || []).filter((f) => f.status !== 'inactive'), [template]);
+  const activeStyle = styles[activeField] || {};
+  const activeLabel = activeFields.find((f) => f.key === activeField)?.label || '';
+  const setActiveStyle = (patch) => { if (activeField) setStyles((s) => ({ ...s, [activeField]: { ...s[activeField], ...patch } })); };
 
   if (error && !data) return <div className="mx-auto max-w-md px-4 py-20 text-center text-gray-500">{error}</div>;
   if (!data) return <div className="mx-auto max-w-md px-4 py-20 text-center text-gray-400">Loading designer…</div>;
@@ -233,34 +257,46 @@ export default function NamePlateDesignerPage() {
 
         {/* Controls */}
         <div className="max-h-[76vh] space-y-5 overflow-y-auto pr-1">
-          {/* Text fields */}
+          {/* Text fields — click one to style it; each keeps its own font + colour */}
           <div className="rounded-2xl border border-gray-200 bg-white p-5">
             <h3 className="text-xs font-semibold uppercase tracking-wide text-indigo-600">Your details</h3>
+            <p className="mt-1 text-xs text-gray-400">Select a line, then pick its font &amp; colour below.</p>
             <div className="mt-3 space-y-3">
-              {activeFields.map((f) => (
-                <div key={f.key}>
-                  <label className="flex items-center justify-between text-sm font-medium text-gray-700">
-                    <span>{f.label}{f.required && <span className="ml-1 text-indigo-500">*</span>}</span>
-                    <span className="text-xs text-gray-400">{(fields[f.key] || '').length}/{f.maxLength}</span>
-                  </label>
-                  <input value={fields[f.key] || ''} maxLength={f.maxLength} placeholder={f.placeholder}
-                    onChange={(e) => setFields((s) => ({ ...s, [f.key]: e.target.value }))}
-                    className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-                </div>
-              ))}
+              {activeFields.map((f) => {
+                const on = activeField === f.key;
+                const st = styles[f.key] || {};
+                return (
+                  <div key={f.key} className={`rounded-xl border p-2.5 transition ${on ? 'border-indigo-400 bg-indigo-50/40 ring-1 ring-indigo-200' : 'border-gray-200'}`}>
+                    <label className="flex items-center justify-between text-sm font-medium text-gray-700">
+                      <span className="flex items-center gap-1.5">
+                        <span className="inline-block h-3.5 w-3.5 rounded-full border border-black/10" style={{ background: st.color || '#1a1a1a' }} />
+                        {f.label}{f.required && <span className="ml-0.5 text-indigo-500">*</span>}
+                      </span>
+                      <span className="text-xs text-gray-400">{(fields[f.key] || '').length}/{f.maxLength}</span>
+                    </label>
+                    <input value={fields[f.key] || ''} maxLength={f.maxLength} placeholder={f.placeholder}
+                      onFocus={() => setActiveField(f.key)}
+                      onChange={(e) => { setActiveField(f.key); setFields((s) => ({ ...s, [f.key]: e.target.value })); }}
+                      className="mt-1.5 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          {/* Choose Font */}
+          {/* Choose Font — applies to the selected line */}
           {fonts.length > 0 && (
             <div className="rounded-2xl border border-gray-200 bg-white p-5">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-indigo-600">Choose font</h3>
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-indigo-600">Choose font</h3>
+                {activeLabel && <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-600">for {activeLabel}</span>}
+              </div>
               <div className="mt-3 grid max-h-64 grid-cols-3 gap-2 overflow-y-auto pr-1">
                 {fonts.map((fo) => {
                   const fam = fo.meta?.family || fo.name;
-                  const on = font === fam;
+                  const on = activeStyle.font === fam;
                   return (
-                    <button key={fo._id} onClick={() => setFont(fam)} title={fo.name}
+                    <button key={fo._id} onClick={() => setActiveStyle({ font: fam })} title={fo.name}
                       className={`rounded-lg border py-3 text-center text-xl transition ${on ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-gray-300'}`}
                       style={{ fontFamily: fam }}>Abc</button>
                   );
@@ -269,14 +305,17 @@ export default function NamePlateDesignerPage() {
             </div>
           )}
 
-          {/* Choose Colour */}
+          {/* Choose Colour — applies to the selected line */}
           {colors.length > 0 && (
             <div className="rounded-2xl border border-gray-200 bg-white p-5">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-indigo-600">Choose colour</h3>
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-indigo-600">Choose colour</h3>
+                {activeLabel && <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-600">for {activeLabel}</span>}
+              </div>
               <div className="mt-3 flex flex-wrap gap-2">
                 {colors.map((c) => c.meta?.hex && (
-                  <button key={c._id} title={c.name} onClick={() => setColor(c.meta.hex)}
-                    className={`h-9 w-9 rounded-full border-2 transition ${color === c.meta.hex ? 'scale-110 border-indigo-600' : 'border-black/10 hover:scale-105'}`}
+                  <button key={c._id} title={c.name} onClick={() => setActiveStyle({ color: c.meta.hex })}
+                    className={`h-9 w-9 rounded-full border-2 transition ${activeStyle.color === c.meta.hex ? 'scale-110 border-indigo-600' : 'border-black/10 hover:scale-105'}`}
                     style={{ background: c.meta.hex }} />
                 ))}
               </div>

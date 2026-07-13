@@ -157,13 +157,22 @@ export default function TemplateCanvasBuilder({
     if (!fc) return;
     if (symRef.current) { fc.remove(symRef.current); symRef.current = null; }
     if (!symbol) { fc.requestRenderAll(); return; }
-    const box = (symbol.scale ?? 0.2) * W;
+    // Sanitize (older templates may have NaN/undefined values).
+    const num = (v, d) => (Number.isFinite(Number(v)) ? Number(v) : d);
+    const sScale = num(symbol.scale, 0.2), sX = num(symbol.x, 0.5), sY = num(symbol.y, 0.2);
+    const box = sScale * W;
 
     const place = (obj, baseW) => {
       const s = box / (baseW || 100);
+      // Clamp the centre so the symbol is never cut off by the canvas edges.
+      const halfW = ((obj.width || 100) * s) / 2;
+      const halfH = ((obj.height || 100) * s) / 2;
+      const m = 4;
+      const cx = Math.min(Math.max(sX * W, halfW + m), W - halfW - m);
+      const cy = Math.min(Math.max(sY * H, halfH + m), H - halfH - m);
       obj.set({
-        left: (symbol.x ?? 0.5) * W,
-        top: (symbol.y ?? 0.2) * H,
+        left: cx,
+        top: cy,
         originX: 'center',
         originY: 'center',
         scaleX: s,
@@ -181,16 +190,18 @@ export default function TemplateCanvasBuilder({
       fc.requestRenderAll();
     };
 
-    if (symbolPreviewUrl) {
-      fabric.FabricImage.fromURL(symbolPreviewUrl, { crossOrigin: 'anonymous' })
-        .then((img) => place(img, Math.max(img.width || 100, img.height || 100)))
-        .catch(() => {});
-    } else {
-      const rect = new fabric.Rect({
-        width: 100, height: 100, rx: 14, ry: 14,
-        fill: 'rgba(79,70,229,0.10)', stroke: '#4f46e5', strokeDashArray: [6, 4], strokeWidth: 2,
-      });
+    // Always show SOMETHING the admin can position — the symbol image if it
+    // loads, otherwise a labelled dashed placeholder.
+    const placeholder = () => {
+      const rect = new fabric.Rect({ width: 100, height: 100, rx: 14, ry: 14, fill: 'rgba(79,70,229,0.12)', stroke: '#4f46e5', strokeDashArray: [6, 4], strokeWidth: 2 });
       place(rect, 100);
+    };
+    if (symbolPreviewUrl) {
+      fabric.FabricImage.fromURL(symbolPreviewUrl)
+        .then((img) => { if (img && (img.width || img.height)) place(img, Math.max(img.width || 100, img.height || 100)); else placeholder(); })
+        .catch(placeholder);
+    } else {
+      placeholder();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [symbol?.x, symbol?.y, symbol?.scale, symbolPreviewUrl, H]);

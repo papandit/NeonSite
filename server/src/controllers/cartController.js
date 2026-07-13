@@ -205,6 +205,7 @@ export const addNameplateItem = asyncHandler(async (req, res) => {
       templateName: template.name,
       fields: design.fields || {},
       selections: enrichedSelections,
+      fieldStyles: design.fieldStyles || {}, // per-field { fontFamily, colorHex } chosen by the customer
       elements: enrichedElements,
       canvas,
     },
