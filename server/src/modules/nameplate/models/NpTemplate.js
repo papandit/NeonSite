@@ -74,6 +74,9 @@ const NpTemplateSchema = new Schema(
     compareAtPricePaise: paiseField({ default: 0 }),
     status: { type: String, enum: ['active', 'draft', 'hidden'], default: 'draft', index: true },
 
+    // Whether this template offers a symbol at all. When false the builder shows
+    // no symbol slot and the storefront hides the "Choose symbol" picker.
+    symbolEnabled: { type: Boolean, default: true },
     // Placement of the customer-chosen symbol on the plate (normalized 0..1).
     // symbolScale = symbol box as a fraction of plate width (aspect preserved).
     symbolScale: { type: Number, default: 0.2, min: 0.02, max: 1 },

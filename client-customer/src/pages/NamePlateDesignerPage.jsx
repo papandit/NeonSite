@@ -322,8 +322,8 @@ export default function NamePlateDesignerPage() {
             </div>
           )}
 
-          {/* Choose Symbol (elements + icons) */}
-          {symbols.length > 0 && (
+          {/* Choose Symbol (elements + icons) — only when the template offers one */}
+          {template.symbolEnabled !== false && symbols.length > 0 && (
             <div className="rounded-2xl border border-gray-200 bg-white p-5">
               <h3 className="text-xs font-semibold uppercase tracking-wide text-indigo-600">Choose symbol</h3>
               <div className="mt-3 grid grid-cols-5 gap-2 sm:grid-cols-6">

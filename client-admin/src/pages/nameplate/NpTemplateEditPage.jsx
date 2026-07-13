@@ -47,7 +47,7 @@ const empty = () => ({
   name: '', category: '', status: 'draft',
   previewImageUrl: '', basePlateImageUrl: '', transparentPngUrl: '',
   widthMm: 300, heightMm: 150, baseRupees: 0, compareRupees: '',
-  symbolScale: 0.2, symbolX: 0.5, symbolY: 0.2,
+  symbolEnabled: true, symbolScale: 0.2, symbolX: 0.5, symbolY: 0.2,
   textFields: [], ...Object.fromEntries(ALLOW_KINDS.map(([, a]) => [a, []])),
 });
 
@@ -82,6 +82,7 @@ export default function NpTemplateEditPage() {
           previewImageUrl: t.previewImageUrl || '', basePlateImageUrl: t.basePlateImageUrl || '', transparentPngUrl: t.transparentPngUrl || '',
           widthMm: t.widthMm, heightMm: t.heightMm, baseRupees: paiseToRupees(t.basePricePaise),
           compareRupees: t.compareAtPricePaise ? paiseToRupees(t.compareAtPricePaise) : '',
+          symbolEnabled: t.symbolEnabled !== false,
           symbolScale: t.symbolScale ?? 0.2, symbolX: t.symbolX ?? 0.5, symbolY: t.symbolY ?? 0.2,
           textFields: (t.textFields || []).map((f) => ({ ...emptyField(), ...f })),
           ...Object.fromEntries(ALLOW_KINDS.map(([, a]) => [a, (t[a] || []).map(String)])),
@@ -120,6 +121,7 @@ export default function NpTemplateEditPage() {
         widthMm: Number(tpl.widthMm), heightMm: Number(tpl.heightMm),
         basePricePaise: rupeesToPaise(tpl.baseRupees || 0),
         compareAtPricePaise: tpl.compareRupees ? rupeesToPaise(tpl.compareRupees) : 0,
+        symbolEnabled: Boolean(tpl.symbolEnabled),
         symbolScale: Number(tpl.symbolScale) || 0.2, symbolX: Number(tpl.symbolX), symbolY: Number(tpl.symbolY),
         textFields: tpl.textFields.filter((f) => f.key && f.label),
         ...Object.fromEntries(ALLOW_KINDS.map(([, a]) => [a, tpl[a]])),
@@ -192,7 +194,7 @@ export default function NpTemplateEditPage() {
             aspect={(Number(tpl.heightMm) || 150) / (Number(tpl.widthMm) || 300)}
             fields={tpl.textFields}
             onFieldChange={(i, patch) => updField(i, patch)}
-            symbol={{ x: Number(tpl.symbolX), y: Number(tpl.symbolY), scale: Number(tpl.symbolScale) }}
+            symbol={tpl.symbolEnabled ? { x: Number(tpl.symbolX), y: Number(tpl.symbolY), scale: Number(tpl.symbolScale) } : null}
             onSymbolChange={(p) => setTpl((t) => ({ ...t, symbolX: p.x ?? t.symbolX, symbolY: p.y ?? t.symbolY, symbolScale: p.scale ?? t.symbolScale }))}
             symbolPreviewUrl={optionImg((options.elements || [])[0]) || optionImg((options.shapes || [])[0])}
           />
@@ -200,8 +202,19 @@ export default function NpTemplateEditPage() {
 
         {/* Symbol placement */}
         <section className="rounded-xl border border-slate-200 bg-white p-5">
-          <h3 className="mb-1 font-semibold">Symbol placement</h3>
-          <p className="mb-4 text-xs text-slate-400">Controls how the customer-chosen symbol sits on this plate — it always fits its box keeping its shape. Manage the symbols themselves under <span className="font-medium text-slate-500">Name Plate Studio → Elements / Icons</span>.</p>
+          <div className="mb-1 flex items-center justify-between">
+            <h3 className="font-semibold">Symbol</h3>
+            <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-600">
+              <input type="checkbox" checked={tpl.symbolEnabled} onChange={(e) => set('symbolEnabled', e.target.checked)} className="h-4 w-4 rounded border-slate-300" />
+              Offer a symbol on this plate
+            </label>
+          </div>
+          <p className="mb-4 text-xs text-slate-400">
+            {tpl.symbolEnabled
+              ? <>Sets where the customer-chosen symbol sits — it always fits its box keeping its shape. Manage the symbols under <span className="font-medium text-slate-500">Name Plate Studio → Elements / Icons</span>.</>
+              : 'No symbol slot — this plate is text-only. Turn it on to let customers add a symbol.'}
+          </p>
+          {tpl.symbolEnabled && (
           <div className="grid gap-5 sm:grid-cols-3">
             <div>
               <label className="flex items-center justify-between text-sm font-medium text-slate-700">Size <span className="text-xs text-slate-400">{Math.round((Number(tpl.symbolScale) || 0.2) * 100)}% of width</span></label>
@@ -216,6 +229,7 @@ export default function NpTemplateEditPage() {
               <input type="range" min="0" max="1" step="0.01" value={tpl.symbolY} onChange={(e) => set('symbolY', Number(e.target.value))} className="mt-2 w-full accent-indigo-600" />
             </div>
           </div>
+          )}
         </section>
 
         {/* Text fields */}
