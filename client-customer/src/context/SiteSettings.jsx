@@ -50,6 +50,13 @@ export const DEFAULT_CONTENT = {
     ctaText: 'Design your neon',
     ctaLink: '/neon',
   },
+  videoNameplate: {
+    heading: 'How we make your name plate',
+    subheading: 'From a blank plate to your finished design — cut, engraved and finished, ready to mount.',
+    url: '/nameplate-studio.mp4',
+    ctaText: 'Design your name plate',
+    ctaLink: '/nameplates',
+  },
   promo: {
     heading: 'Ready to design yours?',
     subheading: 'Create a one-of-a-kind name plate in minutes — or grab a ready design as-is.',
@@ -93,6 +100,7 @@ function withDefaults(data) {
       testimonials: c.testimonials?.length ? c.testimonials : DEFAULT_CONTENT.testimonials,
       faqs: c.faqs?.length ? c.faqs : DEFAULT_CONTENT.faqs,
       video: { ...DEFAULT_CONTENT.video, ...(c.video || {}) },
+      videoNameplate: { ...DEFAULT_CONTENT.videoNameplate, ...(c.videoNameplate || {}) },
       promo: { ...DEFAULT_CONTENT.promo, ...(c.promo || {}) },
       newsletter: { ...DEFAULT_CONTENT.newsletter, ...(c.newsletter || {}) },
       footer: { ...DEFAULT_CONTENT.footer, ...(c.footer || {}) },

@@ -21,6 +21,38 @@ const FEATURE_TINTS = [
   'from-rose-50 to-pink-50',
 ];
 
+// A "behind the craft" video showcase (heading, video, CTA). Admin-editable copy.
+function VideoShowcase({ video, badge, reverse = false }) {
+  if (!video?.url) return null;
+  return (
+    <section className={`px-4 py-16 ${reverse ? 'bg-linear-to-b from-white to-parchment' : 'bg-linear-to-b from-parchment to-white'}`}>
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
+        className="mx-auto max-w-5xl"
+      >
+        <div className="text-center">
+          <span className="inline-block rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-indigo-600">{badge}</span>
+          <h2 className="mt-3 text-2xl font-bold sm:text-3xl">{video.heading}</h2>
+          {video.subheading && <p className="mx-auto mt-2 max-w-2xl text-gray-500">{video.subheading}</p>}
+        </div>
+        <div className="mt-8 overflow-hidden rounded-3xl border border-gray-200 bg-black shadow-2xl ring-1 ring-black/5">
+          <video src={video.url} className="aspect-video w-full object-cover" controls playsInline autoPlay muted loop preload="metadata" />
+        </div>
+        {video.ctaText && (
+          <div className="mt-6 text-center">
+            <Link to={video.ctaLink || '/'} className="inline-block rounded-full bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-indigo-700">
+              {video.ctaText}
+            </Link>
+          </div>
+        )}
+      </motion.div>
+    </section>
+  );
+}
+
 function Section({ title, subtitle, children, cta }) {
   return (
     <section className="mx-auto max-w-6xl px-4 py-12">
@@ -209,43 +241,9 @@ export default function HomePage() {
         </Section>
       )}
 
-      {/* How it's made — video */}
-      {c.video?.url && (
-        <section className="bg-linear-to-b from-parchment to-white px-4 py-16">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.6, ease: 'easeOut' }}
-            className="mx-auto max-w-5xl"
-          >
-            <div className="text-center">
-              <span className="inline-block rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-indigo-600">Behind the craft</span>
-              <h2 className="mt-3 text-2xl font-bold sm:text-3xl">{c.video.heading}</h2>
-              {c.video.subheading && <p className="mx-auto mt-2 max-w-2xl text-gray-500">{c.video.subheading}</p>}
-            </div>
-            <div className="group mt-8 overflow-hidden rounded-3xl border border-gray-200 bg-black shadow-2xl ring-1 ring-black/5">
-              <video
-                src={c.video.url}
-                className="aspect-video w-full object-cover"
-                controls
-                playsInline
-                autoPlay
-                muted
-                loop
-                preload="metadata"
-              />
-            </div>
-            {c.video.ctaText && (
-              <div className="mt-6 text-center">
-                <Link to={c.video.ctaLink || '/neon'} className="inline-block rounded-full bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-indigo-700">
-                  {c.video.ctaText}
-                </Link>
-              </div>
-            )}
-          </motion.div>
-        </section>
-      )}
+      {/* How it's made — videos (neon + name plate), admin-editable */}
+      <VideoShowcase video={c.video} badge="Behind the craft · Neon" />
+      <VideoShowcase video={c.videoNameplate} badge="Behind the craft · Name plates" reverse />
 
       {/* Promo — light, modern, animated */}
       <section className="bg-linear-to-b from-white to-[#f4ece1] px-4 py-16">

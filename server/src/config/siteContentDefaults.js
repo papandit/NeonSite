@@ -49,6 +49,13 @@ export const DEFAULT_SITE_CONTENT = {
     ctaText: 'Design your neon',
     ctaLink: '/neon',
   },
+  videoNameplate: {
+    heading: 'How we make your name plate',
+    subheading: 'From a blank plate to your finished design — cut, engraved and finished, ready to mount.',
+    url: '/nameplate-studio.mp4',
+    ctaText: 'Design your name plate',
+    ctaLink: '/nameplates',
+  },
   promo: {
     heading: 'Ready to design yours?',
     subheading: 'Create a one-of-a-kind name plate in minutes — or grab a ready design as-is.',
@@ -81,6 +88,7 @@ export function mergeSiteContent(stored = {}) {
     testimonials: Array.isArray(s.testimonials) && s.testimonials.length ? s.testimonials : d.testimonials,
     faqs: Array.isArray(s.faqs) && s.faqs.length ? s.faqs : d.faqs,
     video: { ...d.video, ...(s.video || {}) },
+    videoNameplate: { ...d.videoNameplate, ...(s.videoNameplate || {}) },
     promo: { ...d.promo, ...(s.promo || {}) },
     newsletter: { ...d.newsletter, ...(s.newsletter || {}) },
     footer: { ...d.footer, ...(s.footer || {}) },

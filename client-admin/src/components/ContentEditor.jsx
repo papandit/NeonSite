@@ -16,6 +16,7 @@ const EMPTY = {
   testimonials: [],
   faqs: [],
   video: { heading: '', subheading: '', url: '', ctaText: '', ctaLink: '' },
+  videoNameplate: { heading: '', subheading: '', url: '', ctaText: '', ctaLink: '' },
   promo: { heading: '', subheading: '', ctaText: '' },
   newsletter: { heading: '', subheading: '' },
   footer: { about: '', tagline: '' },
@@ -246,13 +247,23 @@ export default function ContentEditor() {
         ]}
       />
 
-      <Card title="Video section" description="The 'Behind the craft' video on the home page. Leave the URL blank to hide the whole section.">
+      <Card title="Neon video section" description="The neon 'Behind the craft' video on the home page. Leave the URL blank to hide it.">
         <Field label="Heading" value={content.video?.heading} onChange={(v) => setNested('video', 'heading', v)} />
         <Field label="Subheading" value={content.video?.subheading} textarea onChange={(v) => setNested('video', 'subheading', v)} />
         <Field label="Video URL" value={content.video?.url} placeholder="/neon-studio.mp4 or a hosted .mp4 URL" onChange={(v) => setNested('video', 'url', v)} />
         <div className="grid gap-3 sm:grid-cols-2">
           <Field label="Button text" value={content.video?.ctaText} onChange={(v) => setNested('video', 'ctaText', v)} />
           <Field label="Button link" value={content.video?.ctaLink} placeholder="/neon" onChange={(v) => setNested('video', 'ctaLink', v)} />
+        </div>
+      </Card>
+
+      <Card title="Name plate video section" description="The name-plate 'Behind the craft' video on the home page. Leave the URL blank to hide it.">
+        <Field label="Heading" value={content.videoNameplate?.heading} onChange={(v) => setNested('videoNameplate', 'heading', v)} />
+        <Field label="Subheading" value={content.videoNameplate?.subheading} textarea onChange={(v) => setNested('videoNameplate', 'subheading', v)} />
+        <Field label="Video URL" value={content.videoNameplate?.url} placeholder="/nameplate-studio.mp4 or a hosted .mp4 URL" onChange={(v) => setNested('videoNameplate', 'url', v)} />
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field label="Button text" value={content.videoNameplate?.ctaText} onChange={(v) => setNested('videoNameplate', 'ctaText', v)} />
+          <Field label="Button link" value={content.videoNameplate?.ctaLink} placeholder="/nameplates" onChange={(v) => setNested('videoNameplate', 'ctaLink', v)} />
         </div>
       </Card>
 
