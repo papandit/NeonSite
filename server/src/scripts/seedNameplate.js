@@ -9,6 +9,7 @@
 import { connectDB, disconnectDB } from '../db/connect.js';
 import { NpCategory, NpFont, NpColor, NpElement } from '../modules/nameplate/registry.js';
 import NpTemplate from '../modules/nameplate/models/NpTemplate.js';
+import slugify from '../utils/slugify.js';
 
 const r = (rupees) => Math.round(rupees * 100);
 const dataUri = (svg) => `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
@@ -81,11 +82,21 @@ const field = (over) => ({
 async function run() {
   await connectDB();
 
-  // Categories
-  const catDefs = ['Wooden Name Plates', 'Acrylic Name Plates', 'Villa Name Plates', 'Office Name Plates', 'LED Name Plates', 'Apartment Name Plates'];
+  // Categories — the 15-strong name-plate collection (replaces the old set).
+  await NpCategory.deleteMany({ name: { $in: ['Wooden Name Plates', 'Acrylic Name Plates', 'Villa Name Plates', 'Office Name Plates', 'LED Name Plates', 'Apartment Name Plates'] } });
+  const catDefs = [
+    'Metal Outdoor', 'Wooden', 'Acrylic', 'Resin', 'Modern', 'For Office',
+    'With Pets', 'With Lights', 'For Desk', 'For Villas', 'Indian Languages',
+    'For Couples', 'Family of 3-4', 'Religious Themes', 'Cute Caricature',
+  ];
   const cats = {};
-  for (const name of catDefs) {
-    cats[name] = await NpCategory.findOneAndUpdate({ name }, { $setOnInsert: { name, status: 'active' } }, { new: true, upsert: true, setDefaultsOnInsert: true });
+  for (let i = 0; i < catDefs.length; i++) {
+    const name = catDefs[i];
+    cats[name] = await NpCategory.findOneAndUpdate(
+      { name },
+      { $setOnInsert: { name, status: 'active' }, $set: { sortOrder: i, slug: slugify(name) } },
+      { new: true, upsert: true, setDefaultsOnInsert: true },
+    );
   }
 
   // Fonts — the full catalogue (all families are preloaded in the customer app).
@@ -129,21 +140,21 @@ async function run() {
   // Templates (wipe the seeded set, recreate)
   await NpTemplate.deleteMany({ slug: /^seed-np-/ });
   const TEMPLATES = [
-    { key: 'wood', name: 'Classic Wooden Family Plate', cat: 'Wooden Name Plates', w: 600, h: 300, price: 1299,
+    { key: 'wood', name: 'Classic Wooden Family Plate', cat: 'Wooden', w: 600, h: 300, price: 1299,
       fields: [field({ key: 'welcome', label: 'Welcome text', defaultValue: 'WELCOME', y: 0.24, defaultSizePx: 26, defaultColorHex: '#f0d9ad', defaultFontFamily: 'Bebas Neue' }),
                field({ key: 'family', label: 'Family name', required: true, defaultValue: 'The Sharma Family', y: 0.55, defaultSizePx: 46, defaultColorHex: '#3a2b1d', defaultFontFamily: 'Fraunces' })] },
-    { key: 'acrylic', name: 'Modern Acrylic Nameplate', cat: 'Acrylic Name Plates', w: 600, h: 300, price: 1499,
+    { key: 'acrylic', name: 'Modern Acrylic Nameplate', cat: 'Acrylic', w: 600, h: 300, price: 1499,
       fields: [field({ key: 'name', label: 'Name', required: true, defaultValue: 'AARAV MEHTA', y: 0.46, defaultSizePx: 48, defaultColorHex: '#1a2a38', defaultFontFamily: 'Bebas Neue' }),
                field({ key: 'subtitle', label: 'Subtitle', defaultValue: 'Architect', y: 0.68, defaultSizePx: 24, defaultColorHex: '#3a566b', defaultFontFamily: 'Nunito' })] },
-    { key: 'villa', plate: 'marble', name: 'Luxury Villa Marble Plate', cat: 'Villa Name Plates', w: 600, h: 400, price: 2499,
+    { key: 'villa', plate: 'marble', name: 'Luxury Villa Marble Plate', cat: 'For Villas', w: 600, h: 400, price: 2499,
       fields: [field({ key: 'villa', label: 'Villa name', required: true, defaultValue: 'Villa Serene', y: 0.44, defaultSizePx: 52, defaultColorHex: '#7c5a1e', defaultFontFamily: 'Great Vibes' }),
                field({ key: 'house', label: 'House number', defaultValue: 'No. 24', y: 0.66, defaultSizePx: 30, defaultColorHex: '#3a2b1d', defaultFontFamily: 'Fraunces' })] },
-    { key: 'office', plate: 'slate', name: 'Minimal Office Desk Plate', cat: 'Office Name Plates', w: 600, h: 200, price: 1099,
+    { key: 'office', plate: 'slate', name: 'Minimal Office Desk Plate', cat: 'For Office', w: 600, h: 200, price: 1099,
       fields: [field({ key: 'name', label: 'Name', required: true, defaultValue: 'Dr. A. Verma', y: 0.42, defaultSizePx: 40, defaultColorHex: '#f4ece1', defaultFontFamily: 'Fraunces' }),
                field({ key: 'title', label: 'Designation', defaultValue: 'Cardiologist', y: 0.7, defaultSizePx: 22, defaultColorHex: '#d4541f', defaultFontFamily: 'Nunito' })] },
-    { key: 'led', name: 'LED Neon Glow Nameplate', cat: 'LED Name Plates', w: 600, h: 300, price: 2999,
+    { key: 'led', name: 'LED Neon Glow Nameplate', cat: 'With Lights', w: 600, h: 300, price: 2999,
       fields: [field({ key: 'name', label: 'Name', required: true, defaultValue: 'The Kapoors', y: 0.5, defaultSizePx: 54, defaultColorHex: '#ffc9e6', defaultFontFamily: 'Pacifico' })] },
-    { key: 'steel', name: 'Brushed Steel Apartment Plate', cat: 'Apartment Name Plates', w: 520, h: 360, price: 1699,
+    { key: 'steel', name: 'Brushed Steel Apartment Plate', cat: 'Modern', w: 520, h: 360, price: 1699,
       fields: [field({ key: 'flat', label: 'Flat number', required: true, defaultValue: 'B-302', y: 0.4, defaultSizePx: 60, defaultColorHex: '#20252c', defaultFontFamily: 'Bebas Neue' }),
                field({ key: 'family', label: 'Family name', defaultValue: 'Nair', y: 0.66, defaultSizePx: 30, defaultColorHex: '#3a3f45', defaultFontFamily: 'Fraunces' })] },
   ];

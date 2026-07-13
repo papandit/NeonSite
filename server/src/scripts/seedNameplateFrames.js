@@ -7,6 +7,7 @@
 
 import { connectDB, disconnectDB } from '../db/connect.js';
 import { NpCategory } from '../modules/nameplate/registry.js';
+import slugify from '../utils/slugify.js';
 import NpTemplate from '../modules/nameplate/models/NpTemplate.js';
 
 const r = (rupees) => Math.round(rupees * 100);
@@ -59,9 +60,9 @@ const field = (over) => ({
 
 async function run() {
   await connectDB();
-  const cat = async (name) => (await NpCategory.findOneAndUpdate({ name }, { $setOnInsert: { name, status: 'active' } }, { new: true, upsert: true, setDefaultsOnInsert: true }))._id;
-  const weddingCat = await cat('Villa Name Plates');
-  const familyCat = await cat('Wooden Name Plates');
+  const cat = async (name) => (await NpCategory.findOneAndUpdate({ name }, { $setOnInsert: { name, status: 'active' }, $set: { slug: slugify(name) } }, { new: true, upsert: true, setDefaultsOnInsert: true }))._id;
+  const weddingCat = await cat('For Couples');
+  const familyCat = await cat('Family of 3-4');
 
   const TEMPLATES = [
     {

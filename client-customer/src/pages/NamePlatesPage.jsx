@@ -31,13 +31,34 @@ export default function NamePlatesPage() {
         <p className="mt-2 text-gray-500">Pick a template and make it yours — live preview, crafted to order.</p>
       </div>
 
-      {/* Category filter */}
+      {/* Category selection — circular tiles (scroll for more) */}
       {cats.length > 0 && (
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <button onClick={() => setParams({})} className={`rounded-full border px-4 py-1.5 text-sm font-medium transition ${!category ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}>All</button>
-          {cats.map((c) => (
-            <button key={c._id} onClick={() => setParams({ category: c.slug })} className={`rounded-full border px-4 py-1.5 text-sm font-medium transition ${category === c.slug ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}>{c.name}</button>
-          ))}
+        <div className="mt-8 flex gap-4 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:gap-5">
+          {[{ _id: '__all', name: 'All', slug: '' }, ...cats].map((c) => {
+            const active = c.slug ? category === c.slug : !category;
+            const img = c.meta?.image;
+            return (
+              <button
+                key={c._id}
+                type="button"
+                onClick={() => setParams(c.slug ? { category: c.slug } : {})}
+                className="group flex w-20 shrink-0 flex-col items-center gap-2 text-center sm:w-24"
+              >
+                <span className={`flex aspect-square w-full items-center justify-center overflow-hidden rounded-full ring-4 transition duration-300 group-hover:-translate-y-1 ${active ? 'ring-indigo-500 shadow-lg' : 'ring-white shadow-md group-hover:ring-indigo-100'}`}>
+                  {img ? (
+                    <img src={img} alt={c.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-110" />
+                  ) : (
+                    <span className="flex h-full w-full items-center justify-center bg-linear-to-br from-indigo-100 via-white to-amber-100 font-display text-2xl text-indigo-500 sm:text-3xl">
+                      {c.name === 'All' ? '✦' : c.name.charAt(0)}
+                    </span>
+                  )}
+                </span>
+                <span className={`text-xs font-semibold leading-tight transition sm:text-sm ${active ? 'text-indigo-600' : 'text-gray-700 group-hover:text-indigo-600'}`}>
+                  {c.name}
+                </span>
+              </button>
+            );
+          })}
         </div>
       )}
 
