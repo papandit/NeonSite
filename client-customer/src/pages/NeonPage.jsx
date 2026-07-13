@@ -121,17 +121,16 @@ export default function NeonPage() {
 
   const tubeMeters = sizeObj ? charCount * (sizeObj.cm / 60) * 0.22 * (fontObj?.script ? 1.25 : 1) : 0;
 
-  // Real-world dimensions: height from the admin's per-size heightCm (falls back
-  // to the font size); width tracks the actual text, or the admin's per-char cm.
+  // Real-world dimensions come straight from the selected size (height × length),
+  // so the preview matches the size chip exactly. If the admin set a per-character
+  // width, the length grows with the text instead.
   const lines = (text || ' ').split('\n');
   const lineCm = sizeObj ? (sizeObj.heightCm > 0 ? sizeObj.heightCm : Math.max(1, Math.round(sizeObj.fontSizePx * 0.33))) : 15;
   const heightCm = lineCm * lines.length;
   const longestLineChars = Math.max(1, ...lines.map((l) => l.replace(/\s/g, '').length));
-  const widthCm = sizeObj?.perCharCm > 0
-    ? Math.max(1, Math.round(longestLineChars * sizeObj.perCharCm))
-    : box.h > 0
-      ? Math.max(1, Math.round(heightCm * (box.w / box.h)))
-      : Math.max(1, Math.round(heightCm * Math.max(1, charCount * 0.5)));
+  const widthCm = sizeObj
+    ? (sizeObj.perCharCm > 0 ? Math.max(1, Math.round(longestLineChars * sizeObj.perCharCm)) : sizeObj.cm)
+    : 30;
 
   const powerOn = () => {
     setOn(true);
@@ -233,8 +232,8 @@ export default function NeonPage() {
               </div>
             </div>
             <p className="mt-3 text-xs leading-relaxed text-slate-500">
-              Live preview on a laser-cut acrylic backboard. Dimensions track your actual text; toggle day/night and power to
-              see how it reads in a real room.
+              Live preview on a laser-cut acrylic backboard. The dimensions match your selected size; toggle day/night and power
+              to see how it reads in a real room.
             </p>
           </div>
 
