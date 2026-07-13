@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getCategories, getProducts, getRecommendedProducts, getBanners } from '../services/catalog';
@@ -73,6 +73,17 @@ export default function HomePage() {
     if (el) el.scrollBy({ left: dir * el.clientWidth * 0.86, behavior: 'smooth' });
   };
 
+  // Fallback circle image: a real product photo from that category when the
+  // admin hasn't uploaded a category banner.
+  const catImage = useMemo(() => {
+    const map = {};
+    [...recent, ...recommended].forEach((p) => {
+      const cid = String(p.category?._id || p.category || '');
+      if (cid && !map[cid] && p.images?.[0]) map[cid] = p.images[0];
+    });
+    return map;
+  }, [recent, recommended]);
+
   useEffect(() => { load(); }, [load]);
   // Live sync: refetch when the admin changes the catalog.
   useLiveCatalog(load);
@@ -145,26 +156,29 @@ export default function HomePage() {
               ref={catScroll}
               className="flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth px-2 pb-3 sm:px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             >
-              {categories.map((c) => (
-                <Link
-                  key={c._id}
-                  to={`/products?category=${c.slug}`}
-                  className="group flex shrink-0 basis-[70%] snap-start flex-col items-center gap-4 text-center sm:basis-[38%] md:basis-[28%] lg:basis-[calc((100%-7.5rem)/5.5)]"
-                >
-                  <div className="aspect-square w-full overflow-hidden rounded-full border border-gray-200 bg-white shadow-sm ring-1 ring-transparent transition group-hover:shadow-lg group-hover:ring-indigo-200">
-                    {c.banner ? (
-                      <img src={c.banner} alt={c.name} className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-indigo-50 font-display text-6xl text-indigo-600">
-                        {c.name?.charAt(0)}
-                      </div>
-                    )}
-                  </div>
-                  <span className="font-display text-lg font-medium text-gray-800 transition group-hover:text-indigo-600">
-                    {c.name}
-                  </span>
-                </Link>
-              ))}
+              {categories.map((c) => {
+                const img = c.banner || catImage[String(c._id)];
+                return (
+                  <Link
+                    key={c._id}
+                    to={`/products?category=${c.slug}`}
+                    className="group flex shrink-0 basis-[70%] snap-start flex-col items-center gap-4 text-center sm:basis-[38%] md:basis-[28%] lg:basis-[calc((100%-7.5rem)/5.5)]"
+                  >
+                    <div className="aspect-square w-full overflow-hidden rounded-full bg-white shadow-md ring-4 ring-white transition duration-300 group-hover:-translate-y-1.5 group-hover:shadow-xl group-hover:ring-indigo-100">
+                      {img ? (
+                        <img src={img} alt={c.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-110" />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-indigo-100 via-white to-amber-100 font-display text-6xl text-indigo-500">
+                          {c.name?.charAt(0)}
+                        </div>
+                      )}
+                    </div>
+                    <span className="font-display text-base font-semibold text-gray-800 transition group-hover:text-indigo-600 sm:text-lg">
+                      {c.name}
+                    </span>
+                  </Link>
+                );
+              })}
             </div>
             <button
               onClick={() => scrollCats(1)}
