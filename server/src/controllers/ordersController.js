@@ -9,14 +9,18 @@ import { generateInvoiceBuffer } from '../services/invoice/generateInvoice.js';
 
 // GET /api/orders  (own, summaries)
 export const listMyOrders = asyncHandler(async (req, res) => {
-  const orders = await Order.find({ user: req.user.id }).sort('-createdAt').lean({ virtuals: true });
+  const orders = await Order.find({ user: req.user.id })
+    .sort('-createdAt')
+    .populate('items.product', 'images')
+    .lean({ virtuals: true });
   const summaries = orders.map((o) => ({
     _id: o._id,
     orderNumber: o.orderNumber,
     totalPaise: o.totalPaise,
     itemCount: o.items.reduce((n, it) => n + it.quantity, 0),
     status: o.statusHistory?.[o.statusHistory.length - 1]?.status,
-    previewImageUrl: o.items?.[0]?.previewImageUrl || null,
+    // Design preview first, else the product's own image.
+    previewImageUrl: o.items?.[0]?.previewImageUrl || o.items?.[0]?.product?.images?.[0] || null,
     createdAt: o.createdAt,
   }));
   return sendSuccess(res, summaries);
