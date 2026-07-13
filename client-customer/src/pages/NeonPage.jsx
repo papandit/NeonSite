@@ -296,14 +296,17 @@ export default function NeonPage() {
 
               {/* size */}
               <div className="mb-6">
-                <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Size &amp; width</div>
+                <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Size (height × length)</div>
                 <div className="flex flex-wrap gap-2">
-                  {cfg.sizes.map((s) => (
-                    <button key={s.key} onClick={() => setSize(s.key)} className={pill(size === s.key)}>
-                      {s.name}<span className="ml-1.5 text-xs text-slate-500">{s.cm}cm</span>
-                      <span className="ml-1.5 text-xs text-indigo-300">{formatPaise(s.basePricePaise)}+</span>
-                    </button>
-                  ))}
+                  {cfg.sizes.map((s) => {
+                    const h = s.heightCm > 0 ? s.heightCm : Math.max(1, Math.round((s.fontSizePx || 46) * 0.33));
+                    return (
+                      <button key={s.key} onClick={() => setSize(s.key)} className={pill(size === s.key)}>
+                        {s.name}<span className="ml-1.5 text-xs text-slate-500">{h} × {s.cm} cm</span>
+                        <span className="ml-1.5 text-xs text-indigo-300">{formatPaise(s.basePricePaise)}+</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 

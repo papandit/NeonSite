@@ -79,7 +79,7 @@ export function quoteNeon(config, spec = {}) {
       charCount,
       font: snap(font, ['key', 'name', 'cssFamily', 'script']),
       color: snap(color, ['key', 'name', 'fill', 'glow']),
-      size: snap(size, ['key', 'name', 'cm', 'fontSizePx', 'basePricePaise', 'perCharPaise']),
+      size: snap(size, ['key', 'name', 'cm', 'heightCm', 'perCharCm', 'fontSizePx', 'basePricePaise', 'perCharPaise']),
       backing: snap(backing, ['key', 'name', 'priceDeltaPaise']),
       adapter: snap(adapter, ['key', 'name', 'priceDeltaPaise']),
       scene: snap(scene, ['key', 'name']),
