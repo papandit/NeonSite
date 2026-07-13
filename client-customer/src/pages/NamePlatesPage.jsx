@@ -31,9 +31,9 @@ export default function NamePlatesPage() {
         <p className="mt-2 text-gray-500">Pick a template and make it yours — live preview, crafted to order.</p>
       </div>
 
-      {/* Category selection — circular tiles (scroll for more) */}
+      {/* Category selection — circular tiles (centres when they fit, scrolls when not) */}
       {cats.length > 0 && (
-        <div className="mt-8 flex gap-4 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:gap-5">
+        <div className="mx-auto mt-8 flex w-fit max-w-full gap-3 overflow-x-auto px-1 pb-2 sm:gap-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {[{ _id: '__all', name: 'All', slug: '' }, ...cats].map((c) => {
             const active = c.slug ? category === c.slug : !category;
             const img = c.meta?.image;
@@ -42,18 +42,18 @@ export default function NamePlatesPage() {
                 key={c._id}
                 type="button"
                 onClick={() => setParams(c.slug ? { category: c.slug } : {})}
-                className="group flex w-20 shrink-0 flex-col items-center gap-2 text-center sm:w-24"
+                className="group flex w-18 shrink-0 flex-col items-center gap-2 text-center sm:w-24"
               >
-                <span className={`flex aspect-square w-full items-center justify-center overflow-hidden rounded-full ring-4 transition duration-300 group-hover:-translate-y-1 ${active ? 'ring-indigo-500 shadow-lg' : 'ring-white shadow-md group-hover:ring-indigo-100'}`}>
+                <span className={`flex aspect-square w-full items-center justify-center overflow-hidden rounded-full transition duration-300 group-hover:-translate-y-1 ${active ? 'shadow-lg ring-2 ring-indigo-500' : 'shadow-sm ring-1 ring-gray-200 group-hover:ring-indigo-300'}`}>
                   {img ? (
                     <img src={img} alt={c.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-110" />
                   ) : (
-                    <span className="flex h-full w-full items-center justify-center bg-linear-to-br from-indigo-100 via-white to-amber-100 font-display text-2xl text-indigo-500 sm:text-3xl">
-                      {c.name === 'All' ? '✦' : c.name.charAt(0)}
+                    <span className={`flex h-full w-full items-center justify-center font-display text-2xl font-semibold sm:text-3xl ${active ? 'bg-linear-to-br from-indigo-500 to-orange-400 text-white' : 'bg-linear-to-br from-orange-50 via-white to-amber-50 text-indigo-500'}`}>
+                      {c.name === 'All' ? '✦' : c.name.charAt(0).toUpperCase()}
                     </span>
                   )}
                 </span>
-                <span className={`text-xs font-semibold leading-tight transition sm:text-sm ${active ? 'text-indigo-600' : 'text-gray-700 group-hover:text-indigo-600'}`}>
+                <span className={`line-clamp-2 min-h-[2.4em] text-[11px] font-semibold leading-tight transition sm:text-xs ${active ? 'text-indigo-600' : 'text-gray-600 group-hover:text-indigo-600'}`}>
                   {c.name}
                 </span>
               </button>

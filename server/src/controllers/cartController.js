@@ -39,6 +39,18 @@ async function enrichNameplateSelections(selections = {}, elements = []) {
   }
   return { selections: sel, elements: enrichedElements };
 }
+
+// Add human-readable font/colour names to each per-field style.
+async function enrichFieldStyles(fieldStyles = {}) {
+  const out = {};
+  for (const [key, st] of Object.entries(fieldStyles || {})) {
+    const e = { ...st };
+    if (st.color && !st.colorName) { const c = await NpColor.findById(st.color).lean().catch(() => null); if (c) e.colorName = c.name; }
+    if (st.font && !st.fontName) { const f = await NpFont.findById(st.font).lean().catch(() => null); if (f) e.fontName = f.name; }
+    out[key] = e;
+  }
+  return out;
+}
 import { getOrCreateCart, serializeCart } from '../services/cart/cartService.js';
 
 async function repriceOrThrow(productId, designDocument) {
@@ -203,9 +215,11 @@ export const addNameplateItem = asyncHandler(async (req, res) => {
       templateId: String(template._id),
       templateSlug: template.slug,
       templateName: template.name,
+      templateWidthMm: template.widthMm,
+      templateHeightMm: template.heightMm,
       fields: design.fields || {},
       selections: enrichedSelections,
-      fieldStyles: design.fieldStyles || {}, // per-field { fontFamily, colorHex } chosen by the customer
+      fieldStyles: await enrichFieldStyles(design.fieldStyles || {}), // per-field font + colour (+ names)
       elements: enrichedElements,
       canvas,
     },

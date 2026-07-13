@@ -41,9 +41,11 @@ function itemDetails(design) {
   if (design.kind === 'nameplate') {
     const n = design.nameplate || {};
     const sel = n.selections || {};
+    const fonts = [...new Set(Object.values(n.fieldStyles || {}).map((s) => s.fontName || s.fontFamily).filter(Boolean))];
+    const size = n.templateWidthMm && n.templateHeightMm ? `${n.templateWidthMm} × ${n.templateHeightMm} mm` : null;
     return {
       text: Object.values(n.fields || {}).filter(Boolean).join(' · '),
-      rows: [['Template', n.templateName], ['Font', sel.fontName || sel.fontFamily]].filter(([, v]) => v),
+      rows: [['Template', n.templateName], ['Font', fonts.length ? fonts.join(', ') : sel.fontName || sel.fontFamily], ['Size', size]].filter(([, v]) => v),
       swatch: sel.colorHex ? { hex: sel.colorHex, name: sel.colorName } : null,
       symbols: (n.elements || []).filter((e) => e?.name || e?.image),
     };
