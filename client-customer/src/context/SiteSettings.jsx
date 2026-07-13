@@ -43,6 +43,13 @@ export const DEFAULT_CONTENT = {
     { q: 'Do you ship across India?', a: 'Yes, we deliver pan-India with tracking. Shipping is free on orders over ₹2000.' },
     { q: 'What is your return policy?', a: 'Because each plate is personalised, we replace items only for manufacturing defects or shipping damage.' },
   ],
+  video: {
+    heading: 'How we craft your neon',
+    subheading: 'Watch a custom neon sign come to life — hand-bent, laser-cut and lit, made to order.',
+    url: '/neon-studio.mp4',
+    ctaText: 'Design your neon',
+    ctaLink: '/neon',
+  },
   promo: {
     heading: 'Ready to design yours?',
     subheading: 'Create a one-of-a-kind name plate in minutes — or grab a ready design as-is.',
@@ -85,6 +92,7 @@ function withDefaults(data) {
       howItWorks: c.howItWorks?.length ? c.howItWorks : DEFAULT_CONTENT.howItWorks,
       testimonials: c.testimonials?.length ? c.testimonials : DEFAULT_CONTENT.testimonials,
       faqs: c.faqs?.length ? c.faqs : DEFAULT_CONTENT.faqs,
+      video: { ...DEFAULT_CONTENT.video, ...(c.video || {}) },
       promo: { ...DEFAULT_CONTENT.promo, ...(c.promo || {}) },
       newsletter: { ...DEFAULT_CONTENT.newsletter, ...(c.newsletter || {}) },
       footer: { ...DEFAULT_CONTENT.footer, ...(c.footer || {}) },

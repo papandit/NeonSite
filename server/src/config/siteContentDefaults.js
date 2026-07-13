@@ -40,6 +40,15 @@ export const DEFAULT_SITE_CONTENT = {
     { q: 'Do you ship across India?', a: 'Yes, we deliver pan-India with tracking. Shipping is free on orders over ₹2000.' },
     { q: 'What is your return policy?', a: 'Because each plate is personalised, we replace items only for manufacturing defects or shipping damage.' },
   ],
+  // "How it's made" video section on the home page. `url` can be a hosted MP4 or
+  // the bundled /neon-studio.mp4. Blank url hides the section.
+  video: {
+    heading: 'How we craft your neon',
+    subheading: 'Watch a custom neon sign come to life — hand-bent, laser-cut and lit, made to order.',
+    url: '/neon-studio.mp4',
+    ctaText: 'Design your neon',
+    ctaLink: '/neon',
+  },
   promo: {
     heading: 'Ready to design yours?',
     subheading: 'Create a one-of-a-kind name plate in minutes — or grab a ready design as-is.',
@@ -71,6 +80,7 @@ export function mergeSiteContent(stored = {}) {
     howItWorks: Array.isArray(s.howItWorks) && s.howItWorks.length ? s.howItWorks : d.howItWorks,
     testimonials: Array.isArray(s.testimonials) && s.testimonials.length ? s.testimonials : d.testimonials,
     faqs: Array.isArray(s.faqs) && s.faqs.length ? s.faqs : d.faqs,
+    video: { ...d.video, ...(s.video || {}) },
     promo: { ...d.promo, ...(s.promo || {}) },
     newsletter: { ...d.newsletter, ...(s.newsletter || {}) },
     footer: { ...d.footer, ...(s.footer || {}) },

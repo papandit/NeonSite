@@ -15,6 +15,7 @@ const EMPTY = {
   howItWorks: [],
   testimonials: [],
   faqs: [],
+  video: { heading: '', subheading: '', url: '', ctaText: '', ctaLink: '' },
   promo: { heading: '', subheading: '', ctaText: '' },
   newsletter: { heading: '', subheading: '' },
   footer: { about: '', tagline: '' },
@@ -244,6 +245,16 @@ export default function ContentEditor() {
           { key: 'a', label: 'Answer', width: 'full', textarea: true },
         ]}
       />
+
+      <Card title="Video section" description="The 'Behind the craft' video on the home page. Leave the URL blank to hide the whole section.">
+        <Field label="Heading" value={content.video?.heading} onChange={(v) => setNested('video', 'heading', v)} />
+        <Field label="Subheading" value={content.video?.subheading} textarea onChange={(v) => setNested('video', 'subheading', v)} />
+        <Field label="Video URL" value={content.video?.url} placeholder="/neon-studio.mp4 or a hosted .mp4 URL" onChange={(v) => setNested('video', 'url', v)} />
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field label="Button text" value={content.video?.ctaText} onChange={(v) => setNested('video', 'ctaText', v)} />
+          <Field label="Button link" value={content.video?.ctaLink} placeholder="/neon" onChange={(v) => setNested('video', 'ctaLink', v)} />
+        </div>
+      </Card>
 
       <Card title="Promo band" description="The coloured call-to-action band.">
         <Field label="Heading" value={content.promo?.heading} onChange={(v) => setNested('promo', 'heading', v)} />
