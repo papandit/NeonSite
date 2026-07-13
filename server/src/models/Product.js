@@ -39,6 +39,13 @@ const ProductSchema = new Schema(
     category: { type: Schema.Types.ObjectId, ref: 'Category', index: true },
     subCategory: { type: Schema.Types.ObjectId, ref: 'SubCategory' },
     description: { type: String, default: '' },
+    // Rich, admin-editable product detail (shown as sections on the product page).
+    // Multiline strings — each non-empty line becomes a bullet / row on render.
+    highlights: { type: String, default: '' },   // short selling points near the price
+    material: { type: String, default: '' },
+    dimensions: { type: String, default: '' },
+    whatsIncluded: { type: String, default: '' }, // one item per line
+    careHandling: { type: String, default: '' },  // one instruction per line
     images: [{ type: String }], // Cloudinary URLs
     colors: { type: [ColorSchema], default: [] }, // buyer-selectable colours
     basePricePaise: paiseField({ required: true }),

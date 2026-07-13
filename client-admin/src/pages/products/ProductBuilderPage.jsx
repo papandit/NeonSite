@@ -51,6 +51,11 @@ export default function ProductBuilderPage() {
             category: product.category?._id || '',
             subCategory: product.subCategory?._id || '',
             description: product.description || '',
+            highlights: product.highlights || '',
+            material: product.material || '',
+            dimensions: product.dimensions || '',
+            whatsIncluded: product.whatsIncluded || '',
+            careHandling: product.careHandling || '',
             priceRupees: paiseToRupees(product.basePricePaise),
             compareRupees: product.compareAtPricePaise ? paiseToRupees(product.compareAtPricePaise) : '',
             status: product.status,
@@ -58,7 +63,7 @@ export default function ProductBuilderPage() {
           setImages(product.images || []);
           setColors(product.colors || []);
         } else {
-          reset({ name: '', category: '', subCategory: '', description: '', priceRupees: 0, compareRupees: '', status: 'active' });
+          reset({ name: '', category: '', subCategory: '', description: '', highlights: '', material: '', dimensions: '', whatsIncluded: '', careHandling: '', priceRupees: 0, compareRupees: '', status: 'active' });
         }
         setError(null);
       } catch (err) {
@@ -92,6 +97,11 @@ export default function ProductBuilderPage() {
         category: values.category || undefined,
         subCategory: values.subCategory || undefined,
         description: values.description,
+        highlights: values.highlights,
+        material: values.material,
+        dimensions: values.dimensions,
+        whatsIncluded: values.whatsIncluded,
+        careHandling: values.careHandling,
         basePricePaise: rupeesToPaise(values.priceRupees),
         compareAtPricePaise: values.compareRupees ? rupeesToPaise(values.compareRupees) : 0,
         status: values.status,
@@ -223,6 +233,33 @@ export default function ProductBuilderPage() {
               <input value={colorName} onChange={(e) => setColorName(e.target.value)} placeholder="e.g. Midnight Black" onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addColor(); } }} className="mt-1 w-48 rounded-md border border-slate-300 px-3 py-2 text-sm" />
             </div>
             <button type="button" onClick={addColor} className="rounded-full bg-slate-800 px-3 py-2 text-sm font-medium text-white hover:bg-slate-900">Add colour</button>
+          </div>
+        </section>
+
+        <section className="rounded-xl border border-slate-200 bg-white p-5">
+          <h3 className="mb-1 font-semibold">Product details</h3>
+          <p className="mb-4 text-xs text-slate-400">Shown as expandable sections on the product page. Put one point per line — each line becomes a bullet.</p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <label className="block text-sm font-medium text-slate-700">Highlights <span className="font-normal text-slate-400">(short points near the price)</span></label>
+              <textarea rows={4} placeholder={'Personalized with your name & title\nMade with durable acrylic & wood\nIncludes 12V/1 Amp adaptor'} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" {...register('highlights')} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700">Material</label>
+              <input placeholder="Acrylic, Wood" className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" {...register('material')} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700">Dimensions</label>
+              <input placeholder="23cm x 5cm x 6cm" className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" {...register('dimensions')} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700">What's included <span className="font-normal text-slate-400">(one per line)</span></label>
+              <textarea rows={3} placeholder={'1 x Desk Name Plate\n1 x 12V / 1 Amp Adaptor'} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" {...register('whatsIncluded')} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700">Care &amp; handling <span className="font-normal text-slate-400">(one per line)</span></label>
+              <textarea rows={3} placeholder={'Wipe it with a damp cloth to clean.\nUse it in covered indoor spaces.'} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" {...register('careHandling')} />
+            </div>
           </div>
         </section>
 

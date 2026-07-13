@@ -8,30 +8,39 @@ import { formatPaise } from '../../utils/money';
 const PIPELINE = ['pending', 'confirmed', 'design_review', 'approved', 'manufacturing', 'packed', 'shipped', 'delivered'];
 const LABEL = (s) => s.replace('_', ' ');
 
-function itemSummary(design) {
-  // Name plate: show the customer's field values + chosen font/colour/symbol.
-  if (design?.kind === 'nameplate') {
+// Everything the customer chose, per product kind (name plate / neon / simple).
+function itemDetails(design) {
+  if (!design) return { text: '', rows: [], swatch: null, symbols: [] };
+  if (design.kind === 'nameplate') {
     const n = design.nameplate || {};
-    const text = Object.entries(n.fields || {}).map(([k, v]) => `${k}: ${v}`).filter((s) => !s.endsWith(': ')).join(' · ');
     const sel = n.selections || {};
-    const parts = [
-      n.templateName && `Template: ${n.templateName}`,
-      sel.fontFamily && `Font: ${sel.fontFamily}`,
-      sel.colorHex && `Colour: ${sel.colorHex}`,
-      (n.elements || []).length && `Symbols: ${(n.elements || []).length}`,
-    ].filter(Boolean);
-    return { options: parts.join(' · '), text, icons: '' };
+    return {
+      text: Object.entries(n.fields || {}).filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`).join(' · '),
+      rows: [['Template', n.templateName], ['Font', sel.fontName || sel.fontFamily]].filter(([, v]) => v),
+      swatch: sel.colorHex ? { hex: sel.colorHex, name: sel.colorName } : null,
+      symbols: (n.elements || []).filter((e) => e?.name || e?.image),
+    };
   }
-  // Neon sign.
-  if (design?.kind === 'neon') {
+  if (design.kind === 'neon') {
     const n = design.neon || {};
-    const options = [n.color?.name, n.font?.name, n.size && `${n.size.name} ${n.size.cm}cm`, n.backing?.name, n.adapter?.name].filter(Boolean).join(', ');
-    return { options, text: n.text || '', icons: '' };
+    return {
+      text: n.text || '',
+      rows: [
+        ['Font', n.font?.name],
+        ['Size', n.size ? `${n.size.name} · ${n.size.cm}cm` : null],
+        ['Backing', n.backing?.name],
+        ['Adapter', n.adapter?.name],
+      ].filter(([, v]) => v),
+      swatch: n.color?.hex ? { hex: n.color.hex, name: n.color.name } : null,
+      symbols: [],
+    };
   }
-  const options = Object.values(design?.selections || {}).map((s) => s?.snapshot?.name).filter(Boolean).join(', ');
-  const text = (design?.text || []).map((t) => `${t.field}: ${t.value}`).filter(Boolean).join(' · ');
-  const icons = (design?.icons || []).map((i) => i?.snapshot?.name).filter(Boolean).join(', ');
-  return { options, text, icons, color: design?.selectedColor || null };
+  return {
+    text: (design.text || []).map((t) => `${t.field}: ${t.value}`).filter(Boolean).join(' · '),
+    rows: Object.values(design.selections || {}).map((s) => s?.snapshot?.name).filter(Boolean).map((v, i) => [`Option ${i + 1}`, v]),
+    swatch: design.selectedColor ? { hex: design.selectedColor.hex, name: design.selectedColor.name } : null,
+    symbols: (design.icons || []).map((ic) => ({ name: ic?.snapshot?.name })).filter((x) => x.name),
+  };
 }
 
 function Stepper({ history }) {
@@ -175,22 +184,39 @@ export default function OrderDetailPage() {
       {/* Items */}
       <div className="space-y-3">
         {order.items.map((it) => {
-          const s = itemSummary(it.designDocument);
+          const d = itemDetails(it.designDocument);
+          const img = it.previewImageUrl || it.product?.images?.[0] || null;
           return (
             <div key={it._id} className="flex gap-4 rounded-xl border border-slate-200 bg-white p-4">
-              <div className="h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-slate-50">
-                {it.previewImageUrl ? <img src={it.previewImageUrl} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-xs text-slate-400">No preview</div>}
+              <div className="h-24 w-24 shrink-0 overflow-hidden rounded-lg border border-slate-100 bg-slate-50">
+                {img ? <img src={img} alt={it.productNameSnapshot || ''} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-xs text-slate-400">No image</div>}
               </div>
               <div className="flex-1 text-sm">
                 <div className="font-medium text-slate-900">{it.productNameSnapshot}</div>
-                {s.text && <div className="text-slate-600">{s.text}</div>}
-                {s.options && <div className="text-xs text-slate-400">Options: {s.options}</div>}
-                {s.icons && <div className="text-xs text-slate-400">Icons: {s.icons}</div>}
-                {s.color && (
-                  <div className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
-                    <span className="font-medium text-slate-600">Colour:</span>
-                    <span className="inline-block h-3.5 w-3.5 rounded-full border border-black/10" style={{ background: s.color.hex }} />
-                    {s.color.name || s.color.hex}
+                {d.text && <div className="text-slate-700">{d.text}</div>}
+                <dl className="mt-1 space-y-0.5 text-xs text-slate-500">
+                  {d.rows.map(([label, value]) => (
+                    <div key={label} className="flex gap-1.5"><dt className="font-medium text-slate-400">{label}:</dt><dd className="text-slate-600">{value}</dd></div>
+                  ))}
+                  {d.swatch && (
+                    <div className="flex items-center gap-1.5">
+                      <dt className="font-medium text-slate-400">Colour:</dt>
+                      <dd className="flex items-center gap-1.5 text-slate-600">
+                        <span className="inline-block h-3.5 w-3.5 rounded-full border border-black/10" style={{ background: d.swatch.hex }} />
+                        {d.swatch.name || d.swatch.hex}
+                      </dd>
+                    </div>
+                  )}
+                </dl>
+                {d.symbols.length > 0 && (
+                  <div className="mt-1 flex flex-wrap items-center gap-2">
+                    <span className="text-xs font-medium text-slate-400">Symbol:</span>
+                    {d.symbols.map((sy, i) => (
+                      <span key={i} className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs text-slate-600">
+                        {sy.image && <img src={sy.image} alt="" className="h-4 w-4 object-contain" />}
+                        {sy.name}
+                      </span>
+                    ))}
                   </div>
                 )}
                 <div className="mt-1 text-xs text-slate-500">Qty {it.quantity} · {formatPaise(it.lineTotalPaise)}</div>

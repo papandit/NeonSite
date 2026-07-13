@@ -63,6 +63,7 @@ export const listOrders = asyncHandler(async (req, res) => {
 export const getOrder = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.id)
     .populate('user', 'name email')
+    .populate('items.product', 'name images')
     .lean({ virtuals: true });
   if (!order) throw ApiError.notFound('Order not found');
   const current = order.statusHistory?.[order.statusHistory.length - 1]?.status;

@@ -35,10 +35,39 @@ function StatusStepper({ statusHistory }) {
   );
 }
 
-function itemSummary(design) {
-  const options = Object.values(design?.selections || {}).map((s) => s?.snapshot?.name).filter(Boolean).join(', ');
-  const text = (design?.text || []).map((t) => t.value).filter(Boolean).join(' · ');
-  return { options, text, color: design?.selectedColor || null };
+// Everything the customer chose, per product kind (name plate / neon / simple).
+function itemDetails(design) {
+  if (!design) return { text: '', rows: [], swatch: null, symbols: [] };
+  if (design.kind === 'nameplate') {
+    const n = design.nameplate || {};
+    const sel = n.selections || {};
+    return {
+      text: Object.values(n.fields || {}).filter(Boolean).join(' · '),
+      rows: [['Template', n.templateName], ['Font', sel.fontName || sel.fontFamily]].filter(([, v]) => v),
+      swatch: sel.colorHex ? { hex: sel.colorHex, name: sel.colorName } : null,
+      symbols: (n.elements || []).filter((e) => e?.name || e?.image),
+    };
+  }
+  if (design.kind === 'neon') {
+    const n = design.neon || {};
+    return {
+      text: n.text || '',
+      rows: [
+        ['Font', n.font?.name],
+        ['Size', n.size ? `${n.size.name} · ${n.size.cm}cm` : null],
+        ['Backing', n.backing?.name],
+        ['Adapter', n.adapter?.name],
+      ].filter(([, v]) => v),
+      swatch: n.color?.hex ? { hex: n.color.hex, name: n.color.name } : null,
+      symbols: [],
+    };
+  }
+  return {
+    text: (design.text || []).map((t) => t.value).filter(Boolean).join(' · '),
+    rows: Object.values(design.selections || {}).map((s) => s?.snapshot?.name).filter(Boolean).map((v, i) => [`Option ${i + 1}`, v]),
+    swatch: design.selectedColor ? { hex: design.selectedColor.hex, name: design.selectedColor.name } : null,
+    symbols: [],
+  };
 }
 
 export default function OrderDetailPage() {
@@ -98,23 +127,48 @@ export default function OrderDetailPage() {
       {/* Items */}
       <div className="space-y-3">
         {order.items.map((it) => {
-          const s = itemSummary(it.designDocument);
+          const d = itemDetails(it.designDocument);
+          const img = it.previewImageUrl || it.product?.images?.[0] || null;
           return (
             <div key={it._id} className="flex gap-4 rounded-xl border border-gray-200 bg-white p-4">
-              <div className="h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-slate-50">
-                {it.previewImageUrl ? <img src={it.previewImageUrl} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-xs text-gray-400">No preview</div>}
+              <div className="h-24 w-24 shrink-0 overflow-hidden rounded-lg border border-gray-100 bg-slate-50">
+                {img ? <img src={img} alt={it.productNameSnapshot || ''} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-xs text-gray-400">No image</div>}
               </div>
               <div className="flex-1">
-                <div className="font-medium">{it.productNameSnapshot}</div>
-                {s.text && <div className="text-sm text-gray-600">“{s.text}”</div>}
-                {s.options && <div className="text-xs text-gray-400">{s.options}</div>}
-                {s.color && (
-                  <div className="mt-1 flex items-center gap-1.5 text-xs text-gray-500">
-                    <span className="inline-block h-3.5 w-3.5 rounded-full border border-black/10" style={{ background: s.color.hex }} />
-                    {s.color.name || s.color.hex}
+                <div className="font-medium text-gray-900">{it.productNameSnapshot}</div>
+                {d.text && <div className="text-sm text-gray-700">“{d.text}”</div>}
+
+                <dl className="mt-1.5 space-y-0.5 text-xs text-gray-500">
+                  {d.rows.map(([label, value]) => (
+                    <div key={label} className="flex gap-1.5">
+                      <dt className="font-medium text-gray-400">{label}:</dt>
+                      <dd className="text-gray-600">{value}</dd>
+                    </div>
+                  ))}
+                  {d.swatch && (
+                    <div className="flex items-center gap-1.5">
+                      <dt className="font-medium text-gray-400">Colour:</dt>
+                      <dd className="flex items-center gap-1.5 text-gray-600">
+                        <span className="inline-block h-3.5 w-3.5 rounded-full border border-black/10" style={{ background: d.swatch.hex }} />
+                        {d.swatch.name || d.swatch.hex}
+                      </dd>
+                    </div>
+                  )}
+                </dl>
+
+                {d.symbols.length > 0 && (
+                  <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                    <span className="text-xs font-medium text-gray-400">Symbol:</span>
+                    {d.symbols.map((sy, i) => (
+                      <span key={i} className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-xs text-gray-600">
+                        {sy.image && <img src={sy.image} alt="" className="h-4 w-4 object-contain" />}
+                        {sy.name}
+                      </span>
+                    ))}
                   </div>
                 )}
-                <div className="mt-1 text-xs text-gray-500">Qty {it.quantity}</div>
+
+                <div className="mt-1.5 text-xs text-gray-500">Qty {it.quantity}</div>
               </div>
               <div className="text-right font-semibold">{formatPaise(it.lineTotalPaise)}</div>
             </div>

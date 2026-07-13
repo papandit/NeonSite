@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getProductBySlug, getRelatedProducts, getRecommendedProducts } from '../services/catalog';
 import { formatPaise } from '../utils/money';
 import { quickAddToCart } from '../store/cartSlice';
@@ -9,6 +10,29 @@ import Rating from '../components/Rating';
 import ProductGrid from '../components/ProductGrid';
 import Reviews from '../components/Reviews';
 import Seo from '../components/Seo';
+
+// Split an admin multiline field into trimmed, non-empty lines.
+const toLines = (s) => (s || '').split('\n').map((x) => x.trim()).filter(Boolean);
+
+// A collapsible detail section (matches the product-page accordions).
+function Accordion({ title, defaultOpen = false, children }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="border-t border-gray-200">
+      <button type="button" onClick={() => setOpen((o) => !o)} className="flex w-full items-center justify-between py-4 text-left">
+        <span className="text-lg font-semibold text-gray-900">{title}</span>
+        <svg className={`h-5 w-5 shrink-0 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 8l4 4 4-4" strokeLinecap="round" strokeLinejoin="round" /></svg>
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.25 }} className="overflow-hidden">
+            <div className="pb-5 text-sm text-gray-600">{children}</div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 export default function ProductDetailPage() {
   const { slug } = useParams();
@@ -91,23 +115,25 @@ export default function ProductDetailPage() {
 
       {/* Intro: gallery + info */}
       <div className="grid gap-8 lg:grid-cols-2">
-        <div>
-          <div className="aspect-square overflow-hidden rounded-xl border border-gray-200 bg-slate-50">
-            {images[activeImage] ? (
-              <img src={images[activeImage]} alt={product.name} className="h-full w-full object-cover" />
-            ) : (
-              <div className="flex h-full items-center justify-center text-gray-400">No image yet</div>
-            )}
-          </div>
+        <div className="flex gap-3">
+          {/* Left vertical thumbnail strip */}
           {images.length > 1 && (
-            <div className="mt-3 flex gap-2">
+            <div className="flex max-h-130 flex-col gap-2 overflow-y-auto pr-0.5">
               {images.map((img, i) => (
-                <button key={i} onClick={() => setActiveImage(i)} className={`h-16 w-16 overflow-hidden rounded-lg border ${i === activeImage ? 'border-indigo-600' : 'border-gray-200'}`}>
+                <button key={i} onClick={() => setActiveImage(i)} className={`h-16 w-16 shrink-0 overflow-hidden rounded-lg border transition ${i === activeImage ? 'border-indigo-600 ring-2 ring-indigo-200' : 'border-gray-200 hover:border-indigo-300'}`}>
                   <img src={img} alt="" className="h-full w-full object-cover" />
                 </button>
               ))}
             </div>
           )}
+          {/* Main image */}
+          <div className="aspect-square flex-1 overflow-hidden rounded-xl border border-gray-200 bg-slate-50">
+            {images[activeImage] ? (
+              <img src={images[activeImage]} alt={product.name} className="h-full w-full object-contain" />
+            ) : (
+              <div className="flex h-full items-center justify-center text-gray-400">No image yet</div>
+            )}
+          </div>
         </div>
 
         <div>
@@ -125,7 +151,18 @@ export default function ProductDetailPage() {
               </>
             )}
           </div>
-          {product.description && <p className="mt-4 text-gray-600">{product.description}</p>}
+          {toLines(product.highlights).length > 0 ? (
+            <ul className="mt-4 space-y-1.5">
+              {toLines(product.highlights).map((h, i) => (
+                <li key={i} className="flex gap-2 text-sm text-gray-600">
+                  <span className="mt-0.5 text-indigo-600">✓</span>
+                  <span>{h}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            product.description && <p className="mt-4 text-gray-600">{product.description}</p>
+          )}
 
           {/* Colour selection */}
           {product.colors?.length > 0 && (
@@ -170,6 +207,49 @@ export default function ProductDetailPage() {
           <p className="mt-3 text-xs text-gray-400">Looking to personalize? Try our <Link to="/nameplates" className="font-medium text-indigo-600 hover:underline">Name Plate Studio</Link> or <Link to="/neon" className="font-medium text-indigo-600 hover:underline">Neon Studio</Link>.</p>
         </div>
       </div>
+
+      {/* Product detail sections (admin-editable) */}
+      {(() => {
+        const descLines = toLines(product.description);
+        const specs = [['Material', product.material], ['Dimensions', product.dimensions]].filter(([, v]) => v);
+        const included = toLines(product.whatsIncluded);
+        const care = toLines(product.careHandling);
+        const hasAny = product.description || specs.length || included.length || care.length;
+        if (!hasAny) return null;
+        return (
+          <section className="mt-12 max-w-3xl">
+            {product.description && (
+              <Accordion title="Description" defaultOpen>
+                {descLines.length > 1 ? (
+                  <ul className="list-disc space-y-1.5 pl-5">{descLines.map((l, i) => <li key={i}>{l}</li>)}</ul>
+                ) : (
+                  <p>{product.description}</p>
+                )}
+              </Accordion>
+            )}
+            {specs.length > 0 && (
+              <Accordion title="Product specifications">
+                <dl className="space-y-1">
+                  {specs.map(([label, value]) => (
+                    <div key={label}>{label}: <span className="text-gray-700">{value}</span></div>
+                  ))}
+                </dl>
+              </Accordion>
+            )}
+            {included.length > 0 && (
+              <Accordion title="What's included">
+                <ul className="space-y-1">{included.map((l, i) => <li key={i}>{l}</li>)}</ul>
+              </Accordion>
+            )}
+            {care.length > 0 && (
+              <Accordion title="Care & handling">
+                <ul className="space-y-1">{care.map((l, i) => <li key={i}>{l}</li>)}</ul>
+              </Accordion>
+            )}
+            <div className="border-t border-gray-200" />
+          </section>
+        );
+      })()}
 
       {/* Reviews */}
       <section className="mt-16">

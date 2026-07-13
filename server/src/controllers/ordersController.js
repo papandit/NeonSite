@@ -24,7 +24,9 @@ export const listMyOrders = asyncHandler(async (req, res) => {
 
 // GET /api/orders/:id  (own, full)
 export const getMyOrder = asyncHandler(async (req, res) => {
-  const order = await Order.findOne({ _id: req.params.id, user: req.user.id }).lean({ virtuals: true });
+  const order = await Order.findOne({ _id: req.params.id, user: req.user.id })
+    .populate('items.product', 'name images')
+    .lean({ virtuals: true });
   if (!order) throw ApiError.notFound('Order not found');
   return sendSuccess(res, order);
 });

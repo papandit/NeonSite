@@ -270,14 +270,16 @@ export default function NeonPage() {
         />
 
         <RowEditor
-          title="Sizes" description="Price = base ₹ + (per-char ₹ × non-space characters). cm is the sign width."
+          title="Sizes" description="Price = base ₹ + (per-char ₹ × non-space characters). Height (cm) = sign height per line (0 = auto from font px). Per-char width (cm) sets length by character count (0 = auto-fit to the text)."
           items={cfg.sizes} onChange={(v) => set('sizes', v)}
-          makeEmpty={() => ({ key: '', name: '', cm: 60, basePricePaise: 260000, perCharPaise: 13000, fontSizePx: 46, active: true })}
+          makeEmpty={() => ({ key: '', name: '', cm: 60, basePricePaise: 260000, perCharPaise: 13000, fontSizePx: 46, heightCm: 15, perCharCm: 0, active: true })}
           addLabel="Add size"
           columns={[
             { key: 'key', label: 'Key', type: 'text' },
             { key: 'name', label: 'Name', type: 'text' },
-            { key: 'cm', label: 'Width (cm)', type: 'number' },
+            { key: 'cm', label: 'Size (cm)', type: 'number' },
+            { key: 'heightCm', label: 'Height (cm)', type: 'number' },
+            { key: 'perCharCm', label: 'Per-char width (cm)', type: 'number' },
             { key: 'basePricePaise', label: 'Base (₹)', type: 'money' },
             { key: 'perCharPaise', label: 'Per char (₹)', type: 'money' },
             { key: 'fontSizePx', label: 'Font px', type: 'number' },

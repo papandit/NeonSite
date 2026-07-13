@@ -121,13 +121,17 @@ export default function NeonPage() {
 
   const tubeMeters = sizeObj ? charCount * (sizeObj.cm / 60) * 0.22 * (fontObj?.script ? 1.25 : 1) : 0;
 
-  // Real-world dimensions derived from the ACTUAL rendered line(s).
+  // Real-world dimensions: height from the admin's per-size heightCm (falls back
+  // to the font size); width tracks the actual text, or the admin's per-char cm.
   const lines = (text || ' ').split('\n');
-  const lineCm = sizeObj ? Math.max(1, Math.round(sizeObj.fontSizePx * 0.33)) : 15;
+  const lineCm = sizeObj ? (sizeObj.heightCm > 0 ? sizeObj.heightCm : Math.max(1, Math.round(sizeObj.fontSizePx * 0.33))) : 15;
   const heightCm = lineCm * lines.length;
-  const widthCm = box.h > 0
-    ? Math.max(1, Math.round(heightCm * (box.w / box.h)))
-    : Math.max(1, Math.round(heightCm * Math.max(1, charCount * 0.5)));
+  const longestLineChars = Math.max(1, ...lines.map((l) => l.replace(/\s/g, '').length));
+  const widthCm = sizeObj?.perCharCm > 0
+    ? Math.max(1, Math.round(longestLineChars * sizeObj.perCharCm))
+    : box.h > 0
+      ? Math.max(1, Math.round(heightCm * (box.w / box.h)))
+      : Math.max(1, Math.round(heightCm * Math.max(1, charCount * 0.5)));
 
   const powerOn = () => {
     setOn(true);

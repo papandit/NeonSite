@@ -47,12 +47,12 @@ export const DEFAULT_NEON = {
   ],
   // cm = physical width; basePricePaise + per-character charge scale with size.
   sizes: [
-    { key: 'xs', name: 'Mini', cm: 30, basePricePaise: 140000, perCharPaise: 7000, fontSizePx: 28, active: true },
-    { key: 's', name: 'Small', cm: 40, basePricePaise: 180000, perCharPaise: 9000, fontSizePx: 34, active: true },
-    { key: 'm', name: 'Medium', cm: 60, basePricePaise: 260000, perCharPaise: 13000, fontSizePx: 46, active: true },
-    { key: 'l', name: 'Large', cm: 80, basePricePaise: 360000, perCharPaise: 18000, fontSizePx: 60, active: true },
-    { key: 'xl', name: 'XL', cm: 100, basePricePaise: 480000, perCharPaise: 24000, fontSizePx: 76, active: true },
-    { key: 'xxl', name: 'Jumbo', cm: 120, basePricePaise: 600000, perCharPaise: 30000, fontSizePx: 92, active: true },
+    { key: 'xs', name: 'Mini', cm: 30, basePricePaise: 140000, perCharPaise: 7000, fontSizePx: 28, heightCm: 9, perCharCm: 0, active: true },
+    { key: 's', name: 'Small', cm: 40, basePricePaise: 180000, perCharPaise: 9000, fontSizePx: 34, heightCm: 11, perCharCm: 0, active: true },
+    { key: 'm', name: 'Medium', cm: 60, basePricePaise: 260000, perCharPaise: 13000, fontSizePx: 46, heightCm: 15, perCharCm: 0, active: true },
+    { key: 'l', name: 'Large', cm: 80, basePricePaise: 360000, perCharPaise: 18000, fontSizePx: 60, heightCm: 20, perCharCm: 0, active: true },
+    { key: 'xl', name: 'XL', cm: 100, basePricePaise: 480000, perCharPaise: 24000, fontSizePx: 76, heightCm: 25, perCharCm: 0, active: true },
+    { key: 'xxl', name: 'Jumbo', cm: 120, basePricePaise: 600000, perCharPaise: 30000, fontSizePx: 92, heightCm: 30, perCharCm: 0, active: true },
   ],
   backings: [
     { key: 'cut', name: 'Cut to shape', priceDeltaPaise: 0, active: true },

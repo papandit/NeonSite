@@ -15,6 +15,30 @@ import { getNeonProduct } from '../services/neon/neonProduct.js';
 import NpTemplate from '../modules/nameplate/models/NpTemplate.js';
 import { quoteNpDesign } from '../modules/nameplate/services/quoteDesign.js';
 import { getNameplateProduct } from '../modules/nameplate/services/nameplateProduct.js';
+import { NpColor, NpFont, NpElement, NpIcon } from '../modules/nameplate/registry.js';
+
+// Snapshot human-readable names/images for the customer's name-plate choices so
+// the order shows exactly what was selected, even if options change later.
+const npElImg = (o) => o?.meta?.image || o?.meta?.svg || o?.imageUrl || o?.svg || '';
+async function enrichNameplateSelections(selections = {}, elements = []) {
+  const sel = { ...selections };
+  if (sel.color && !sel.colorName) {
+    const c = await NpColor.findById(sel.color).lean().catch(() => null);
+    if (c) { sel.colorName = c.name; sel.colorHex = sel.colorHex || c.meta?.hex; }
+  }
+  if (sel.font && !sel.fontName) {
+    const f = await NpFont.findById(sel.font).lean().catch(() => null);
+    if (f) sel.fontName = f.name;
+  }
+  const enrichedElements = [];
+  for (const el of elements || []) {
+    const id = el.id || el._id;
+    if (!id) continue;
+    const opt = (await NpElement.findById(id).lean().catch(() => null)) || (await NpIcon.findById(id).lean().catch(() => null));
+    enrichedElements.push({ id: String(id), name: opt?.name || 'Symbol', image: npElImg(opt) });
+  }
+  return { selections: sel, elements: enrichedElements };
+}
 import { getOrCreateCart, serializeCart } from '../services/cart/cartService.js';
 
 async function repriceOrThrow(productId, designDocument) {
@@ -169,6 +193,9 @@ export const addNameplateItem = asyncHandler(async (req, res) => {
     throw ApiError.badRequest('Name-plate design is invalid', { code: 'NP_DESIGN_INVALID', details: errors });
   }
 
+  const { selections: enrichedSelections, elements: enrichedElements } =
+    await enrichNameplateSelections(design.selections || {}, design.elements || []);
+
   const designDocument = {
     schemaVersion: 1,
     kind: 'nameplate',
@@ -177,8 +204,8 @@ export const addNameplateItem = asyncHandler(async (req, res) => {
       templateSlug: template.slug,
       templateName: template.name,
       fields: design.fields || {},
-      selections: design.selections || {},
-      elements: design.elements || [],
+      selections: enrichedSelections,
+      elements: enrichedElements,
       canvas,
     },
     render: { previewImageUrl },
