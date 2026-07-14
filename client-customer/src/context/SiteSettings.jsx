@@ -44,17 +44,17 @@ export const DEFAULT_CONTENT = {
     { q: 'What is your return policy?', a: 'Because each plate is personalised, we replace items only for manufacturing defects or shipping damage.' },
   ],
   video: {
-    heading: 'How we craft your neon',
-    subheading: 'Watch a custom neon sign come to life — hand-bent, laser-cut and lit, made to order.',
+    heading: 'How to create your neon craft',
+    subheading: 'A quick look at building your own custom neon — pick your text, font, colour and size, and we bring it to life.',
     url: '/neon-studio.mp4',
-    ctaText: 'Design your neon',
+    ctaText: 'Create your neon',
     ctaLink: '/neon',
   },
   videoNameplate: {
-    heading: 'How we make your name plate',
-    subheading: 'From a blank plate to your finished design — cut, engraved and finished, ready to mount.',
+    heading: 'How to create your name plate craft',
+    subheading: 'See how easy it is to design your own name plate — choose a template, add your text, colour and symbol, and order.',
     url: '/nameplate-studio.mp4',
-    ctaText: 'Design your name plate',
+    ctaText: 'Create your name plate',
     ctaLink: '/nameplates',
   },
   promo: {

@@ -241,9 +241,9 @@ export default function HomePage() {
         </Section>
       )}
 
-      {/* How it's made — videos (neon + name plate), admin-editable */}
-      <VideoShowcase video={c.video} badge="Behind the craft · Neon" />
-      <VideoShowcase video={c.videoNameplate} badge="Behind the craft · Name plates" reverse />
+      {/* How to create — videos (neon + name plate), admin-editable */}
+      <VideoShowcase video={c.video} badge="Neon craft" />
+      <VideoShowcase video={c.videoNameplate} badge="Name plate craft" reverse />
 
       {/* Promo — light, modern, animated */}
       <section className="bg-linear-to-b from-white to-[#f4ece1] px-4 py-16">
