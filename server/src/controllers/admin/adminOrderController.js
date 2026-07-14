@@ -3,6 +3,7 @@
 // renders are regenerated from the frozen designDocument on demand.
 
 import mongoose from 'mongoose';
+import PDFDocument from 'pdfkit';
 import asyncHandler from '../../utils/asyncHandler.js';
 import { sendSuccess } from '../../utils/apiResponse.js';
 import ApiError from '../../utils/ApiError.js';
@@ -103,23 +104,56 @@ export const productionRender = asyncHandler(async (req, res) => {
   const item = order.items.id(req.params.itemId);
   if (!item) throw ApiError.notFound('Order item not found');
 
+  const fmt = ['png', 'svg', 'pdf'].includes(req.query.format) ? req.query.format : 'png';
+  const base = `${order.orderNumber}-${req.params.itemId}`;
+
   // Neon signs and name plates aren't fabric plate renders — their production
-  // artwork is the captured preview image. Serve its bytes (decoding a data URI
-  // so we never stuff a huge string into a redirect Location header).
+  // artwork is the captured preview image. PNG serves it as-is; SVG and PDF wrap
+  // that image so every button yields a valid, correctly-typed file.
   if (item.designDocument?.kind === 'neon' || item.designDocument?.kind === 'nameplate') {
     const url = item.designDocument?.render?.previewImageUrl;
     if (!url) throw ApiError.badRequest('This item has no captured preview to download.');
     const m = /^data:([^;]+);base64,(.*)$/s.exec(url);
-    if (m) {
-      const buf = Buffer.from(m[2], 'base64');
-      res.set('Content-Type', m[1]);
-      res.set('Content-Disposition', `attachment; filename="${order.orderNumber}-${req.params.itemId}.${(m[1].split('/')[1] || 'png').replace('svg+xml', 'svg')}"`);
-      return res.send(buf);
+    if (!m) return res.redirect(url); // a normal hosted URL
+
+    const mime = m[1];
+    const buf = Buffer.from(m[2], 'base64');
+    // Read PNG intrinsic size (IHDR) for sensible SVG/PDF dimensions.
+    let w = 1200;
+    let h = 800;
+    if (mime === 'image/png' && buf.length > 24) { w = buf.readUInt32BE(16); h = buf.readUInt32BE(20); }
+
+    if (fmt === 'svg') {
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><image x="0" y="0" width="${w}" height="${h}" xlink:href="${url}" href="${url}"/></svg>`;
+      res.set('Content-Type', 'image/svg+xml');
+      res.set('Content-Disposition', `attachment; filename="${base}.svg"`);
+      return res.send(svg);
     }
-    return res.redirect(url); // a normal hosted URL
+    if (fmt === 'pdf') {
+      try {
+        const doc = new PDFDocument({ autoFirstPage: false });
+        const chunks = [];
+        doc.on('data', (c) => chunks.push(c));
+        const done = new Promise((resolve) => doc.on('end', resolve));
+        doc.addPage({ size: [w, h], margin: 0 });
+        doc.image(buf, 0, 0, { width: w, height: h }); // pdfkit supports PNG/JPEG
+        doc.end();
+        await done;
+        res.set('Content-Type', 'application/pdf');
+        res.set('Content-Disposition', `attachment; filename="${base}.pdf"`);
+        return res.send(Buffer.concat(chunks));
+      } catch {
+        // Unsupported/corrupt image for PDF embedding — fall back to the raw image.
+      }
+    }
+    // png (or any other) → send the image bytes as-is.
+    const ext = (mime.split('/')[1] || 'png').replace('svg+xml', 'svg');
+    res.set('Content-Type', mime);
+    res.set('Content-Disposition', `attachment; filename="${base}.${ext}"`);
+    return res.send(buf);
   }
 
-  const format = ['png', 'svg', 'pdf'].includes(req.query.format) ? req.query.format : 'png';
+  const format = fmt;
   const { buffer, mime, ext } = await renderProduction(item.designDocument, { format });
 
   res.set('Content-Type', mime);

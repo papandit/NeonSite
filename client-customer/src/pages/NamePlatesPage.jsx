@@ -33,7 +33,7 @@ export default function NamePlatesPage() {
 
       {/* Category selection — circular tiles (centres when they fit, scrolls when not) */}
       {cats.length > 0 && (
-        <div className="mx-auto mt-8 flex w-fit max-w-full gap-3 overflow-x-auto px-1 pb-2 sm:gap-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="mx-auto mt-8 flex w-fit max-w-full gap-4 overflow-x-auto px-2 py-4 sm:gap-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {[{ _id: '__all', name: 'All', slug: '' }, ...cats].map((c) => {
             const active = c.slug ? category === c.slug : !category;
             const img = c.meta?.image;
@@ -42,7 +42,7 @@ export default function NamePlatesPage() {
                 key={c._id}
                 type="button"
                 onClick={() => setParams(c.slug ? { category: c.slug } : {})}
-                className="group flex w-18 shrink-0 flex-col items-center gap-2 text-center sm:w-24"
+                className="group flex w-24 shrink-0 flex-col items-center gap-2.5 text-center sm:w-28"
               >
                 <span className={`flex aspect-square w-full items-center justify-center overflow-hidden rounded-full transition duration-300 group-hover:-translate-y-1 ${active ? 'shadow-lg ring-2 ring-indigo-500' : 'shadow-sm ring-1 ring-gray-200 group-hover:ring-indigo-300'}`}>
                   {img ? (
