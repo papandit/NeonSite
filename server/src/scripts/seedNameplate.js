@@ -126,6 +126,14 @@ async function run() {
     ['Navy', '#1b2a4a', 0], ['Sky Blue', '#38bdf8', 0], ['Teal', '#0e7490', 0],
     ['Emerald', '#047857', 0], ['Forest', '#14532d', 0], ['Mint', '#6ee7b7', 0],
     ['Slate', '#475569', 0],
+    // Extended palette
+    ['Matte Black', '#28282b', 0], ['Grey', '#808080', 0], ['Cream', '#fffdd0', 0],
+    ['Beige', '#e8d9b5', 0], ['Sand', '#c2b280', 0], ['Brass', '#b5a642', 2000],
+    ['Wine', '#722f37', 0], ['Crimson', '#dc143c', 0], ['Terracotta', '#cc4e3a', 0],
+    ['Peach', '#ffcba4', 0], ['Mustard', '#e1ad01', 0], ['Olive', '#6b8e23', 0],
+    ['Sage', '#9caf88', 0], ['Jade', '#00a86b', 0], ['Turquoise', '#30d5c8', 0],
+    ['Steel Blue', '#4682b4', 0], ['Midnight', '#191970', 0], ['Indigo', '#4b0082', 0],
+    ['Plum', '#8e4585', 0], ['Lilac', '#c8a2c8', 0],
   ];
   for (const [name, hex, price] of colorDefs) {
     await NpColor.findOneAndUpdate({ name }, { $setOnInsert: { name, status: 'active', priceDeltaPaise: price, meta: { hex } } }, { upsert: true, setDefaultsOnInsert: true });
