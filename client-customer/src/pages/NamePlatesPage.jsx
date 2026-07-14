@@ -42,18 +42,18 @@ export default function NamePlatesPage() {
                 key={c._id}
                 type="button"
                 onClick={() => setParams(c.slug ? { category: c.slug } : {})}
-                className="group flex w-24 shrink-0 flex-col items-center gap-2.5 text-center sm:w-28"
+                className="group flex w-28 shrink-0 flex-col items-center gap-3 text-center sm:w-36"
               >
                 <span className={`flex aspect-square w-full items-center justify-center overflow-hidden rounded-full transition duration-300 group-hover:-translate-y-1 ${active ? 'shadow-lg ring-2 ring-indigo-500' : 'shadow-sm ring-1 ring-gray-200 group-hover:ring-indigo-300'}`}>
                   {img ? (
                     <img src={img} alt={c.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-110" />
                   ) : (
-                    <span className={`flex h-full w-full items-center justify-center font-display text-2xl font-semibold sm:text-3xl ${active ? 'bg-linear-to-br from-indigo-500 to-orange-400 text-white' : 'bg-linear-to-br from-orange-50 via-white to-amber-50 text-indigo-500'}`}>
+                    <span className={`flex h-full w-full items-center justify-center font-display text-3xl font-semibold sm:text-5xl ${active ? 'bg-linear-to-br from-indigo-500 to-orange-400 text-white' : 'bg-linear-to-br from-orange-50 via-white to-amber-50 text-indigo-500'}`}>
                       {c.name === 'All' ? '✦' : c.name.charAt(0).toUpperCase()}
                     </span>
                   )}
                 </span>
-                <span className={`line-clamp-2 min-h-[2.4em] text-[11px] font-semibold leading-tight transition sm:text-xs ${active ? 'text-indigo-600' : 'text-gray-600 group-hover:text-indigo-600'}`}>
+                <span className={`line-clamp-2 min-h-[2.4em] text-xs font-semibold leading-tight transition sm:text-sm ${active ? 'text-indigo-600' : 'text-gray-600 group-hover:text-indigo-600'}`}>
                   {c.name}
                 </span>
               </button>
