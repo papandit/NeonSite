@@ -30,7 +30,10 @@ export default function OptionCrudPage() {
   const [busy, setBusy] = useState(false);
   const [meta, setMeta] = useState({});
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm();
+  const { register, handleSubmit, reset, setValue, getValues, formState: { errors } } = useForm();
+
+  // Auto-fill the Name from an uploaded file when the admin hasn't typed one.
+  const suggestName = (suggested) => { if (suggested && !getValues('name')?.trim()) setValue('name', suggested, { shouldValidate: true }); };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -189,6 +192,7 @@ export default function OptionCrudPage() {
                       kind={f.kind}
                       value={meta[f.key] || ''}
                       onChange={(v) => setMetaField(f.key, v)}
+                      onUploaded={(_url, suggested) => suggestName(suggested)}
                     />
                   );
                 }

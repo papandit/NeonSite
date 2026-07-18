@@ -41,7 +41,10 @@ export default function NpCrudPage() {
   const [busy, setBusy] = useState(false);
   const [meta, setMeta] = useState({});
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm();
+  const { register, handleSubmit, reset, setValue, getValues, formState: { errors } } = useForm();
+
+  // Auto-fill the Name from an uploaded file when the admin hasn't typed one.
+  const suggestName = (suggested) => { if (suggested && !getValues('name')?.trim()) setValue('name', suggested, { shouldValidate: true }); };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -185,7 +188,7 @@ export default function NpCrudPage() {
               <p className="text-xs font-medium uppercase text-slate-400">Details</p>
               {collection.metaFields.map((f) => {
                 if (f.input === 'file') {
-                  return <FileUpload key={f.key} label={f.label} kind={f.kind} folder={`nameplate/${key}`} value={meta[f.key] || ''} onChange={(v) => setMetaField(f.key, v)} />;
+                  return <FileUpload key={f.key} label={f.label} kind={f.kind} folder={`nameplate/${key}`} value={meta[f.key] || ''} onChange={(v) => setMetaField(f.key, v)} onUploaded={(_url, suggested) => suggestName(suggested)} />;
                 }
                 if (f.input === 'color') {
                   return (

@@ -8,6 +8,15 @@ const ACCEPT = {
   svg: 'image/svg+xml,.svg',
 };
 
+// A friendly name derived from a filename: "shree-yantra.svg" -> "Shree Yantra".
+const nameFromFile = (filename = '') =>
+  filename
+    .replace(/\.[^./\\]+$/, '')
+    .replace(/[-_]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+
 // Server-signed upload with a "paste a URL" fallback (works even without
 // Cloudinary configured — handy for local testing).
 export default function FileUpload({
@@ -37,7 +46,7 @@ export default function FileUpload({
     try {
       const res = await uploadAsset(kind, file, { folder });
       onChange(res.url);
-      onUploaded?.(res.url); // let multi-image callers auto-append on upload
+      onUploaded?.(res.url, nameFromFile(file.name)); // url + a name suggested from the filename
     } catch (err) {
       setError(apiErrorMessage(err, 'Upload failed'));
     } finally {
