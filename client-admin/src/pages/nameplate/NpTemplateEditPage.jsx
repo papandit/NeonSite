@@ -22,8 +22,6 @@ const ALLOW_KINDS = [
   ['fonts', 'allowedFonts', 'Fonts'],
   ['colors', 'allowedColors', 'Colors'],
   ['elements', 'allowedElements', 'Elements'],
-  ['shapes', 'allowedShapes', 'Shapes'],
-  ['materials', 'allowedMaterials', 'Materials'],
   ['sizes', 'allowedSizes', 'Sizes'],
   ['backgrounds', 'allowedBackgrounds', 'Backgrounds'],
 ];
@@ -196,7 +194,6 @@ export default function NpTemplateEditPage() {
             onFieldChange={(i, patch) => updField(i, patch)}
             symbol={tpl.symbolEnabled ? { x: Number(tpl.symbolX), y: Number(tpl.symbolY), scale: Number(tpl.symbolScale) } : null}
             onSymbolChange={(p) => setTpl((t) => ({ ...t, symbolX: p.x ?? t.symbolX, symbolY: p.y ?? t.symbolY, symbolScale: p.scale ?? t.symbolScale }))}
-            symbolPreviewUrl={optionImg((options.elements || [])[0]) || optionImg((options.shapes || [])[0])}
           />
         </section>
 

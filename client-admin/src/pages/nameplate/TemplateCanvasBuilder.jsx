@@ -17,7 +17,6 @@ export default function TemplateCanvasBuilder({
   onFieldChange,
   symbol,
   onSymbolChange,
-  symbolPreviewUrl,
 }) {
   const elRef = useRef(null);
   const fcRef = useRef(null);
@@ -67,6 +66,13 @@ export default function TemplateCanvasBuilder({
       fc.requestRenderAll();
     });
 
+    // Double-click a text line to edit it right on the plate; the typed text is
+    // saved as that field's default value.
+    fc.on('text:editing:exited', (e) => {
+      const o = e.target;
+      if (o?.ncType === 'text') cbRef.current.onFieldChange?.(o.ncIndex, { defaultValue: o.text });
+    });
+
     return () => { fc.dispose(); fcRef.current = null; objsRef.current = {}; symRef.current = null; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [H]);
@@ -105,7 +111,7 @@ export default function TemplateCanvasBuilder({
         fontFamily: f.defaultFontFamily || 'Georgia, serif',
         textAlign: f.align || 'center',
         angle: f.rotation || 0,
-        editable: false,
+        editable: true, // double-click to edit the text on the plate
         borderColor: '#4f46e5',
         cornerColor: '#4f46e5',
         cornerStyle: 'circle',
@@ -190,21 +196,14 @@ export default function TemplateCanvasBuilder({
       fc.requestRenderAll();
     };
 
-    // Always show SOMETHING the admin can position — the symbol image if it
-    // loads, otherwise a labelled dashed placeholder.
-    const placeholder = () => {
-      const rect = new fabric.Rect({ width: 100, height: 100, rx: 14, ry: 14, fill: 'rgba(79,70,229,0.12)', stroke: '#4f46e5', strokeDashArray: [6, 4], strokeWidth: 2 });
-      place(rect, 100);
-    };
-    if (symbolPreviewUrl) {
-      fabric.FabricImage.fromURL(symbolPreviewUrl)
-        .then((img) => { if (img && (img.width || img.height)) place(img, Math.max(img.width || 100, img.height || 100)); else placeholder(); })
-        .catch(placeholder);
-    } else {
-      placeholder();
-    }
+    // A clean, always-centred slot marker (never cut) showing where + how big the
+    // customer's chosen symbol will sit. The actual symbol is picked on the
+    // storefront; here we only set its box.
+    const rect = new fabric.Rect({ left: 0, top: 0, width: 100, height: 100, rx: 14, ry: 14, fill: 'rgba(79,70,229,0.12)', stroke: '#4f46e5', strokeDashArray: [6, 4], strokeWidth: 2 });
+    const star = new fabric.Text('✦', { left: 50, top: 50, originX: 'center', originY: 'center', fontSize: 44, fill: '#4f46e5' });
+    place(new fabric.Group([rect, star]), 100);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [symbol?.x, symbol?.y, symbol?.scale, symbolPreviewUrl, H]);
+  }, [symbol?.x, symbol?.y, symbol?.scale, H]);
 
   return (
     <div>
@@ -214,7 +213,7 @@ export default function TemplateCanvasBuilder({
         </div>
       </div>
       <p className="mt-2 text-center text-xs text-slate-400">
-        Drag to move · corner handles to resize · top handle to rotate. The storefront renders this exact layout.
+        Drag to move · corner handles to resize · top handle to rotate · <span className="font-medium text-slate-500">double-click text to edit</span>. The storefront renders this exact layout.
         {!baseImageUrl && ' Upload a base plate image above for a realistic backdrop.'}
       </p>
     </div>
