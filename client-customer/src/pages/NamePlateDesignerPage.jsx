@@ -21,6 +21,10 @@ export const PENDING_NAMEPLATE_KEY = 'nc_pending_nameplate';
 const CANVAS_W = 560;
 
 const elImg = (e) => e?.meta?.image || e?.imageUrl || e?.meta?.svg || e?.svg;
+// Recolourable symbols carry a `currentColor` SVG in meta.svgRaw — tint it to hex.
+const colorizeSvg = (raw, hex) => `data:image/svg+xml,${encodeURIComponent(raw.replace('<svg', `<svg style="color:${hex}"`))}`;
+const isRecolor = (e) => Boolean(e?.meta?.recolor && e?.meta?.svgRaw);
+const symbolImg = (e, hex) => (isRecolor(e) ? colorizeSvg(e.meta.svgRaw, hex) : elImg(e));
 
 export default function NamePlateDesignerPage() {
   const { slug } = useParams();
@@ -33,6 +37,7 @@ export default function NamePlateDesignerPage() {
   const [styles, setStyles] = useState({});         // { fieldKey: { font, color } } — per text field
   const [activeField, setActiveField] = useState(null); // which field the font/colour pickers edit
   const [symbolId, setSymbolId] = useState(null);   // chosen element id
+  const [symbolColor, setSymbolColor] = useState('#c8a04d'); // colour for recolourable symbols
   const [price, setPrice] = useState(0);
   const [errors, setErrors] = useState([]);
   const [adding, setAdding] = useState(false);
@@ -73,6 +78,12 @@ export default function NamePlateDesignerPage() {
     () => [...(data?.options.elements || []), ...(data?.options.icons || [])],
     [data]
   );
+  // Group symbols by section (meta.group) — e.g. Christianity, Hinduism…
+  const symbolGroups = useMemo(() => {
+    const g = {};
+    for (const s of symbols) { const k = s.meta?.group || 'Symbols'; (g[k] ||= []).push(s); }
+    return Object.entries(g);
+  }, [symbols]);
 
   // Load all offered fonts so the grid + canvas render them.
   useEffect(() => {
@@ -154,7 +165,7 @@ export default function NamePlateDesignerPage() {
     if (!fc) return;
     if (symbolRef.current) { fc.remove(symbolRef.current); symbolRef.current = null; }
     const opt = symbols.find((e) => e._id === symbolId);
-    const url = elImg(opt);
+    const url = symbolImg(opt, symbolColor);
     if (!url) { fc.requestRenderAll(); return; }
     const t = template || {};
     // Position: admin template fields, else a legacy layout slot, else top-centre.
@@ -180,7 +191,7 @@ export default function NamePlateDesignerPage() {
       fc.requestRenderAll();
     }).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [symbolId, symbols, template]);
+  }, [symbolId, symbols, template, symbolColor]);
 
   // Representative style (the first field) — used for the server price selection.
   const fontIdFor = (fam) => fonts.find((f) => (f.meta?.family || f.name) === fam)?._id;
@@ -222,7 +233,7 @@ export default function NamePlateDesignerPage() {
         fields,
         selections: { font: fontIdFor(rep.font), color: colorIdFor(rep.color), fontFamily: rep.font, colorHex: rep.color },
         fieldStyles,
-        elements: symbolId ? [{ id: symbolId }] : [],
+        elements: symbolId ? [{ id: symbolId, colorHex: symbolColor }] : [],
       };
       const payload = { templateSlug: slug, design, canvas: {}, previewImageUrl, quantity: 1 };
       if (isAuthed) { await dispatch(addNameplateToCart(payload)).unwrap(); navigate('/cart'); }
@@ -322,19 +333,43 @@ export default function NamePlateDesignerPage() {
             </div>
           )}
 
-          {/* Choose Symbol (elements + icons) — only when the template offers one */}
+          {/* Choose Symbol — grouped by section (religion etc.), recolourable */}
           {template.symbolEnabled !== false && symbols.length > 0 && (
             <div className="rounded-2xl border border-gray-200 bg-white p-5">
               <h3 className="text-xs font-semibold uppercase tracking-wide text-indigo-600">Choose symbol</h3>
-              <div className="mt-3 grid grid-cols-5 gap-2 sm:grid-cols-6">
-                <button onClick={() => setSymbolId(null)} className={`flex h-14 items-center justify-center rounded-lg border text-xs ${!symbolId ? 'border-indigo-500 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-400'}`}>None</button>
-                {symbols.map((el) => (
-                  <button key={el._id} onClick={() => setSymbolId(el._id)} title={el.name}
-                    className={`flex h-14 items-center justify-center rounded-lg border p-1.5 transition ${symbolId === el._id ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-indigo-300'}`}>
-                    {elImg(el) ? <img src={elImg(el)} alt={el.name} className="max-h-full max-w-full object-contain" /> : <span className="truncate text-[10px] text-gray-400">{el.name}</span>}
-                  </button>
+              <button onClick={() => setSymbolId(null)} className={`mt-3 rounded-full border px-3 py-1 text-xs font-medium transition ${!symbolId ? 'border-indigo-500 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-500 hover:border-indigo-300'}`}>None</button>
+              <div className="mt-3 max-h-72 space-y-3 overflow-y-auto pr-1">
+                {symbolGroups.map(([group, items]) => (
+                  <div key={group}>
+                    <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-gray-400">{group}</div>
+                    <div className="grid grid-cols-5 gap-2 sm:grid-cols-6">
+                      {items.map((el) => {
+                        const src = symbolImg(el, symbolColor);
+                        return (
+                          <button key={el._id} onClick={() => setSymbolId(el._id)} title={el.name}
+                            className={`flex h-14 items-center justify-center rounded-lg border p-1.5 transition ${symbolId === el._id ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-indigo-300'}`}>
+                            {src ? <img src={src} alt={el.name} className="max-h-full max-w-full object-contain" /> : <span className="truncate text-[10px] text-gray-400">{el.name}</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                 ))}
               </div>
+
+              {/* Symbol colour — only for recolourable (currentColor) symbols */}
+              {isRecolor(symbols.find((e) => e._id === symbolId)) && colors.length > 0 && (
+                <div className="mt-4 border-t border-gray-100 pt-3">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-indigo-600">Symbol colour</div>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {colors.map((c) => c.meta?.hex && (
+                      <button key={c._id} title={c.name} onClick={() => setSymbolColor(c.meta.hex)}
+                        className={`h-8 w-8 rounded-full border-2 transition ${symbolColor === c.meta.hex ? 'scale-110 border-indigo-600' : 'border-black/10 hover:scale-105'}`}
+                        style={{ background: c.meta.hex }} />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

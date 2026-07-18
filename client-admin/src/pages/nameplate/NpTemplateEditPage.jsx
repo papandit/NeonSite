@@ -13,9 +13,10 @@ import PageHeader from '../../components/PageHeader';
 import FileUpload from '../../components/FileUpload';
 import TemplateCanvasBuilder from './TemplateCanvasBuilder';
 
-// Image/thumbnail URL for a symbol-like option (element / icon / shape).
+// Image/thumbnail URL for any option that carries one.
 const optionImg = (o) => o?.meta?.image || o?.meta?.svg || o?.imageUrl || o?.svg || o?.meta?.thumbnail || '';
-const SYMBOL_KINDS = ['elements', 'icons', 'shapes'];
+// Option kinds that render an image thumbnail (+ name) in the allowed-options picker.
+const SYMBOL_KINDS = ['elements', 'icons', 'shapes', 'backgrounds', 'materials'];
 
 const templates = resource('nameplate/templates');
 const ALLOW_KINDS = [
@@ -175,12 +176,23 @@ export default function NpTemplateEditPage() {
 
         {/* Images */}
         <section className="rounded-xl border border-slate-200 bg-white p-5">
-          <h3 className="mb-4 font-semibold">Plate images</h3>
+          <h3 className="mb-1 font-semibold">Plate images</h3>
+          <p className="mb-4 text-xs text-slate-400">Each image has a different job — see the note under each field.</p>
           <div className="grid gap-4 sm:grid-cols-3">
-            <FileUpload label="Base plate image" kind="image" folder="nameplate/plates" value={tpl.basePlateImageUrl} onChange={(v) => set('basePlateImageUrl', v)} />
-            <FileUpload label="Preview image" kind="image" folder="nameplate/plates" value={tpl.previewImageUrl} onChange={(v) => set('previewImageUrl', v)} />
-            <FileUpload label="Transparent PNG" kind="image" folder="nameplate/plates" value={tpl.transparentPngUrl} onChange={(v) => set('transparentPngUrl', v)} />
+            <div>
+              <FileUpload label="Base plate image" kind="image" folder="nameplate/plates" value={tpl.basePlateImageUrl} onChange={(v) => set('basePlateImageUrl', v)} />
+              <p className="mt-1.5 text-xs text-slate-400">The plate/frame the customer designs ON — shown as the backdrop in the visual builder and behind the text &amp; symbol on the storefront.</p>
+            </div>
+            <div>
+              <FileUpload label="Preview image" kind="image" folder="nameplate/plates" value={tpl.previewImageUrl} onChange={(v) => set('previewImageUrl', v)} />
+              <p className="mt-1.5 text-xs text-slate-400">The thumbnail shown on the template card in the gallery. Leave blank to fall back to the base plate.</p>
+            </div>
+            <div>
+              <FileUpload label="Transparent PNG" kind="image" folder="nameplate/plates" value={tpl.transparentPngUrl} onChange={(v) => set('transparentPngUrl', v)} />
+              <p className="mt-1.5 text-xs text-slate-400">Optional frame overlay with a see-through centre — sits ON TOP so the text shows inside the frame.</p>
+            </div>
           </div>
+          <p className="mt-3 text-xs text-slate-400">Tip: to offer different backdrops, add them under <span className="font-medium text-slate-500">Name Plate Studio → Backgrounds</span> and enable them in “Allowed options” below — customers place their text &amp; symbol on the chosen background to build the plate.</p>
         </section>
 
         {/* Visual builder — drag / resize / rotate fields + symbol on the plate */}

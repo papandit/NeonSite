@@ -35,7 +35,7 @@ async function enrichNameplateSelections(selections = {}, elements = []) {
     const id = el.id || el._id;
     if (!id) continue;
     const opt = (await NpElement.findById(id).lean().catch(() => null)) || (await NpIcon.findById(id).lean().catch(() => null));
-    enrichedElements.push({ id: String(id), name: opt?.name || 'Symbol', image: npElImg(opt) });
+    enrichedElements.push({ id: String(id), name: opt?.name || 'Symbol', image: npElImg(opt), colorHex: el.colorHex || null });
   }
   return { selections: sel, elements: enrichedElements };
 }
