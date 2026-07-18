@@ -137,21 +137,22 @@ export default function TemplateCanvasBuilder({
     if (!fc) return;
     shown.forEach(({ f, i }) => {
       const o = objsRef.current[i];
-      if (!o || o === fc.getActiveObject()) return; // don't fight an in-progress edit
+      if (!o) return;
       ensureGoogleFont(f.defaultFontFamily);
+      // Appearance (colour / font / align) always updates live — even on the
+      // selected line — so form changes show immediately in the preview.
       o.set({
-        text: f.defaultValue || f.label || f.key,
         fill: f.defaultColorHex || '#1a1a1a',
         fontFamily: f.defaultFontFamily || 'Georgia, serif',
         textAlign: f.align || 'center',
-        left: (f.x ?? 0.5) * W,
-        top: (f.y ?? 0.5) * H,
-        fontSize: f.defaultSizePx || 40,
-        angle: f.rotation || 0,
-        scaleX: 1,
-        scaleY: 1,
       });
-      o.setCoords();
+      // Text updates unless the admin is typing directly into this line.
+      if (!o.isEditing) o.set({ text: f.defaultValue || f.label || f.key });
+      // Position / size / rotation must NOT fight an in-progress drag/resize.
+      if (o !== fc.getActiveObject()) {
+        o.set({ left: (f.x ?? 0.5) * W, top: (f.y ?? 0.5) * H, fontSize: f.defaultSizePx || 40, angle: f.rotation || 0, scaleX: 1, scaleY: 1 });
+        o.setCoords();
+      }
     });
     fc.requestRenderAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
