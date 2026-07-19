@@ -1,40 +1,122 @@
 name: CI
 
+# Runs on every push and PR. Three parallel checks; all must pass. Pair with a
+# branch-protection rule that REQUIRES the "backend", "client-customer" and
+# "client-admin" checks before merge, so build-passing-but-broken code can't
+# reach the branch the server deploys.
+#
+# CI only gates code quality — it NEVER deploys. Deploys are manual and separate
+# (see deploy.sh / DEPLOYMENT.md on the server), with build-before-swap +
+# /health check + auto-rollback.
 on:
   push:
     branches: ['**']
   pull_request:
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  test-and-build:
+  backend:
+    name: backend (boot + tests)
     runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ ping: 1 }).ok'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      # A real Mongo so the boot smoke connects + queries like prod.
+      MONGODB_URI: mongodb://localhost:27017/neonsite_ci
+      JWT_SECRET: ci-test-secret-not-real
+      NODE_ENV: test
+      PORT: "5000"
     steps:
       - uses: actions/checkout@v4
-
+      # node-canvas native deps (render service). npm usually fetches a prebuilt
+      # binary for node 20 linux-x64, but install the libs so a source build
+      # can't fail CI.
+      - name: Install node-canvas system libs
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-
-      # Native libraries for node-canvas (render service).
-      - name: Install canvas system deps
-        run: sudo apt-get update && sudo apt-get install -y libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
-
-      - name: Server — install + unit tests (pricing + state machine)
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+      - name: Install
+        working-directory: server
+        run: npm ci --no-audit --no-fund
+      - name: Unit tests (pricing + order state machine)
+        working-directory: server
+        run: npm test
+      - name: Boot smoke — server starts and answers /health
         working-directory: server
         run: |
-          npm ci
-          npm test
+          npm start &
+          SERVER_PID=$!
+          ok=0
+          for i in $(seq 1 30); do
+            if curl -fsS -o /dev/null http://localhost:5000/health; then ok=1; break; fi
+            sleep 2
+          done
+          kill $SERVER_PID 2>/dev/null || true
+          if [ "$ok" != "1" ]; then
+            echo "::error::server did not answer /health within 60s"
+            exit 1
+          fi
+          echo "backend boot + /health OK"
 
-      - name: Customer client — install + lint + build
+  client-customer:
+    name: client-customer (lint + build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
         working-directory: client-customer
-        run: |
-          npm ci
-          npm run lint
-          npm run build
+    env:
+      # Frontends call the API same-origin via VITE_API_BASE_URL=/api; a
+      # placeholder is fine for a build-only check.
+      VITE_API_BASE_URL: /api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: client-customer/package-lock.json
+      - name: Install
+        run: npm ci --no-audit --no-fund
+      - name: Lint
+        run: npm run lint
+      - name: Build
+        run: npm run build
 
-      - name: Admin client — install + lint + build
+  client-admin:
+    name: client-admin (lint + build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
         working-directory: client-admin
-        run: |
-          npm ci
-          npm run lint
-          npm run build
+    env:
+      VITE_API_BASE_URL: /api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: client-admin/package-lock.json
+      - name: Install
+        run: npm ci --no-audit --no-fund
+      - name: Lint
+        run: npm run lint
+      - name: Build
+        run: npm run build
