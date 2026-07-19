@@ -21,10 +21,48 @@ export const PENDING_NAMEPLATE_KEY = 'nc_pending_nameplate';
 const CANVAS_W = 560;
 
 const elImg = (e) => e?.meta?.image || e?.imageUrl || e?.meta?.svg || e?.svg;
-// Recolourable symbols carry a `currentColor` SVG in meta.svgRaw — tint it to hex.
-const colorizeSvg = (raw, hex) => `data:image/svg+xml,${encodeURIComponent(raw.replace('<svg', `<svg style="color:${hex}"`))}`;
 const isRecolor = (e) => Boolean(e?.meta?.recolor && e?.meta?.svgRaw);
+
+// An SVG with only a viewBox has NO intrinsic size — browsers fall back to
+// 300×150, which makes the symbol render squashed / cropped on the canvas.
+// Give it explicit width/height taken from the viewBox.
+function sizeSvg(text) {
+  if (/<svg[^>]*\bwidth\s*=/i.test(text)) return text;
+  const m = /viewBox\s*=\s*"([^"]+)"/i.exec(text);
+  let w = 100;
+  let h = 100;
+  if (m) {
+    const p = m[1].trim().split(/[\s,]+/).map(Number);
+    if (p.length === 4 && p[2] > 0 && p[3] > 0) { w = p[2]; h = p[3]; }
+  }
+  return text.replace(/<svg/i, `<svg width="${w}" height="${h}"`);
+}
+const svgDataUrl = (text) => `data:image/svg+xml,${encodeURIComponent(text)}`;
+// Recolourable symbols use `currentColor` — substitute the hex directly.
+const colorizeSvg = (raw, hex) => svgDataUrl(sizeSvg(String(raw).replace(/currentColor/g, hex)));
+// Thumbnail source (sync) — <img> sizes fine via CSS.
 const symbolImg = (e, hex) => (isRecolor(e) ? colorizeSvg(e.meta.svgRaw, hex) : elImg(e));
+
+// Canvas-safe symbol URL. Hosted SVGs are fetched so they can be normalised too.
+async function resolveSymbolUrl(opt, hex) {
+  if (!opt) return null;
+  if (isRecolor(opt)) return colorizeSvg(opt.meta.svgRaw, hex);
+  const url = elImg(opt);
+  if (!url) return null;
+  if (url.startsWith('data:image/svg+xml')) {
+    const body = url.slice(url.indexOf(',') + 1);
+    const raw = url.includes(';base64,') ? atob(body) : decodeURIComponent(body);
+    return svgDataUrl(sizeSvg(raw));
+  }
+  if (url.startsWith('data:')) return url; // raster data URI — fine as-is
+  try {
+    const res = await fetch(url);
+    const ct = res.headers.get('content-type') || '';
+    const text = await res.text();
+    if (ct.includes('svg') || /^\s*<(\?xml|svg)/i.test(text)) return svgDataUrl(sizeSvg(text));
+  } catch { /* not an SVG or blocked — fall back to the raw URL */ }
+  return url;
+}
 
 export default function NamePlateDesignerPage() {
   const { slug } = useParams();
@@ -165,8 +203,8 @@ export default function NamePlateDesignerPage() {
     if (!fc) return;
     if (symbolRef.current) { fc.remove(symbolRef.current); symbolRef.current = null; }
     const opt = symbols.find((e) => e._id === symbolId);
-    const url = symbolImg(opt, symbolColor);
-    if (!url) { fc.requestRenderAll(); return; }
+    if (!opt) { fc.requestRenderAll(); return; }
+    let cancelled = false;
     const t = template || {};
     // Position: admin template fields, else a legacy layout slot, else top-centre.
     const slot = (t.layout || []).find((l) => l.type === 'element' || l.type === 'icon');
@@ -175,7 +213,10 @@ export default function NamePlateDesignerPage() {
     // Size: template symbolScale × the symbol's own scale multiplier (meta.scale).
     const perSymbol = Number(opt?.meta?.scale) > 0 ? Number(opt.meta.scale) : 1;
     const box = CANVAS_W * (t.symbolScale ?? 0.2) * perSymbol;
-    fabric.FabricImage.fromURL(url, { crossOrigin: 'anonymous' }).then((img) => {
+    resolveSymbolUrl(opt, symbolColor).then((url) => {
+      if (!url || cancelled) { fc.requestRenderAll(); return; }
+      return fabric.FabricImage.fromURL(url, { crossOrigin: 'anonymous' }).then((img) => {
+      if (cancelled) return;
       // Fit the whole symbol inside the box, preserving its aspect ratio.
       const s = box / Math.max(img.width || 100, img.height || 100);
       const halfW = ((img.width || 100) * s) / 2;
@@ -185,11 +226,13 @@ export default function NamePlateDesignerPage() {
       const cx = Math.min(Math.max(sx, halfW + m), CANVAS_W - halfW - m);
       const cy = Math.min(Math.max(sy, halfH + m), CANVAS_H - halfH - m);
       img.set({ left: cx, top: cy, originX: 'center', originY: 'center', scaleX: s, scaleY: s, selectable: false, evented: false });
-      symbolRef.current = img;
-      fc.add(img);
-      img.bringToFront?.();
-      fc.requestRenderAll();
+        symbolRef.current = img;
+        fc.add(img);
+        img.bringToFront?.();
+        fc.requestRenderAll();
+      });
     }).catch(() => {});
+    return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [symbolId, symbols, template, symbolColor]);
 

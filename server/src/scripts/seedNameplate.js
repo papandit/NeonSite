@@ -65,12 +65,12 @@ const PLATES = {
 
 // ---------- decorative elements (SVG) ----------
 const ELEMENTS = {
-  Flower: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><g fill="#d4541f">${Array.from({ length: 6 }, (_, i) => `<ellipse cx="50" cy="26" rx="10" ry="22" transform="rotate(${i * 60} 50 50)"/>`).join('')}</g><circle cx="50" cy="50" r="10" fill="#f6b23d"/></svg>`,
-  Leaf: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 8 C 80 30, 80 70, 50 92 C 20 70, 20 30, 50 8 Z" fill="#3f7d4f"/><path d="M50 12 L50 88" stroke="#2c5c39" stroke-width="3"/></svg>`,
-  Star: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 6 L61 38 L95 38 L67 58 L78 90 L50 70 L22 90 L33 58 L5 38 L39 38 Z" fill="#f6b23d"/></svg>`,
-  Heart: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 86 C 10 56, 12 20, 38 24 C 46 25, 50 34, 50 34 C 50 34, 54 25, 62 24 C 88 20, 90 56, 50 86 Z" fill="#e0556a"/></svg>`,
-  Om: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text x="50" y="72" font-size="72" text-anchor="middle" fill="#b5651d" font-family="serif">ॐ</text></svg>`,
-  Paw: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><g fill="#6d431f"><circle cx="30" cy="38" r="10"/><circle cx="50" cy="30" r="10"/><circle cx="70" cy="38" r="10"/><ellipse cx="50" cy="66" rx="20" ry="16"/></g></svg>`,
+  Flower: `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><g fill="#d4541f">${Array.from({ length: 6 }, (_, i) => `<ellipse cx="50" cy="26" rx="10" ry="22" transform="rotate(${i * 60} 50 50)"/>`).join('')}</g><circle cx="50" cy="50" r="10" fill="#f6b23d"/></svg>`,
+  Leaf: `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M50 8 C 80 30, 80 70, 50 92 C 20 70, 20 30, 50 8 Z" fill="#3f7d4f"/><path d="M50 12 L50 88" stroke="#2c5c39" stroke-width="3"/></svg>`,
+  Star: `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M50 6 L61 38 L95 38 L67 58 L78 90 L50 70 L22 90 L33 58 L5 38 L39 38 Z" fill="#f6b23d"/></svg>`,
+  Heart: `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M50 86 C 10 56, 12 20, 38 24 C 46 25, 50 34, 50 34 C 50 34, 54 25, 62 24 C 88 20, 90 56, 50 86 Z" fill="#e0556a"/></svg>`,
+  Om: `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><text x="50" y="72" font-size="72" text-anchor="middle" fill="#b5651d" font-family="serif">ॐ</text></svg>`,
+  Paw: `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><g fill="#6d431f"><circle cx="30" cy="38" r="10"/><circle cx="50" cy="30" r="10"/><circle cx="70" cy="38" r="10"/><ellipse cx="50" cy="66" rx="20" ry="16"/></g></svg>`,
 };
 
 const field = (over) => ({
