@@ -26,11 +26,12 @@ export const NP_COLLECTIONS = [
     { key: 'scale', label: 'Size × (1 = normal, 1.5 = bigger)', input: 'number' },
     { key: 'group', label: 'Group', input: 'text' },
   ] },
-  { key: 'shapes', label: 'Shapes', metaFields: [
+  // `hidden` = kept working (routes + CRUD) but not surfaced in the nav/dashboard.
+  { key: 'shapes', label: 'Shapes', hidden: true, metaFields: [
     { key: 'svg', label: 'SVG', input: 'file', kind: 'svg' },
     { key: 'thumbnail', label: 'Thumbnail', input: 'file', kind: 'image' },
   ] },
-  { key: 'materials', label: 'Materials', metaFields: [
+  { key: 'materials', label: 'Materials', hidden: true, metaFields: [
     { key: 'image', label: 'Image', input: 'file', kind: 'image' },
     { key: 'description', label: 'Description', input: 'text' },
   ] },
