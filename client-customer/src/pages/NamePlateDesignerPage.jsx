@@ -197,10 +197,11 @@ export default function NamePlateDesignerPage() {
       ensureGoogleFont(fam);
       const val = fields[key] || f?.placeholder || '';
       const maxW = CANVAS_W * 0.9;
+      const maxH = CANVAS_H * 0.9;
       t.set({ text: val || ' ', fill: st.color || '#1a1a1a', fontFamily: fam, fontSize: t.baseSize, angle: t.baseAngle || 0 });
-      // shrink only if the text would overflow the plate (auto-width IText)
+      // Shrink to fit the plate — width for long lines, height for multi-line text.
       let guard = 0;
-      while (t.width > maxW && t.fontSize > 8 && guard < 60) { t.set({ fontSize: t.fontSize - 1 }); guard++; }
+      while ((t.width > maxW || t.height > maxH) && t.fontSize > 8 && guard < 60) { t.set({ fontSize: t.fontSize - 1 }); guard++; }
       t.set({ left: (f?.x ?? 0.5) * CANVAS_W, top: (f?.y ?? 0.5) * CANVAS_H });
     }
     fc.requestRenderAll();
@@ -365,10 +366,12 @@ export default function NamePlateDesignerPage() {
                       </span>
                       <span className="text-xs text-gray-400">{(fields[f.key] || '').length}/{f.maxLength}</span>
                     </label>
-                    <input value={fields[f.key] || ''} maxLength={f.maxLength} placeholder={f.placeholder}
+                    {/* Textarea so Enter starts a new line — the plate renders each line. */}
+                    <textarea rows={2} value={fields[f.key] || ''} maxLength={f.maxLength} placeholder={f.placeholder}
                       onFocus={() => setActiveField(f.key)}
                       onChange={(e) => { setActiveField(f.key); setFields((s) => ({ ...s, [f.key]: e.target.value })); }}
-                      className="mt-1.5 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                      className="mt-1.5 w-full resize-y rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                    <p className="mt-1 text-[11px] text-gray-400">Press Enter for a new line.</p>
                   </div>
                 );
               })}
