@@ -334,9 +334,15 @@ export default function NamePlateDesignerPage() {
       <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_380px]">
         {/* Frame preview */}
         <div>
-          <div className="flex justify-center rounded-2xl border border-gray-200 bg-white p-3">
+          {/* Square stage — the canvas scales up to fill it while keeping its own
+              aspect (object-fit), so the layout still matches the admin builder. */}
+          <div className="np-stage flex aspect-square w-full items-center justify-center rounded-2xl border border-gray-200 bg-white p-4 sm:p-6">
             <canvas ref={canvasElRef} className="rounded-lg" />
           </div>
+          <style>{`
+            .np-stage .canvas-container { width: 100% !important; height: 100% !important; }
+            .np-stage .canvas-container canvas { width: 100% !important; height: 100% !important; object-fit: contain; display: block; }
+          `}</style>
           <p className="mt-2 text-center text-xs text-gray-400">Live preview — the print file is regenerated at high resolution server-side.</p>
         </div>
 
