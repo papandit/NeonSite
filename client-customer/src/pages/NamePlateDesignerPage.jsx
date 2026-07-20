@@ -76,6 +76,8 @@ export default function NamePlateDesignerPage() {
   const [activeField, setActiveField] = useState(null); // which field the font/colour pickers edit
   const [symbolId, setSymbolId] = useState(null);   // chosen element id
   const [symbolColor, setSymbolColor] = useState('#c8a04d'); // colour for recolourable symbols
+  const [backgroundId, setBackgroundId] = useState(null);    // customer-chosen backdrop
+  const [bgGroup, setBgGroup] = useState('');                // which background section is open
   const [price, setPrice] = useState(0);
   const [errors, setErrors] = useState([]);
   const [adding, setAdding] = useState(false);
@@ -123,6 +125,25 @@ export default function NamePlateDesignerPage() {
     return Object.entries(g);
   }, [symbols]);
 
+  // Customer-chosen backgrounds (photo plates), grouped by meta.group.
+  const backgrounds = useMemo(() => (data?.options.backgrounds || []).filter((b) => elImg(b)), [data]);
+  const bgAllowed = Boolean(template?.backgroundEnabled) && backgrounds.length > 0;
+  // "Name only" plates are hand-crafted: collect the text, don't restyle a preview.
+  const textOnly = Boolean(template?.textOnly);
+  const bgGroups = useMemo(() => {
+    const g = {};
+    for (const b of backgrounds) { const k = b.meta?.group || 'Backgrounds'; (g[k] ||= []).push(b); }
+    return Object.entries(g);
+  }, [backgrounds]);
+
+  // Default to the first background once the template offers them.
+  useEffect(() => {
+    if (!bgAllowed) return;
+    if (backgroundId && backgrounds.some((b) => b._id === backgroundId)) return;
+    const first = backgrounds[0];
+    if (first) { setBackgroundId(first._id); setBgGroup(first.meta?.group || 'Backgrounds'); }
+  }, [bgAllowed, backgrounds, backgroundId]);
+
   // Load all offered fonts so the grid + canvas render them.
   useEffect(() => {
     if (!data) return;
@@ -138,21 +159,11 @@ export default function NamePlateDesignerPage() {
     fcRef.current = fc;
     fc.setDimensions({ width: CANVAS_W, height: CANVAS_H });
 
-    // Frame image (transparent PNG preferred, else base plate).
-    const frameUrl = template.transparentPngUrl || template.basePlateImageUrl || template.previewImageUrl;
-    if (frameUrl) {
-      fabric.FabricImage.fromURL(frameUrl, { crossOrigin: 'anonymous' }).then((img) => {
-        const s = Math.min(CANVAS_W / img.width, CANVAS_H / img.height);
-        img.set({ scaleX: s, scaleY: s, originX: 'center', originY: 'center', left: CANVAS_W / 2, top: CANVAS_H / 2 });
-        fc.backgroundImage = img;
-        fc.requestRenderAll();
-      }).catch(() => {});
-    }
-
     // One locked, auto-width IText per active field — placed at the admin's exact
     // position, size and rotation so the storefront mirrors the template builder.
     const d = dataRef.current;
-    (d.template.textFields || []).filter((f) => f.status !== 'inactive').forEach((f) => {
+    // Name-only plates are crafted by hand — never draw the text on the preview.
+    if (!d.template.textOnly) (d.template.textFields || []).filter((f) => f.status !== 'inactive').forEach((f) => {
       const t = new fabric.IText(f.defaultValue || f.placeholder || f.label || 'Text', {
         left: (f.x ?? 0.5) * CANVAS_W, top: (f.y ?? 0.5) * CANVAS_H,
         originX: 'center', originY: 'center',
@@ -196,6 +207,26 @@ export default function NamePlateDesignerPage() {
   }, [fields, styles]);
 
   useEffect(() => { reflow(); }, [reflow]);
+
+  // ---- plate backdrop: the customer's chosen background, else the base plate ----
+  useEffect(() => {
+    const fc = fcRef.current;
+    if (!fc || !template) return;
+    const chosen = bgAllowed ? backgrounds.find((b) => b._id === backgroundId) : null;
+    const url = (chosen && elImg(chosen))
+      || template.transparentPngUrl || template.basePlateImageUrl || template.previewImageUrl;
+    if (!url) { fc.backgroundImage = null; fc.requestRenderAll(); return; }
+    let cancelled = false;
+    fabric.FabricImage.fromURL(url, { crossOrigin: 'anonymous' }).then((img) => {
+      if (cancelled) return;
+      const s = Math.min(CANVAS_W / img.width, CANVAS_H / img.height);
+      img.set({ scaleX: s, scaleY: s, originX: 'center', originY: 'center', left: CANVAS_W / 2, top: CANVAS_H / 2 });
+      fc.backgroundImage = img;
+      fc.requestRenderAll();
+    }).catch(() => {});
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [template, backgroundId, bgAllowed, backgrounds]);
 
   // ---- symbol (element/icon) — sized + positioned by the admin template ----
   useEffect(() => {
@@ -244,7 +275,7 @@ export default function NamePlateDesignerPage() {
   useEffect(() => {
     if (!template) return;
     const rep = styles[Object.keys(styles)[0]] || {};
-    const design = { fields, selections: { font: fontIdFor(rep.font), color: colorIdFor(rep.color) }, elements: symbolId ? [{ id: symbolId }] : [] };
+    const design = { fields, selections: { font: fontIdFor(rep.font), color: colorIdFor(rep.color), background: bgAllowed ? backgroundId : undefined }, elements: symbolId ? [{ id: symbolId }] : [] };
     const t = setTimeout(() => {
       quoteNpDesign(slug, design).then((qd) => { setPrice(qd.pricePaise); setErrors(qd.errors || []); }).catch(() => {});
     }, 300);
@@ -274,7 +305,7 @@ export default function NamePlateDesignerPage() {
       const rep = styles[Object.keys(styles)[0]] || {};
       const design = {
         fields,
-        selections: { font: fontIdFor(rep.font), color: colorIdFor(rep.color), fontFamily: rep.font, colorHex: rep.color },
+        selections: { font: fontIdFor(rep.font), color: colorIdFor(rep.color), fontFamily: rep.font, colorHex: rep.color, background: bgAllowed ? backgroundId : undefined },
         fieldStyles,
         elements: symbolId ? [{ id: symbolId, colorHex: symbolColor }] : [],
       };
@@ -314,7 +345,7 @@ export default function NamePlateDesignerPage() {
           {/* Text fields — click one to style it; each keeps its own font + colour */}
           <div className="rounded-2xl border border-gray-200 bg-white p-5">
             <h3 className="text-xs font-semibold uppercase tracking-wide text-indigo-600">Your details</h3>
-            <p className="mt-1 text-xs text-gray-400">Select a line, then pick its font &amp; colour below.</p>
+            <p className="mt-1 text-xs text-gray-400">{textOnly ? "Type the name exactly as you want it crafted — we'll make it in the style shown." : "Select a line, then pick its font & colour below."}</p>
             <div className="mt-3 space-y-3">
               {activeFields.map((f) => {
                 const on = activeField === f.key;
@@ -339,7 +370,7 @@ export default function NamePlateDesignerPage() {
           </div>
 
           {/* Choose Font — applies to the selected line */}
-          {fonts.length > 0 && (
+          {!textOnly && fonts.length > 0 && (
             <div className="rounded-2xl border border-gray-200 bg-white p-5">
               <div className="flex items-center justify-between">
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-indigo-600">Choose font</h3>
@@ -360,7 +391,7 @@ export default function NamePlateDesignerPage() {
           )}
 
           {/* Choose Colour — applies to the selected line */}
-          {colors.length > 0 && (
+          {!textOnly && colors.length > 0 && (
             <div className="rounded-2xl border border-gray-200 bg-white p-5">
               <div className="flex items-center justify-between">
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-indigo-600">Choose colour</h3>
@@ -376,8 +407,36 @@ export default function NamePlateDesignerPage() {
             </div>
           )}
 
+          {/* Choose Background — photo plates, grouped into sections */}
+          {bgAllowed && (
+            <div className="rounded-2xl border border-gray-200 bg-white p-5">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-indigo-600">Choose background</h3>
+              {bgGroups.length > 1 && (
+                <select
+                  value={bgGroup}
+                  onChange={(e) => setBgGroup(e.target.value)}
+                  className="mt-3 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                >
+                  {bgGroups.map(([g]) => <option key={g} value={g}>{g}</option>)}
+                </select>
+              )}
+              <div className="mt-3 grid max-h-72 grid-cols-3 gap-2 overflow-y-auto pr-1">
+                {(bgGroups.find(([g]) => g === bgGroup)?.[1] || backgrounds).map((b) => (
+                  <button
+                    key={b._id}
+                    onClick={() => setBackgroundId(b._id)}
+                    title={b.name}
+                    className={`overflow-hidden rounded-lg border transition ${backgroundId === b._id ? 'border-indigo-500 ring-2 ring-indigo-200' : 'border-gray-200 hover:border-indigo-300'}`}
+                  >
+                    <img src={elImg(b)} alt={b.name} className="aspect-square w-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Choose Symbol — grouped by section (religion etc.), recolourable */}
-          {template.symbolEnabled !== false && symbols.length > 0 && (
+          {!textOnly && template.symbolEnabled !== false && symbols.length > 0 && (
             <div className="rounded-2xl border border-gray-200 bg-white p-5">
               <h3 className="text-xs font-semibold uppercase tracking-wide text-indigo-600">Choose symbol</h3>
               <button onClick={() => setSymbolId(null)} className={`mt-3 rounded-full border px-3 py-1 text-xs font-medium transition ${!symbolId ? 'border-indigo-500 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-500 hover:border-indigo-300'}`}>None</button>

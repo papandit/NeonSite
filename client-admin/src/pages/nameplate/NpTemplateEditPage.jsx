@@ -46,7 +46,7 @@ const empty = () => ({
   name: '', category: '', status: 'draft',
   previewImageUrl: '', basePlateImageUrl: '', transparentPngUrl: '',
   widthMm: 300, heightMm: 150, baseRupees: 0, compareRupees: '',
-  symbolEnabled: true, symbolScale: 0.2, symbolX: 0.5, symbolY: 0.2,
+  symbolEnabled: true, backgroundEnabled: false, textOnly: false, symbolScale: 0.2, symbolX: 0.5, symbolY: 0.2,
   textFields: [], ...Object.fromEntries(ALLOW_KINDS.map(([, a]) => [a, []])),
 });
 
@@ -81,7 +81,7 @@ export default function NpTemplateEditPage() {
           previewImageUrl: t.previewImageUrl || '', basePlateImageUrl: t.basePlateImageUrl || '', transparentPngUrl: t.transparentPngUrl || '',
           widthMm: t.widthMm, heightMm: t.heightMm, baseRupees: paiseToRupees(t.basePricePaise),
           compareRupees: t.compareAtPricePaise ? paiseToRupees(t.compareAtPricePaise) : '',
-          symbolEnabled: t.symbolEnabled !== false,
+          symbolEnabled: t.symbolEnabled !== false, backgroundEnabled: Boolean(t.backgroundEnabled), textOnly: Boolean(t.textOnly),
           symbolScale: t.symbolScale ?? 0.2, symbolX: t.symbolX ?? 0.5, symbolY: t.symbolY ?? 0.2,
           textFields: (t.textFields || []).map((f) => ({ ...emptyField(), ...f })),
           ...Object.fromEntries(ALLOW_KINDS.map(([, a]) => [a, (t[a] || []).map(String)])),
@@ -120,7 +120,7 @@ export default function NpTemplateEditPage() {
         widthMm: Number(tpl.widthMm), heightMm: Number(tpl.heightMm),
         basePricePaise: rupeesToPaise(tpl.baseRupees || 0),
         compareAtPricePaise: tpl.compareRupees ? rupeesToPaise(tpl.compareRupees) : 0,
-        symbolEnabled: Boolean(tpl.symbolEnabled),
+        symbolEnabled: Boolean(tpl.symbolEnabled), backgroundEnabled: Boolean(tpl.backgroundEnabled), textOnly: Boolean(tpl.textOnly),
         symbolScale: Number(tpl.symbolScale) || 0.2, symbolX: Number(tpl.symbolX), symbolY: Number(tpl.symbolY),
         textFields: tpl.textFields.filter((f) => f.key && f.label),
         ...Object.fromEntries(ALLOW_KINDS.map(([, a]) => [a, tpl[a]])),
@@ -207,6 +207,38 @@ export default function NpTemplateEditPage() {
             symbol={tpl.symbolEnabled ? { x: Number(tpl.symbolX), y: Number(tpl.symbolY), scale: Number(tpl.symbolScale) } : null}
             onSymbolChange={(p) => setTpl((t) => ({ ...t, symbolX: p.x ?? t.symbolX, symbolY: p.y ?? t.symbolY, symbolScale: p.scale ?? t.symbolScale }))}
           />
+        </section>
+
+        {/* Name-only plates (hand-crafted from the customer's text) */}
+        <section className="rounded-xl border border-slate-200 bg-white p-5">
+          <div className="mb-1 flex items-center justify-between">
+            <h3 className="font-semibold">Name only</h3>
+            <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-600">
+              <input type="checkbox" checked={tpl.textOnly} onChange={(e) => set('textOnly', e.target.checked)} className="h-4 w-4 rounded border-slate-300" />
+              Customer just types the name
+            </label>
+          </div>
+          <p className="text-xs text-slate-400">
+            {tpl.textOnly
+              ? 'On — the storefront shows only the text box (no font/colour/symbol pickers) and does NOT draw the text on the preview. Use this for hand-crafted plates like calligraphy or regional-language cutouts; the typed name reaches you on the order.'
+              : 'Off — the customer designs live on the plate (text is drawn on the preview with their font & colour).'}
+          </p>
+        </section>
+
+        {/* Customer-chosen background (photo plate) */}
+        <section className="rounded-xl border border-slate-200 bg-white p-5">
+          <div className="mb-1 flex items-center justify-between">
+            <h3 className="font-semibold">Background</h3>
+            <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-600">
+              <input type="checkbox" checked={tpl.backgroundEnabled} onChange={(e) => set('backgroundEnabled', e.target.checked)} className="h-4 w-4 rounded border-slate-300" />
+              Let customers choose the background
+            </label>
+          </div>
+          <p className="text-xs text-slate-400">
+            {tpl.backgroundEnabled
+              ? <>Turns this into a photo name plate — the customer picks a background (grouped by its <span className="font-medium text-slate-500">Group / section</span>) and their text sits on it. Pick which ones under “Allowed options → Backgrounds”; add artwork in <span className="font-medium text-slate-500">Name Plate Studio → Backgrounds</span>.</>
+              : 'Off — the plate always uses the base plate image above.'}
+          </p>
         </section>
 
         {/* Symbol placement */}

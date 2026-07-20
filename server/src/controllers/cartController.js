@@ -15,7 +15,7 @@ import { getNeonProduct } from '../services/neon/neonProduct.js';
 import NpTemplate from '../modules/nameplate/models/NpTemplate.js';
 import { quoteNpDesign } from '../modules/nameplate/services/quoteDesign.js';
 import { getNameplateProduct } from '../modules/nameplate/services/nameplateProduct.js';
-import { NpColor, NpFont, NpElement, NpIcon } from '../modules/nameplate/registry.js';
+import { NpColor, NpFont, NpElement, NpIcon, NpBackground } from '../modules/nameplate/registry.js';
 
 // Snapshot human-readable names/images for the customer's name-plate choices so
 // the order shows exactly what was selected, even if options change later.
@@ -29,6 +29,10 @@ async function enrichNameplateSelections(selections = {}, elements = []) {
   if (sel.font && !sel.fontName) {
     const f = await NpFont.findById(sel.font).lean().catch(() => null);
     if (f) sel.fontName = f.name;
+  }
+  if (sel.background && !sel.backgroundName) {
+    const b = await NpBackground.findById(sel.background).lean().catch(() => null);
+    if (b) { sel.backgroundName = b.name; sel.backgroundImage = npElImg(b); }
   }
   const enrichedElements = [];
   for (const el of elements || []) {

@@ -41,6 +41,7 @@ export const NP_COLLECTIONS = [
   ] },
   { key: 'backgrounds', label: 'Backgrounds', metaFields: [
     { key: 'image', label: 'Image / texture', input: 'file', kind: 'image' },
+    { key: 'group', label: 'Group / section (e.g. Individuals & Couples)', input: 'text' },
     { key: 'type', label: 'Type (color/texture)', input: 'text' },
   ] },
 ];

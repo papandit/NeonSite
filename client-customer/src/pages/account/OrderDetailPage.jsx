@@ -45,7 +45,7 @@ function itemDetails(design) {
     const size = n.templateWidthMm && n.templateHeightMm ? `${n.templateWidthMm} × ${n.templateHeightMm} mm` : null;
     return {
       text: Object.values(n.fields || {}).filter(Boolean).join(' · '),
-      rows: [['Template', n.templateName], ['Font', fonts.length ? fonts.join(', ') : sel.fontName || sel.fontFamily], ['Size', size]].filter(([, v]) => v),
+      rows: [['Template', n.templateName], ['Background', sel.backgroundName], ['Font', fonts.length ? fonts.join(', ') : sel.fontName || sel.fontFamily], ['Size', size]].filter(([, v]) => v),
       swatch: sel.colorHex ? { hex: sel.colorHex, name: sel.colorName } : null,
       symbols: (n.elements || []).filter((e) => e?.name || e?.image),
     };

@@ -77,6 +77,13 @@ const NpTemplateSchema = new Schema(
     // Whether this template offers a symbol at all. When false the builder shows
     // no symbol slot and the storefront hides the "Choose symbol" picker.
     symbolEnabled: { type: Boolean, default: true },
+    // When true the customer picks the plate's background artwork (photo plate);
+    // the chosen background replaces the base plate behind their text.
+    backgroundEnabled: { type: Boolean, default: false },
+    // "Name only": the plate is crafted by hand from the customer's text, so the
+    // storefront just collects the name — no live restyling, no text drawn on the
+    // preview. The typed text still reaches the admin on the order.
+    textOnly: { type: Boolean, default: false },
     // Placement of the customer-chosen symbol on the plate (normalized 0..1).
     // symbolScale = symbol box as a fraction of plate width (aspect preserved).
     symbolScale: { type: Number, default: 0.2, min: 0.02, max: 1 },
