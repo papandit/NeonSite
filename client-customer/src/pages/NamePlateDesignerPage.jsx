@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import * as fabric from 'fabric';
 import { getNpTemplate, quoteNpDesign } from '../services/nameplate';
 import { ensureGoogleFont } from '../lib/loadFont';
-import { uploadPreview } from '../services/pricing';
+import { uploadPreview, uploadCustomerImage } from '../services/pricing';
 import { addNameplateToCart } from '../store/cartSlice';
 import { selectIsAuthenticated } from '../store/authSlice';
 import { formatPaise } from '../utils/money';
@@ -78,6 +78,9 @@ export default function NamePlateDesignerPage() {
   const [symbolColor, setSymbolColor] = useState('#c8a04d'); // colour for recolourable symbols
   const [backgroundId, setBackgroundId] = useState(null);    // customer-chosen backdrop
   const [bgGroup, setBgGroup] = useState('');                // which background section is open
+  const [customBg, setCustomBg] = useState(null);             // customer-uploaded background URL
+  const [bgUploading, setBgUploading] = useState(false);
+  const [bgError, setBgError] = useState(null);
   const [price, setPrice] = useState(0);
   const [errors, setErrors] = useState([]);
   const [adding, setAdding] = useState(false);
@@ -127,7 +130,7 @@ export default function NamePlateDesignerPage() {
 
   // Customer-chosen backgrounds (photo plates), grouped by meta.group.
   const backgrounds = useMemo(() => (data?.options.backgrounds || []).filter((b) => elImg(b)), [data]);
-  const bgAllowed = Boolean(template?.backgroundEnabled) && backgrounds.length > 0;
+  const bgAllowed = Boolean(template?.backgroundEnabled);
   // "Name only" plates are hand-crafted: collect the text, don't restyle a preview.
   const textOnly = Boolean(template?.textOnly);
   const bgGroups = useMemo(() => {
@@ -143,6 +146,30 @@ export default function NamePlateDesignerPage() {
     const first = backgrounds[0];
     if (first) { setBackgroundId(first._id); setBgGroup(first.meta?.group || 'Backgrounds'); }
   }, [bgAllowed, backgrounds, backgroundId]);
+
+  // Upload the customer's own background — stored server-side, then used as the
+  // plate backdrop (fitted inside the plate, so it never crops).
+  const onUploadBackground = async (file) => {
+    if (!file) return;
+    setBgError(null);
+    if (!/^image\/(png|jpe?g|webp)$/.test(file.type)) { setBgError('Please choose a PNG, JPEG or WebP image.'); return; }
+    if (file.size > 8 * 1024 * 1024) { setBgError('That image is over 8MB — please pick a smaller one.'); return; }
+    setBgUploading(true);
+    try {
+      const dataUrl = await new Promise((resolve, reject) => {
+        const fr = new FileReader();
+        fr.onload = () => resolve(fr.result);
+        fr.onerror = () => reject(new Error('read failed'));
+        fr.readAsDataURL(file);
+      });
+      const { url } = await uploadCustomerImage(dataUrl);
+      setCustomBg(url);
+    } catch (e) {
+      setBgError(apiErrorMessage(e, 'Could not upload that image'));
+    } finally {
+      setBgUploading(false);
+    }
+  };
 
   // Load all offered fonts so the grid + canvas render them.
   useEffect(() => {
@@ -214,7 +241,8 @@ export default function NamePlateDesignerPage() {
     const fc = fcRef.current;
     if (!fc || !template) return;
     const chosen = bgAllowed ? backgrounds.find((b) => b._id === backgroundId) : null;
-    const url = (chosen && elImg(chosen))
+    const url = (bgAllowed && customBg)
+      || (chosen && elImg(chosen))
       || template.transparentPngUrl || template.basePlateImageUrl || template.previewImageUrl;
     if (!url) { fc.backgroundImage = null; fc.requestRenderAll(); return; }
     let cancelled = false;
@@ -227,7 +255,7 @@ export default function NamePlateDesignerPage() {
     }).catch(() => {});
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [template, backgroundId, bgAllowed, backgrounds]);
+  }, [template, backgroundId, bgAllowed, backgrounds, customBg]);
 
   // ---- symbol (element/icon) — sized + positioned by the admin template ----
   useEffect(() => {
@@ -306,7 +334,7 @@ export default function NamePlateDesignerPage() {
       const rep = styles[Object.keys(styles)[0]] || {};
       const design = {
         fields,
-        selections: { font: fontIdFor(rep.font), color: colorIdFor(rep.color), fontFamily: rep.font, colorHex: rep.color, background: bgAllowed ? backgroundId : undefined },
+        selections: { font: fontIdFor(rep.font), color: colorIdFor(rep.color), fontFamily: rep.font, colorHex: rep.color, background: bgAllowed && !customBg ? backgroundId : undefined, customBackgroundUrl: bgAllowed ? customBg || undefined : undefined },
         fieldStyles,
         elements: symbolId ? [{ id: symbolId, colorHex: symbolColor }] : [],
       };
@@ -316,7 +344,7 @@ export default function NamePlateDesignerPage() {
     } catch (err) { setError(apiErrorMessage(err, 'Could not add to cart')); }
     finally { setAdding(false); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [template, fields, styles, symbolId, slug, isAuthed]);
+  }, [template, fields, styles, symbolId, slug, isAuthed, customBg, backgroundId, bgAllowed]);
 
   const activeFields = useMemo(() => (template?.textFields || []).filter((f) => f.status !== 'inactive'), [template]);
   const activeStyle = styles[activeField] || {};
@@ -430,17 +458,45 @@ export default function NamePlateDesignerPage() {
                 </select>
               )}
               <div className="mt-3 grid max-h-72 grid-cols-3 gap-2 overflow-y-auto pr-1">
+                {/* Upload your own */}
+                <label
+                  title="Upload your own background"
+                  className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed p-1 text-center transition ${customBg ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300 hover:border-indigo-400 hover:bg-indigo-50/40'}`}
+                >
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    className="hidden"
+                    onChange={(e) => { onUploadBackground(e.target.files?.[0]); e.target.value = ''; }}
+                  />
+                  {customBg ? (
+                    <img src={customBg} alt="Your background" className="h-full w-full rounded object-cover" />
+                  ) : (
+                    <>
+                      <span className="text-lg text-indigo-500">{bgUploading ? '…' : '⬆'}</span>
+                      <span className="text-[10px] font-semibold leading-tight text-gray-500">{bgUploading ? 'Uploading' : 'Upload yours'}</span>
+                    </>
+                  )}
+                </label>
+
                 {(bgGroups.find(([g]) => g === bgGroup)?.[1] || backgrounds).map((b) => (
                   <button
                     key={b._id}
-                    onClick={() => setBackgroundId(b._id)}
+                    onClick={() => { setBackgroundId(b._id); setCustomBg(null); }}
                     title={b.name}
-                    className={`overflow-hidden rounded-lg border transition ${backgroundId === b._id ? 'border-indigo-500 ring-2 ring-indigo-200' : 'border-gray-200 hover:border-indigo-300'}`}
+                    className={`overflow-hidden rounded-lg border transition ${!customBg && backgroundId === b._id ? 'border-indigo-500 ring-2 ring-indigo-200' : 'border-gray-200 hover:border-indigo-300'}`}
                   >
                     <img src={elImg(b)} alt={b.name} className="aspect-square w-full object-cover" />
                   </button>
                 ))}
               </div>
+              {bgError && <p className="mt-2 text-xs text-red-600">{bgError}</p>}
+              {customBg && (
+                <button onClick={() => setCustomBg(null)} className="mt-2 text-xs font-medium text-indigo-600 hover:underline">
+                  Remove my image
+                </button>
+              )}
+              <p className="mt-2 text-[11px] text-gray-400">Your image is fitted inside the plate — nothing gets cropped.</p>
             </div>
           )}
 

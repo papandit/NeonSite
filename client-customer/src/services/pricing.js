@@ -13,3 +13,8 @@ export function requestQuote(productId, designDocument) {
 export function uploadPreview(dataUrl) {
   return api.post('/render/preview-upload', { dataUrl }).then((r) => r.data.data);
 }
+
+/** Upload a customer-supplied image (e.g. their own background). Returns { url }. */
+export function uploadCustomerImage(dataUrl) {
+  return api.post('/render/customer-upload', { dataUrl }).then((r) => r.data.data);
+}

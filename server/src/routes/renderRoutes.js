@@ -3,10 +3,11 @@
 // gate). Rate limiting is added in Phase 6.
 
 import { Router } from 'express';
-import { uploadPreview } from '../controllers/render/previewController.js';
+import { uploadPreview, uploadCustomerImage } from '../controllers/render/previewController.js';
 
 const router = Router();
 
 router.post('/preview-upload', uploadPreview);
+router.post('/customer-upload', uploadCustomerImage);
 
 export default router;
