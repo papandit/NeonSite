@@ -60,6 +60,13 @@ const field = (over) => ({
 
 async function run() {
   await connectDB();
+  // These are showcase/demo templates — only (re)create when explicitly opted in,
+  // so a routine re-run never resurrects them after you've deleted them.
+  if (process.env.SEED_DEMO !== '1') {
+    console.log('Skipping demo frame templates — set SEED_DEMO=1 to (re)create them.');
+    await disconnectDB();
+    return;
+  }
   const cat = async (name) => (await NpCategory.findOneAndUpdate({ name }, { $setOnInsert: { name, status: 'active' }, $set: { slug: slugify(name) } }, { new: true, upsert: true, setDefaultsOnInsert: true }))._id;
   const weddingCat = await cat('For Couples');
   const familyCat = await cat('Family of 3-4');

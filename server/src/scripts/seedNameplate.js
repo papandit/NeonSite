@@ -82,22 +82,11 @@ const field = (over) => ({
 async function run() {
   await connectDB();
 
-  // Categories — the 15-strong name-plate collection (replaces the old set).
-  await NpCategory.deleteMany({ name: { $in: ['Wooden Name Plates', 'Acrylic Name Plates', 'Villa Name Plates', 'Office Name Plates', 'LED Name Plates', 'Apartment Name Plates'] } });
-  const catDefs = [
-    'Metal Outdoor', 'Wooden', 'Acrylic', 'Resin', 'Modern', 'For Office',
-    'With Pets', 'With Lights', 'For Desk', 'For Villas', 'Indian Languages',
-    'For Couples', 'Family of 3-4', 'Religious Themes', 'Cute Caricature',
-  ];
-  const cats = {};
-  for (let i = 0; i < catDefs.length; i++) {
-    const name = catDefs[i];
-    cats[name] = await NpCategory.findOneAndUpdate(
-      { name },
-      { $setOnInsert: { name, status: 'active' }, $set: { sortOrder: i, slug: slugify(name) } },
-      { new: true, upsert: true, setDefaultsOnInsert: true },
-    );
-  }
+  // Demo data (the 15 categories + the seed-np-* showcase templates) is
+  // DESTRUCTIVE / re-adding, so it only runs when you explicitly opt in with
+  // SEED_DEMO=1. A routine re-run then just refreshes the safe upserts below
+  // (fonts / colours / elements) and never resurrects deleted demo data.
+  const DEMO = process.env.SEED_DEMO === '1';
 
   // Fonts — the full catalogue (all families are preloaded in the customer app).
   const FONT_FAMILIES = [
@@ -143,6 +132,31 @@ async function run() {
   for (const [name, svg] of Object.entries(ELEMENTS)) {
     const uri = dataUri(svg);
     await NpElement.findOneAndUpdate({ name }, { $setOnInsert: { name, status: 'active', priceDeltaPaise: 2000, imageUrl: uri, meta: { image: uri } } }, { upsert: true, setDefaultsOnInsert: true });
+  }
+
+  if (!DEMO) {
+    const [fN, cN, eN] = await Promise.all([NpFont.countDocuments(), NpColor.countDocuments(), NpElement.countDocuments()]);
+    console.log(`Name Plate seed (safe): fonts ${fN}, colors ${cN}, elements ${eN}. Skipped demo categories + templates — set SEED_DEMO=1 to (re)create them.`);
+    await disconnectDB();
+    return;
+  }
+
+  // ---- DEMO ONLY (SEED_DEMO=1) — replaces categories + recreates showcase templates ----
+  // Categories — the 15-strong name-plate collection (replaces the old set).
+  await NpCategory.deleteMany({ name: { $in: ['Wooden Name Plates', 'Acrylic Name Plates', 'Villa Name Plates', 'Office Name Plates', 'LED Name Plates', 'Apartment Name Plates'] } });
+  const catDefs = [
+    'Metal Outdoor', 'Wooden', 'Acrylic', 'Resin', 'Modern', 'For Office',
+    'With Pets', 'With Lights', 'For Desk', 'For Villas', 'Indian Languages',
+    'For Couples', 'Family of 3-4', 'Religious Themes', 'Cute Caricature',
+  ];
+  const cats = {};
+  for (let i = 0; i < catDefs.length; i++) {
+    const name = catDefs[i];
+    cats[name] = await NpCategory.findOneAndUpdate(
+      { name },
+      { $setOnInsert: { name, status: 'active' }, $set: { sortOrder: i, slug: slugify(name) } },
+      { new: true, upsert: true, setDefaultsOnInsert: true },
+    );
   }
 
   // Templates (wipe the seeded set, recreate)
