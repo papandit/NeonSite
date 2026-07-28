@@ -5,7 +5,7 @@
 import ApiError from '../../utils/ApiError.js';
 import asyncHandler from '../../utils/asyncHandler.js';
 import { sendSuccess } from '../../utils/apiResponse.js';
-import { persistAsset, requestOrigin } from '../../services/assets/assetStore.js';
+import { persistAsset } from '../../services/assets/assetStore.js';
 import { sanitizeSvg } from '../../services/cloudinary/sanitizeSvg.js';
 
 function requireFile(req) {
@@ -23,7 +23,6 @@ export const uploadImageAsset = asyncHandler(async (req, res) => {
     folder: req.query.folder || 'images',
     contentType: file.mimetype,
     filename: file.originalname,
-    baseUrl: requestOrigin(req),
   });
   return sendSuccess(res, result, 201);
 });
@@ -37,7 +36,6 @@ export const uploadFontAsset = asyncHandler(async (req, res) => {
     folder: 'fonts',
     contentType: file.mimetype || 'font/ttf',
     filename: file.originalname,
-    baseUrl: requestOrigin(req),
   });
   return sendSuccess(res, { ...result, format: result.format || ext }, 201);
 });
@@ -51,7 +49,6 @@ export const uploadSvgAsset = asyncHandler(async (req, res) => {
     folder: 'icons',
     contentType: 'image/svg+xml',
     filename: file.originalname,
-    baseUrl: requestOrigin(req),
   });
   return sendSuccess(res, result, 201);
 });

@@ -82,7 +82,6 @@ async function upload(file) {
     folder: 'neon-products',
     contentType: MIME[path.extname(file).toLowerCase()] || 'image/png',
     filename: path.basename(file),
-    baseUrl: BASE_URL,
   });
   return res.url;
 }

@@ -8,7 +8,7 @@ import asyncHandler from '../../utils/asyncHandler.js';
 import { sendSuccess } from '../../utils/apiResponse.js';
 import ApiError from '../../utils/ApiError.js';
 import { uploadBuffer, isCloudinaryConfigured } from '../../services/cloudinary/index.js';
-import { persistAsset, requestOrigin } from '../../services/assets/assetStore.js';
+import { persistAsset } from '../../services/assets/assetStore.js';
 
 const DATA_URL_RE = /^data:(image\/(png|jpeg|webp));base64,([A-Za-z0-9+/=]+)$/;
 
@@ -58,7 +58,6 @@ export const uploadCustomerImage = asyncHandler(async (req, res) => {
     folder: 'customer-backgrounds',
     contentType: match[1],
     filename: 'background',
-    baseUrl: requestOrigin(req),
   });
   return sendSuccess(res, { url: result.url }, 201);
 });
