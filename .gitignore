@@ -47,3 +47,6 @@ Thumbs.db
 coverage/
 .nyc_output/
 Religion Symbols.html
+
+# Drive download archives (the extracted folders are committed instead)
+drive-download-*.zip
