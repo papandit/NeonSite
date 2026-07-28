@@ -27,6 +27,8 @@ export default function ProductBuilderPage() {
   const [colors, setColors] = useState([]);
   const [colorName, setColorName] = useState('');
   const [colorHex, setColorHex] = useState('#111827');
+  const [lightOnImageUrl, setLightOnImageUrl] = useState('');
+  const [lightOffImageUrl, setLightOffImageUrl] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -56,14 +58,20 @@ export default function ProductBuilderPage() {
             dimensions: product.dimensions || '',
             whatsIncluded: product.whatsIncluded || '',
             careHandling: product.careHandling || '',
+            isNeon: Boolean(product.isNeon),
+            sizeText: product.sizeText || '',
+            sizeUnits: product.sizeUnits || '',
+            colorText: product.colorText || '',
             priceRupees: paiseToRupees(product.basePricePaise),
             compareRupees: product.compareAtPricePaise ? paiseToRupees(product.compareAtPricePaise) : '',
             status: product.status,
           });
           setImages(product.images || []);
           setColors(product.colors || []);
+          setLightOnImageUrl(product.lightOnImageUrl || '');
+          setLightOffImageUrl(product.lightOffImageUrl || '');
         } else {
-          reset({ name: '', category: '', subCategory: '', description: '', highlights: '', material: '', dimensions: '', whatsIncluded: '', careHandling: '', priceRupees: 0, compareRupees: '', status: 'active' });
+          reset({ name: '', category: '', subCategory: '', description: '', highlights: '', material: '', dimensions: '', whatsIncluded: '', careHandling: '', priceRupees: 0, compareRupees: '', status: 'active', isNeon: false, sizeText: '', sizeUnits: 'Inches', colorText: '' });
         }
         setError(null);
       } catch (err) {
@@ -107,6 +115,9 @@ export default function ProductBuilderPage() {
         status: values.status,
         images,
         colors,
+        isNeon: Boolean(values.isNeon),
+        lightOnImageUrl, lightOffImageUrl,
+        sizeText: values.sizeText, sizeUnits: values.sizeUnits, colorText: values.colorText,
       };
       if (isEdit) await products.update(id, payload);
       else await products.create(payload);
@@ -233,6 +244,37 @@ export default function ProductBuilderPage() {
               <input value={colorName} onChange={(e) => setColorName(e.target.value)} placeholder="e.g. Midnight Black" onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addColor(); } }} className="mt-1 w-48 rounded-md border border-slate-300 px-3 py-2 text-sm" />
             </div>
             <button type="button" onClick={addColor} className="rounded-full bg-slate-800 px-3 py-2 text-sm font-medium text-white hover:bg-slate-900">Add colour</button>
+          </div>
+        </section>
+
+        {/* Ready-made neon signs — light on/off artwork + physical specs */}
+        <section className="rounded-xl border border-slate-200 bg-white p-5">
+          <div className="mb-1 flex items-center justify-between">
+            <h3 className="font-semibold">Neon sign</h3>
+            <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-600">
+              <input type="checkbox" className="h-4 w-4 rounded border-slate-300" {...register('isNeon')} />
+              This is a neon sign
+            </label>
+          </div>
+          <p className="mb-4 text-xs text-slate-400">Turn on for ready-made neon signs. The storefront then shows a light ON/OFF switch on the product page and lights the card up on hover.</p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <FileUpload label="Light ON image (lit)" kind="image" folder="neon-products" value={lightOnImageUrl} onChange={setLightOnImageUrl} />
+            <FileUpload label="Light OFF image (unlit)" kind="image" folder="neon-products" value={lightOffImageUrl} onChange={setLightOffImageUrl} />
+          </div>
+          <p className="mt-2 text-xs text-slate-400">The thumbnail / preview image is the first entry under “Images” above.</p>
+          <div className="mt-4 grid gap-4 sm:grid-cols-3">
+            <div>
+              <label className="block text-sm font-medium text-slate-700">Size</label>
+              <input placeholder="10 x 13" className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" {...register('sizeText')} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700">Size units</label>
+              <input placeholder="Inches" className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" {...register('sizeUnits')} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700">Colour</label>
+              <input placeholder="Red &amp; Skyblue" className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" {...register('colorText')} />
+            </div>
           </div>
         </section>
 

@@ -48,6 +48,16 @@ const ProductSchema = new Schema(
     careHandling: { type: String, default: '' },  // one instruction per line
     images: [{ type: String }], // Cloudinary URLs
     colors: { type: [ColorSchema], default: [] }, // buyer-selectable colours
+
+    // ---- Ready-made neon signs (catalogue products, NOT the Neon Studio) ----
+    // When `isNeon` is true the storefront shows a light ON/OFF toggle using the
+    // two artwork images below, plus the physical size and colour description.
+    isNeon: { type: Boolean, default: false, index: true },
+    lightOnImageUrl: { type: String, default: '' },   // sign lit up
+    lightOffImageUrl: { type: String, default: '' },  // sign switched off
+    sizeText: { type: String, default: '' },          // e.g. "10 x 13"
+    sizeUnits: { type: String, default: '' },         // e.g. "Inches"
+    colorText: { type: String, default: '' },         // e.g. "Red & Skyblue"
     basePricePaise: paiseField({ required: true }),
     // Optional "original" / MRP price shown struck-through when higher than the
     // selling price (basePricePaise). 0 = no compare-at price.

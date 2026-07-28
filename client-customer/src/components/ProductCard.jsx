@@ -15,6 +15,8 @@ export default function ProductCard({ product, wishlisted = false, onWishlist, o
   const [addState, setAddState] = useState('idle'); // idle | adding | added
   const swatches = product.swatches || [];
   const [selectedColor, setSelectedColor] = useState(swatches[0] || null);
+  // Ready-made neon signs carry lit/unlit artwork — light up on hover.
+  const isNeon = Boolean(product.isNeon && (product.lightOnImageUrl || product.lightOffImageUrl));
 
   const handleAdd = async () => {
     if (!onAddToCart || addState === 'adding') return;
@@ -44,7 +46,14 @@ export default function ProductCard({ product, wishlisted = false, onWishlist, o
           </span>
         )}
         <Link to={`/products/${product.slug}`}>
-          {product.images?.[0] ? (
+          {isNeon ? (
+            /* Neon sign — lights up on hover (off artwork → on artwork) */
+            <span className="relative block h-full w-full bg-[#141118]">
+              <img src={product.lightOffImageUrl || product.lightOnImageUrl} alt={product.name} className="h-full w-full object-contain transition-opacity duration-300 group-hover:opacity-0" />
+              <img src={product.lightOnImageUrl || product.lightOffImageUrl} alt="" aria-hidden className="absolute inset-0 h-full w-full object-contain opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+              <span className="absolute bottom-2 left-2 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-semibold text-gray-700 shadow-sm">✨ Hover to light up</span>
+            </span>
+          ) : product.images?.[0] ? (
             <img
               src={product.images[0]}
               alt={product.name}

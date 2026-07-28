@@ -30,7 +30,8 @@ const NON_MATCHING_ID = '000000000000000000000000';
 // Light list projection: everything a card needs, plus the product's colour
 // panel so we can surface swatches — without the heavy full customizationConfig.
 const CARD_SELECT =
-  'name slug images colors basePricePaise compareAtPricePaise rating category subCategory status createdAt customizationConfig.color';
+  'name slug images colors basePricePaise compareAtPricePaise rating category subCategory status createdAt customizationConfig.color '
+  + 'isNeon lightOnImageUrl lightOffImageUrl sizeText sizeUnits colorText';
 const COLOR_POPULATE = { path: 'customizationConfig.color.options', match: { status: 'active' }, select: 'name meta' };
 
 // Turn a populated product into a card payload: derive colour swatches and drop

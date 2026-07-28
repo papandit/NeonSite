@@ -43,6 +43,7 @@ export default function ProductDetailPage() {
   const [related, setRelated] = useState([]);
   const [recommended, setRecommended] = useState([]);
   const [activeImage, setActiveImage] = useState(0);
+  const [lightOn, setLightOn] = useState(true); // neon signs: lit by default
   const [selectedColor, setSelectedColor] = useState(null);
   const [qty, setQty] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -89,6 +90,11 @@ export default function ProductDetailPage() {
   }
 
   const images = product.images?.length ? product.images : [];
+  // Ready-made neon signs ship with lit / unlit artwork — show a light switch.
+  const isNeon = Boolean(product.isNeon && (product.lightOnImageUrl || product.lightOffImageUrl));
+  const neonImage = lightOn
+    ? (product.lightOnImageUrl || product.lightOffImageUrl)
+    : (product.lightOffImageUrl || product.lightOnImageUrl);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
@@ -115,6 +121,28 @@ export default function ProductDetailPage() {
 
       {/* Intro: gallery + info */}
       <div className="grid gap-8 lg:grid-cols-2">
+        {isNeon ? (
+          /* Ready-made neon sign — light ON/OFF viewer */
+          <div>
+            <div className={`aspect-square overflow-hidden rounded-xl border transition-colors duration-500 ${lightOn ? 'border-gray-800 bg-[#141118]' : 'border-gray-200 bg-slate-100'}`}>
+              <img src={neonImage} alt={product.name} className="h-full w-full object-contain transition-opacity duration-300" />
+            </div>
+            <div className="mt-3 flex items-center justify-center gap-3">
+              <span className={`text-sm font-medium ${lightOn ? 'text-gray-400' : 'text-gray-900'}`}>Light off</span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={lightOn}
+                onClick={() => setLightOn((v) => !v)}
+                className={`relative h-7 w-14 rounded-full transition-colors ${lightOn ? 'bg-indigo-600' : 'bg-gray-300'}`}
+              >
+                <span className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-all ${lightOn ? 'left-8' : 'left-1'}`} />
+              </button>
+              <span className={`text-sm font-medium ${lightOn ? 'text-gray-900' : 'text-gray-400'}`}>Light on ✨</span>
+            </div>
+            <p className="mt-1 text-center text-xs text-gray-400">See how it looks lit up or switched off.</p>
+          </div>
+        ) : (
         <div className="flex gap-3">
           {/* Left vertical thumbnail strip */}
           {images.length > 1 && (
@@ -135,6 +163,7 @@ export default function ProductDetailPage() {
             )}
           </div>
         </div>
+        )}
 
         <div>
           {product.category?.name && <span className="text-sm text-gray-400">{product.category.name}</span>}
@@ -151,6 +180,18 @@ export default function ProductDetailPage() {
               </>
             )}
           </div>
+          {/* Neon sign specs straight from the catalogue */}
+          {isNeon && (product.sizeText || product.colorText) && (
+            <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm">
+              {product.sizeText && (
+                <div className="flex gap-1.5"><dt className="text-gray-400">Size:</dt><dd className="font-medium text-gray-800">{product.sizeText} {product.sizeUnits}</dd></div>
+              )}
+              {product.colorText && (
+                <div className="flex gap-1.5"><dt className="text-gray-400">Colour:</dt><dd className="font-medium text-gray-800">{product.colorText}</dd></div>
+              )}
+            </dl>
+          )}
+
           {toLines(product.highlights).length > 0 ? (
             <ul className="mt-4 space-y-1.5">
               {toLines(product.highlights).map((h, i) => (
