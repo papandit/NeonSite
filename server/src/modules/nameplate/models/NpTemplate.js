@@ -74,6 +74,26 @@ const NpTemplateSchema = new Schema(
     compareAtPricePaise: paiseField({ default: 0 }),
     status: { type: String, enum: ['active', 'draft', 'hidden'], default: 'draft', index: true },
 
+    // Template style:
+    //   'classic'    — text (+ optional symbol) sits directly on the base plate.
+    //   'background' — a "background style plate": the customer's chosen (or
+    //                  uploaded) artwork fills a region ON the base plate, with
+    //                  optional text/symbol on top. bgSlot defines that region.
+    style: { type: String, enum: ['classic', 'background'], default: 'classic', index: true },
+    // Where the background artwork sits on the plate (normalized 0..1).
+    bgSlot: {
+      x: { type: Number, default: 0.5, min: 0, max: 1 },      // centre
+      y: { type: Number, default: 0.5, min: 0, max: 1 },
+      width: { type: Number, default: 0.8, min: 0.02, max: 1 },
+      height: { type: Number, default: 0.8, min: 0.02, max: 1 },
+      radius: { type: Number, default: 0, min: 0 },           // corner rounding (px on a 560px canvas)
+    },
+
+    // Which controls this template offers the customer. Everything is opt-in, so
+    // a plate can be text-only, background-only, or any combination.
+    textEnabled: { type: Boolean, default: true },
+    colorEnabled: { type: Boolean, default: true },
+    sizeEnabled: { type: Boolean, default: true },
     // Whether this template offers a symbol at all. When false the builder shows
     // no symbol slot and the storefront hides the "Choose symbol" picker.
     symbolEnabled: { type: Boolean, default: true },

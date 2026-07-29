@@ -132,6 +132,10 @@ export default function NamePlateDesignerPage() {
   // Customer-chosen backgrounds (photo plates), grouped by meta.group.
   const backgrounds = useMemo(() => (data?.options.backgrounds || []).filter((b) => elImg(b)), [data]);
   const bgAllowed = Boolean(template?.backgroundEnabled);
+  const isBgStyle = template?.style === 'background';
+  const colorAllowed = template?.colorEnabled !== false;
+  const sizeAllowed = template?.sizeEnabled !== false;
+  const textAllowed = template?.textEnabled !== false;
   const sizes = data?.options.sizes || [];
   const sizeLabel = (z) => {
     const m = z?.meta || {};
@@ -255,9 +259,12 @@ export default function NamePlateDesignerPage() {
     const fc = fcRef.current;
     if (!fc || !template) return;
     const chosen = bgAllowed ? backgrounds.find((b) => b._id === backgroundId) : null;
-    const url = (bgAllowed && customBg)
-      || (chosen && elImg(chosen))
-      || template.transparentPngUrl || template.basePlateImageUrl || template.previewImageUrl;
+    // Background-style plates keep the base plate as the frame — the artwork is
+    // drawn INSIDE bgSlot by the effect below instead of replacing the plate.
+    const url = isBgStyle
+      ? (template.basePlateImageUrl || template.previewImageUrl)
+      : ((bgAllowed && customBg) || (chosen && elImg(chosen))
+         || template.transparentPngUrl || template.basePlateImageUrl || template.previewImageUrl);
     if (!url) { fc.backgroundImage = null; fc.requestRenderAll(); return; }
     let cancelled = false;
     fabric.FabricImage.fromURL(url, { crossOrigin: 'anonymous' }).then((img) => {
@@ -269,7 +276,41 @@ export default function NamePlateDesignerPage() {
     }).catch(() => {});
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [template, backgroundId, bgAllowed, backgrounds, customBg]);
+  }, [template, backgroundId, bgAllowed, backgrounds, customBg, isBgStyle]);
+
+  // ---- background artwork inside the plate's region (background-style plates) ----
+  const bgObjRef = useRef(null);
+  useEffect(() => {
+    const fc = fcRef.current;
+    if (!fc || !template) return;
+    if (bgObjRef.current) { fc.remove(bgObjRef.current); bgObjRef.current = null; }
+    if (!isBgStyle || !bgAllowed) { fc.requestRenderAll(); return; }
+    const chosen = backgrounds.find((b) => b._id === backgroundId);
+    const url = customBg || (chosen && elImg(chosen));
+    if (!url) { fc.requestRenderAll(); return; }
+
+    const slot = template.bgSlot || {};
+    const num = (v, d) => (Number.isFinite(Number(v)) ? Number(v) : d);
+    const bw = Math.max(0.02, num(slot.width, 0.8)) * CANVAS_W;
+    const bh = Math.max(0.02, num(slot.height, 0.8)) * CANVAS_H;
+    const bx = num(slot.x, 0.5) * CANVAS_W;
+    const by = num(slot.y, 0.5) * CANVAS_H;
+
+    let cancelled = false;
+    fabric.FabricImage.fromURL(url, { crossOrigin: 'anonymous' }).then((img) => {
+      if (cancelled) return;
+      // Cover-fill the region, then clip to it — identical to the admin builder.
+      const s = Math.max(bw / (img.width || 1), bh / (img.height || 1));
+      img.set({ left: bx, top: by, originX: 'center', originY: 'center', scaleX: s, scaleY: s, selectable: false, evented: false });
+      img.clipPath = new fabric.Rect({ width: bw / s, height: bh / s, originX: 'center', originY: 'center' });
+      bgObjRef.current = img;
+      fc.add(img);
+      fc.sendObjectToBack?.(img); // behind the text + symbol
+      fc.requestRenderAll();
+    }).catch(() => {});
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [template, isBgStyle, bgAllowed, backgroundId, backgrounds, customBg]);
 
   // ---- symbol (element/icon) — sized + positioned by the admin template ----
   useEffect(() => {
@@ -392,6 +433,7 @@ export default function NamePlateDesignerPage() {
         {/* Controls */}
         <div className="max-h-[76vh] space-y-5 overflow-y-auto pr-1">
           {/* Text fields — click one to style it; each keeps its own font + colour */}
+          {textAllowed && activeFields.length > 0 && (
           <div className="rounded-2xl border border-gray-200 bg-white p-5">
             <h3 className="text-xs font-semibold uppercase tracking-wide text-indigo-600">Your details</h3>
             <p className="mt-1 text-xs text-gray-400">{textOnly ? "Type the name exactly as you want it crafted — we'll make it in the style shown." : "Select a line, then pick its font & colour below."}</p>
@@ -419,9 +461,10 @@ export default function NamePlateDesignerPage() {
               })}
             </div>
           </div>
+          )}
 
           {/* Choose Font — applies to the selected line */}
-          {!textOnly && fonts.length > 0 && (
+          {!textOnly && textAllowed && fonts.length > 0 && (
             <div className="rounded-2xl border border-gray-200 bg-white p-5">
               <div className="flex items-center justify-between">
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-indigo-600">Choose font</h3>
@@ -442,7 +485,7 @@ export default function NamePlateDesignerPage() {
           )}
 
           {/* Choose Colour — applies to the selected line */}
-          {!textOnly && colors.length > 0 && (
+          {!textOnly && colorAllowed && colors.length > 0 && (
             <div className="rounded-2xl border border-gray-200 bg-white p-5">
               <div className="flex items-center justify-between">
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-indigo-600">Choose colour</h3>
@@ -459,7 +502,7 @@ export default function NamePlateDesignerPage() {
           )}
 
           {/* Choose size */}
-          {sizes.length > 0 && (
+          {sizeAllowed && sizes.length > 0 && (
             <div className="rounded-2xl border border-gray-200 bg-white p-5">
               <h3 className="text-xs font-semibold uppercase tracking-wide text-indigo-600">Choose size</h3>
               <div className="mt-3 flex flex-wrap gap-2">

@@ -41,9 +41,9 @@ export const NP_COLLECTIONS = [
     { key: 'unit', label: 'Unit', input: 'select', options: ['inch', 'cm', 'mm'] },
   ] },
   { key: 'backgrounds', label: 'Backgrounds', metaFields: [
-    { key: 'image', label: 'Image / texture', input: 'file', kind: 'image' },
+    { key: 'image', label: 'Background artwork (fills the plate region)', input: 'file', kind: 'image' },
+    { key: 'preview', label: 'Preview thumbnail (shown in the picker — optional)', input: 'file', kind: 'image' },
     { key: 'group', label: 'Group / section (e.g. Individuals & Couples)', input: 'text' },
-    { key: 'type', label: 'Type (color/texture)', input: 'text' },
   ] },
 ];
 

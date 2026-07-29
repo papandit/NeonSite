@@ -17,6 +17,9 @@ export default function TemplateCanvasBuilder({
   onFieldChange,
   symbol,
   onSymbolChange,
+  bgSlot,            // { x, y, width, height } normalized — background-style plates
+  onBgSlotChange,
+  bgPreviewUrl,      // sample artwork shown inside the slot
 }) {
   const elRef = useRef(null);
   const fcRef = useRef(null);
@@ -54,6 +57,13 @@ export default function TemplateCanvasBuilder({
           y: +(o.top / H).toFixed(4),
           defaultSizePx: size,
           rotation: Math.round(o.angle || 0),
+        });
+      } else if (o.ncType === 'bgslot') {
+        cbRef.current.onBgSlotChange?.({
+          x: +(o.left / W).toFixed(4),
+          y: +(o.top / H).toFixed(4),
+          width: +(((o.width || 100) * (o.scaleX || 1)) / W).toFixed(4),
+          height: +(((o.height || 100) * (o.scaleY || 1)) / H).toFixed(4),
         });
       } else if (o.ncType === 'symbol') {
         const scale = +(((o.width || 100) * (o.scaleX || 1)) / W).toFixed(4);
@@ -157,6 +167,49 @@ export default function TemplateCanvasBuilder({
     fc.requestRenderAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fields]);
+
+  // ---- background region (background-style plates): drag + resize freely ----
+  const bgRef = useRef(null);
+  useEffect(() => {
+    const fc = fcRef.current;
+    if (!fc) return;
+    if (bgRef.current) { fc.remove(bgRef.current); bgRef.current = null; }
+    if (!bgSlot) { fc.requestRenderAll(); return; }
+    const num = (v, d) => (Number.isFinite(Number(v)) ? Number(v) : d);
+    const bw = Math.max(0.02, num(bgSlot.width, 0.8)) * W;
+    const bh = Math.max(0.02, num(bgSlot.height, 0.8)) * H;
+    const bx = num(bgSlot.x, 0.5) * W;
+    const by = num(bgSlot.y, 0.5) * H;
+
+    const style = {
+      left: bx, top: by, originX: 'center', originY: 'center',
+      borderColor: '#0ea5e9', cornerColor: '#0ea5e9', cornerStyle: 'circle',
+      cornerSize: 10, transparentCorners: false,
+    };
+    const place = (obj) => {
+      obj.set(style);
+      obj.ncType = 'bgslot';
+      bgRef.current = obj;
+      fc.add(obj);
+      fc.sendObjectToBack?.(obj); // stay behind the text + symbol
+      fc.requestRenderAll();
+    };
+
+    if (bgPreviewUrl) {
+      fabric.FabricImage.fromURL(bgPreviewUrl, { crossOrigin: 'anonymous' })
+        .then((img) => {
+          // Cover-fill the region, then clip to it — exactly how the storefront draws it.
+          const s = Math.max(bw / (img.width || 1), bh / (img.height || 1));
+          img.set({ scaleX: s, scaleY: s });
+          img.clipPath = new fabric.Rect({ width: bw / s, height: bh / s, originX: 'center', originY: 'center' });
+          place(img);
+        })
+        .catch(() => place(new fabric.Rect({ width: bw, height: bh, fill: 'rgba(14,165,233,0.12)', stroke: '#0ea5e9', strokeDashArray: [6, 4], strokeWidth: 2 })));
+    } else {
+      place(new fabric.Rect({ width: bw, height: bh, fill: 'rgba(14,165,233,0.12)', stroke: '#0ea5e9', strokeDashArray: [6, 4], strokeWidth: 2 }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bgSlot?.x, bgSlot?.y, bgSlot?.width, bgSlot?.height, bgPreviewUrl, H]);
 
   // ---- symbol slot (draggable + resizable) ----
   useEffect(() => {

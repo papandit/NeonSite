@@ -46,6 +46,8 @@ const empty = () => ({
   name: '', category: '', status: 'draft',
   previewImageUrl: '', basePlateImageUrl: '', transparentPngUrl: '',
   widthMm: 300, heightMm: 150, baseRupees: 0, compareRupees: '',
+  style: 'classic', bgSlot: { x: 0.5, y: 0.5, width: 0.8, height: 0.8 },
+  textEnabled: true, colorEnabled: true, sizeEnabled: true,
   symbolEnabled: true, backgroundEnabled: false, textOnly: false, symbolScale: 0.2, symbolX: 0.5, symbolY: 0.2,
   textFields: [], ...Object.fromEntries(ALLOW_KINDS.map(([, a]) => [a, []])),
 });
@@ -81,6 +83,9 @@ export default function NpTemplateEditPage() {
           previewImageUrl: t.previewImageUrl || '', basePlateImageUrl: t.basePlateImageUrl || '', transparentPngUrl: t.transparentPngUrl || '',
           widthMm: t.widthMm, heightMm: t.heightMm, baseRupees: paiseToRupees(t.basePricePaise),
           compareRupees: t.compareAtPricePaise ? paiseToRupees(t.compareAtPricePaise) : '',
+          style: t.style || 'classic',
+          bgSlot: { x: t.bgSlot?.x ?? 0.5, y: t.bgSlot?.y ?? 0.5, width: t.bgSlot?.width ?? 0.8, height: t.bgSlot?.height ?? 0.8 },
+          textEnabled: t.textEnabled !== false, colorEnabled: t.colorEnabled !== false, sizeEnabled: t.sizeEnabled !== false,
           symbolEnabled: t.symbolEnabled !== false, backgroundEnabled: Boolean(t.backgroundEnabled), textOnly: Boolean(t.textOnly),
           symbolScale: t.symbolScale ?? 0.2, symbolX: t.symbolX ?? 0.5, symbolY: t.symbolY ?? 0.2,
           textFields: (t.textFields || []).map((f) => ({ ...emptyField(), ...f })),
@@ -120,6 +125,9 @@ export default function NpTemplateEditPage() {
         widthMm: Number(tpl.widthMm), heightMm: Number(tpl.heightMm),
         basePricePaise: rupeesToPaise(tpl.baseRupees || 0),
         compareAtPricePaise: tpl.compareRupees ? rupeesToPaise(tpl.compareRupees) : 0,
+        style: tpl.style || 'classic',
+        bgSlot: { x: Number(tpl.bgSlot?.x) || 0.5, y: Number(tpl.bgSlot?.y) || 0.5, width: Number(tpl.bgSlot?.width) || 0.8, height: Number(tpl.bgSlot?.height) || 0.8 },
+        textEnabled: Boolean(tpl.textEnabled), colorEnabled: Boolean(tpl.colorEnabled), sizeEnabled: Boolean(tpl.sizeEnabled),
         symbolEnabled: Boolean(tpl.symbolEnabled), backgroundEnabled: Boolean(tpl.backgroundEnabled), textOnly: Boolean(tpl.textOnly),
         symbolScale: Number(tpl.symbolScale) || 0.2, symbolX: Number(tpl.symbolX), symbolY: Number(tpl.symbolY),
         textFields: tpl.textFields.filter((f) => f.key && f.label),
@@ -178,7 +186,7 @@ export default function NpTemplateEditPage() {
         <section className="rounded-xl border border-slate-200 bg-white p-5">
           <h3 className="mb-1 font-semibold">Plate images</h3>
           <p className="mb-4 text-xs text-slate-400">Each image has a different job — see the note under each field.</p>
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className={`grid gap-4 ${tpl.style === 'background' ? 'sm:grid-cols-2' : 'sm:grid-cols-3'}`}>
             <div>
               <FileUpload label="Base plate image" kind="image" folder="nameplate/plates" value={tpl.basePlateImageUrl} onChange={(v) => set('basePlateImageUrl', v)} />
               <p className="mt-1.5 text-xs text-slate-400">The plate/frame the customer designs ON — shown as the backdrop in the visual builder and behind the text &amp; symbol on the storefront.</p>
@@ -187,10 +195,12 @@ export default function NpTemplateEditPage() {
               <FileUpload label="Preview image" kind="image" folder="nameplate/plates" value={tpl.previewImageUrl} onChange={(v) => set('previewImageUrl', v)} />
               <p className="mt-1.5 text-xs text-slate-400">The thumbnail shown on the template card in the gallery. Leave blank to fall back to the base plate.</p>
             </div>
-            <div>
-              <FileUpload label="Transparent PNG" kind="image" folder="nameplate/plates" value={tpl.transparentPngUrl} onChange={(v) => set('transparentPngUrl', v)} />
-              <p className="mt-1.5 text-xs text-slate-400">Optional frame overlay with a see-through centre — sits ON TOP so the text shows inside the frame.</p>
-            </div>
+            {tpl.style !== 'background' && (
+              <div>
+                <FileUpload label="Transparent PNG" kind="image" folder="nameplate/plates" value={tpl.transparentPngUrl} onChange={(v) => set('transparentPngUrl', v)} />
+                <p className="mt-1.5 text-xs text-slate-400">Optional frame overlay with a see-through centre — sits ON TOP so the text shows inside the frame.</p>
+              </div>
+            )}
           </div>
           <p className="mt-3 text-xs text-slate-400">Tip: to offer different backdrops, add them under <span className="font-medium text-slate-500">Name Plate Studio → Backgrounds</span> and enable them in “Allowed options” below — customers place their text &amp; symbol on the chosen background to build the plate.</p>
         </section>
@@ -198,7 +208,7 @@ export default function NpTemplateEditPage() {
         {/* Visual builder — drag / resize / rotate fields + symbol on the plate */}
         <section className="rounded-xl border border-slate-200 bg-white p-5">
           <h3 className="mb-1 font-semibold">Visual builder</h3>
-          <p className="mb-3 text-xs text-slate-400">Drag to move, use the corner handles to resize (text = font size), and the top handle to rotate. Changes save straight to the template and the storefront renders the exact same layout.</p>
+          <p className="mb-3 text-xs text-slate-400">Drag to move, corner handles to resize, top handle to rotate — changes save straight to the template and the storefront renders the exact same layout.{tpl.style === 'background' && ' The blue region is where the customer’s background artwork sits; drag or resize it to fit the plate.'}</p>
           <TemplateCanvasBuilder
             baseImageUrl={tpl.basePlateImageUrl}
             aspect={(Number(tpl.heightMm) || 150) / (Number(tpl.widthMm) || 300)}
@@ -206,39 +216,63 @@ export default function NpTemplateEditPage() {
             onFieldChange={(i, patch) => updField(i, patch)}
             symbol={tpl.symbolEnabled ? { x: Number(tpl.symbolX), y: Number(tpl.symbolY), scale: Number(tpl.symbolScale) } : null}
             onSymbolChange={(p) => setTpl((t) => ({ ...t, symbolX: p.x ?? t.symbolX, symbolY: p.y ?? t.symbolY, symbolScale: p.scale ?? t.symbolScale }))}
+            bgSlot={tpl.style === 'background' ? tpl.bgSlot : null}
+            onBgSlotChange={(p) => setTpl((t) => ({ ...t, bgSlot: { ...t.bgSlot, ...p } }))}
+            bgPreviewUrl={optionImg((options.backgrounds || [])[0])}
           />
         </section>
 
-        {/* Name-only plates (hand-crafted from the customer's text) */}
+        {/* Template style + what the customer can change */}
         <section className="rounded-xl border border-slate-200 bg-white p-5">
-          <div className="mb-1 flex items-center justify-between">
-            <h3 className="font-semibold">Name only</h3>
-            <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-600">
-              <input type="checkbox" checked={tpl.textOnly} onChange={(e) => set('textOnly', e.target.checked)} className="h-4 w-4 rounded border-slate-300" />
-              Customer just types the name
-            </label>
+          <h3 className="mb-1 font-semibold">Template style</h3>
+          <p className="mb-3 text-xs text-slate-400">Pick how this plate is built, then tick only the controls customers should get.</p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {[
+              ['classic', 'Classic plate', 'Text (and an optional symbol) sit directly on the base plate.'],
+              ['background', 'Background plate', 'The customer’s chosen or uploaded artwork fills a region ON the plate — drag it below.'],
+            ].map(([v, title, desc]) => (
+              <button
+                key={v}
+                type="button"
+                onClick={() => set('style', v)}
+                className={`rounded-xl border p-4 text-left transition ${tpl.style === v ? 'border-indigo-500 bg-indigo-50 ring-1 ring-indigo-200' : 'border-slate-200 hover:border-indigo-300'}`}
+              >
+                <span className="block text-sm font-semibold text-slate-800">{title}</span>
+                <span className="mt-0.5 block text-xs text-slate-500">{desc}</span>
+              </button>
+            ))}
           </div>
-          <p className="text-xs text-slate-400">
-            {tpl.textOnly
-              ? 'On — the storefront shows only the text box (no font/colour/symbol pickers) and does NOT draw the text on the preview. Use this for hand-crafted plates like calligraphy or regional-language cutouts; the typed name reaches you on the order.'
-              : 'Off — the customer designs live on the plate (text is drawn on the preview with their font & colour).'}
-          </p>
-        </section>
 
-        {/* Customer-chosen background (photo plate) */}
-        <section className="rounded-xl border border-slate-200 bg-white p-5">
-          <div className="mb-1 flex items-center justify-between">
-            <h3 className="font-semibold">Background</h3>
-            <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-600">
-              <input type="checkbox" checked={tpl.backgroundEnabled} onChange={(e) => set('backgroundEnabled', e.target.checked)} className="h-4 w-4 rounded border-slate-300" />
-              Let customers choose the background
-            </label>
+          <div className="mt-5 border-t border-slate-100 pt-4">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Customer controls</p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {[
+                ['textEnabled', 'Text fields', 'Customers type their own text.'],
+                ['colorEnabled', 'Colour', 'Choose the text colour.'],
+                ['sizeEnabled', 'Size', 'Choose a plate size.'],
+                ['symbolEnabled', 'Symbol', 'Add a symbol / icon.'],
+                ['backgroundEnabled', 'Background', 'Pick artwork — or upload their own photo.'],
+              ].map(([key, label, hint]) => (
+                <label key={key} className="flex cursor-pointer items-start gap-2 rounded-lg border border-slate-200 p-2.5 hover:bg-slate-50">
+                  <input type="checkbox" checked={Boolean(tpl[key])} onChange={(e) => set(key, e.target.checked)} className="mt-0.5 h-4 w-4 rounded border-slate-300" />
+                  <span>
+                    <span className="block text-sm font-medium text-slate-700">{label}</span>
+                    <span className="block text-xs text-slate-400">{hint}</span>
+                  </span>
+                </label>
+              ))}
+            </div>
+
+            {tpl.textEnabled && (
+              <label className="mt-3 flex cursor-pointer items-start gap-2 rounded-lg border border-amber-200 bg-amber-50/60 p-2.5">
+                <input type="checkbox" checked={tpl.textOnly} onChange={(e) => set('textOnly', e.target.checked)} className="mt-0.5 h-4 w-4 rounded border-slate-300" />
+                <span>
+                  <span className="block text-sm font-medium text-slate-700">Name only (hand-crafted)</span>
+                  <span className="block text-xs text-slate-500">Collect the text but don’t draw it on the preview — for calligraphy / cut-out plates. The typed name still reaches you on the order.</span>
+                </span>
+              </label>
+            )}
           </div>
-          <p className="text-xs text-slate-400">
-            {tpl.backgroundEnabled
-              ? <>Turns this into a photo name plate — the customer picks a background (grouped by its <span className="font-medium text-slate-500">Group / section</span>) and their text sits on it. Pick which ones under “Allowed options → Backgrounds”; add artwork in <span className="font-medium text-slate-500">Name Plate Studio → Backgrounds</span>.</>
-              : 'Off — the plate always uses the base plate image above.'}
-          </p>
         </section>
 
         {/* Symbol placement */}
