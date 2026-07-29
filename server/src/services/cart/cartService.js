@@ -13,7 +13,7 @@ export function cartSubtotalPaise(cart) {
 
 // Client-facing cart with populated product basics + subtotal.
 export async function serializeCart(cart) {
-  await cart.populate('items.product', 'name slug images basePricePaise status');
+  await cart.populate('items.product', 'name slug images basePricePaise status lightOnImageUrl sizeText sizeUnits colorText dimensions description');
   const items = cart.items.map((it) => ({
     _id: it._id,
     product: it.product,

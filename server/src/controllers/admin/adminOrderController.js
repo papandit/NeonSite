@@ -38,10 +38,17 @@ export const listOrders = asyncHandler(async (req, res) => {
           { $skip: skip },
           { $limit: limitNum },
           { $lookup: { from: 'users', localField: 'user', foreignField: '_id', as: 'userDoc' } },
+          { $lookup: { from: 'products', localField: 'items.product', foreignField: '_id', as: 'prodDocs' } },
           {
             $project: {
               orderNumber: 1, totalPaise: 1, currentStatus: 1, itemCount: 1, createdAt: 1,
-              preview: { $arrayElemAt: ['$items.previewImageUrl', 0] },
+              // Design preview first, else the product's own image.
+              preview: {
+                $ifNull: [
+                  { $arrayElemAt: ['$items.previewImageUrl', 0] },
+                  { $arrayElemAt: [{ $arrayElemAt: ['$prodDocs.images', 0] }, 0] },
+                ],
+              },
               userName: { $arrayElemAt: ['$userDoc.name', 0] },
               userEmail: { $arrayElemAt: ['$userDoc.email', 0] },
             },
@@ -64,7 +71,7 @@ export const listOrders = asyncHandler(async (req, res) => {
 export const getOrder = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.id)
     .populate('user', 'name email')
-    .populate('items.product', 'name images')
+    .populate('items.product', 'name images lightOnImageUrl sizeText sizeUnits colorText dimensions description')
     .lean({ virtuals: true });
   if (!order) throw ApiError.notFound('Order not found');
   const current = order.statusHistory?.[order.statusHistory.length - 1]?.status;
@@ -89,7 +96,12 @@ export const updateStatus = asyncHandler(async (req, res) => {
   order.statusHistory.push({ status, note: note || '', by: req.user.id, at: new Date() });
   await order.save();
 
-  const fresh = await Order.findById(order._id).populate('user', 'name email').lean({ virtuals: true });
+  // Populate the same shape as getOrder — without items.product the admin view
+  // loses its image fallback right after a status change ("No image").
+  const fresh = await Order.findById(order._id)
+    .populate('user', 'name email')
+    .populate('items.product', 'name images lightOnImageUrl sizeText sizeUnits colorText dimensions description')
+    .lean({ virtuals: true });
 
   // Best-effort status email (design_review uses the approval-request template).
   sendStatusUpdate(fresh, status, note || '').catch(() => {});

@@ -8,7 +8,7 @@ import { formatPaise } from '../utils/money';
 import { toast } from '../lib/toast';
 
 // Everything the customer chose, per kind — text, detail rows, colour swatches, symbols.
-function itemDetails(design) {
+function itemDetails(design, fallback = {}) {
   if (!design) return { text: '', rows: [], swatches: [], symbols: [] };
   if (design.kind === 'nameplate') {
     const n = design.nameplate || {};
@@ -46,9 +46,18 @@ function itemDetails(design) {
       symbols: [],
     };
   }
+  // Simple / neon-sign product: show the frozen product attributes.
+  const ps = design.productSnapshot || {};
+  const size = [ps.sizeText || fallback.sizeText, ps.sizeUnits || fallback.sizeUnits].filter(Boolean).join(' ') || ps.dimensions || fallback.dimensions;
   return {
     text: (design.text || []).map((t) => t.value).filter(Boolean).join(' · '),
-    rows: Object.values(design.selections || {}).map((s) => s?.snapshot?.name).filter(Boolean).map((v, i) => [`Option ${i + 1}`, v]),
+    rows: [
+      ['Size', size],
+      ['Colour', ps.colorText || fallback.colorText],
+      ['Material', ps.material || fallback.material],
+      ...Object.values(design.selections || {}).map((s) => s?.snapshot?.name).filter(Boolean).map((v, i) => [`Option ${i + 1}`, v]),
+    ].filter(([, v]) => v),
+    description: ps.description || fallback.description || '',
     swatches: design.selectedColor ? [{ hex: design.selectedColor.hex, name: design.selectedColor.name }] : [],
     symbols: [],
   };
@@ -108,7 +117,7 @@ export default function CartPage() {
         {/* Items */}
         <div className="space-y-4">
           {cart.items.map((it) => {
-            const d = itemDetails(it.designDocument);
+            const d = itemDetails(it.designDocument, it.product || {});
             // Custom-design preview (name plate / neon) first, else the product's own image.
             const img = it.previewImageUrl || it.product?.images?.[0] || null;
             return (
@@ -143,6 +152,7 @@ export default function CartPage() {
                           </div>
                         )}
                       </dl>
+                      {d.description && <p className="mt-1 line-clamp-2 text-xs text-gray-400">{d.description}</p>}
                       {d.symbols.length > 0 && (
                         <div className="mt-1 flex flex-wrap items-center gap-1.5">
                           <span className="text-xs font-medium text-gray-400">Symbol:</span>

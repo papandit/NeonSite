@@ -9,7 +9,7 @@ const PIPELINE = ['pending', 'confirmed', 'design_review', 'approved', 'manufact
 const LABEL = (s) => s.replace('_', ' ');
 
 // Everything the customer chose, per product kind (name plate / neon / simple).
-function itemDetails(design) {
+function itemDetails(design, fallback = {}) {
   if (!design) return { text: '', rows: [], swatch: null, symbols: [] };
   if (design.kind === 'nameplate') {
     const n = design.nameplate || {};
@@ -37,9 +37,18 @@ function itemDetails(design) {
       symbols: [],
     };
   }
+  // Simple / neon-sign product: show the frozen product attributes.
+  const ps = design.productSnapshot || {};
+  const size = [ps.sizeText || fallback.sizeText, ps.sizeUnits || fallback.sizeUnits].filter(Boolean).join(' ') || ps.dimensions || fallback.dimensions;
   return {
     text: (design.text || []).map((t) => `${t.field}: ${t.value}`).filter(Boolean).join(' · '),
-    rows: Object.values(design.selections || {}).map((s) => s?.snapshot?.name).filter(Boolean).map((v, i) => [`Option ${i + 1}`, v]),
+    rows: [
+      ['Size', size],
+      ['Colour', ps.colorText || fallback.colorText],
+      ['Material', ps.material || fallback.material],
+      ...Object.values(design.selections || {}).map((s) => s?.snapshot?.name).filter(Boolean).map((v, i) => [`Option ${i + 1}`, v]),
+    ].filter(([, v]) => v),
+    description: ps.description || fallback.description || '',
     swatch: design.selectedColor ? { hex: design.selectedColor.hex, name: design.selectedColor.name } : null,
     symbols: (design.icons || []).map((ic) => ({ name: ic?.snapshot?.name })).filter((x) => x.name),
   };
@@ -186,7 +195,7 @@ export default function OrderDetailPage() {
       {/* Items */}
       <div className="space-y-3">
         {order.items.map((it) => {
-          const d = itemDetails(it.designDocument);
+          const d = itemDetails(it.designDocument, it.product || {});
           const img = it.previewImageUrl || it.product?.images?.[0] || null;
           return (
             <div key={it._id} className="flex gap-4 rounded-xl border border-slate-200 bg-white p-4">
@@ -210,6 +219,7 @@ export default function OrderDetailPage() {
                     </div>
                   )}
                 </dl>
+                {d.description && <p className="mt-1 text-xs leading-relaxed text-slate-500">{d.description}</p>}
                 {d.symbols.length > 0 && (
                   <div className="mt-1 flex flex-wrap items-center gap-2">
                     <span className="text-xs font-medium text-slate-400">Symbol:</span>

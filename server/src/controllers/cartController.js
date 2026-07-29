@@ -82,6 +82,22 @@ function resolveProductColor(product, color) {
   return { name: chosen.name || '', hex: chosen.hex };
 }
 
+// Freeze the product's own attributes (size / colour / description) onto the
+// design so cart + order views can show them, and editing the catalogue later
+// never rewrites a past order (INVARIANT 5).
+function productSnapshot(product) {
+  const snap = {
+    description: product.description || '',
+    sizeText: product.sizeText || '',
+    sizeUnits: product.sizeUnits || '',
+    colorText: product.colorText || '',
+    dimensions: product.dimensions || '',
+    material: product.material || '',
+    isNeon: Boolean(product.isNeon),
+  };
+  return Object.values(snap).some((v) => v !== '' && v !== false) ? snap : null;
+}
+
 // A valid default design so a product can be added to the cart without opening
 // the editor (buy as-is): first allowed option per enabled panel; required text
 // gets a placeholder the buyer can edit later.
@@ -159,6 +175,10 @@ export const quickAdd = asyncHandler(async (req, res) => {
   // travels through the cart and is snapshotted onto the order.
   const chosenColor = resolveProductColor(product, color);
   if (chosenColor) corrected.selectedColor = chosenColor;
+
+  // Freeze the product's own attributes (size / colour / description) too.
+  const snap = productSnapshot(product);
+  if (snap) corrected.productSnapshot = snap;
 
   const cart = await getOrCreateCart(req.user.id);
   cart.items.push({
