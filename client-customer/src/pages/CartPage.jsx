@@ -24,7 +24,9 @@ function itemDetails(design, fallback = {}) {
       swatches.push({ hex, name: s.colorName });
     }
     if (!swatches.length && sel.colorHex) swatches.push({ hex: sel.colorHex, name: sel.colorName });
-    const size = n.templateWidthMm && n.templateHeightMm ? `${n.templateWidthMm} × ${n.templateHeightMm} mm` : null;
+    const size = sel.sizeName
+      ? [sel.sizeName, sel.sizeLabel].filter(Boolean).join(' · ')
+      : (n.templateWidthMm && n.templateHeightMm ? `${n.templateWidthMm} × ${n.templateHeightMm} mm` : null);
     return {
       text: Object.values(n.fields || {}).filter(Boolean).join(' · '),
       rows: [['Template', n.templateName], ['Background', sel.customBackgroundUrl ? 'Customer-supplied image' : sel.backgroundName], ['Font', fonts.length ? fonts.join(', ') : sel.fontName || sel.fontFamily], ['Size', size]].filter(([, v]) => v),
@@ -38,7 +40,7 @@ function itemDetails(design, fallback = {}) {
       text: n.text || '',
       rows: [
         ['Font', n.font?.name],
-        ['Size', n.size ? `${n.size.name} · ${n.size.heightCm ? `${n.size.heightCm} × ${n.size.cm}` : n.size.cm} cm` : null],
+        ['Size', n.size ? `${n.size.name} · ${n.size.heightCm ? `${n.size.heightCm} × ${n.size.cm}` : n.size.cm} ${n.size.unit || 'cm'}` : null],
         ['Backing', n.backing?.name],
         ['Adapter', n.adapter?.name],
       ].filter(([, v]) => v),

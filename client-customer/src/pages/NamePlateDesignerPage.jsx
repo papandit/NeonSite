@@ -76,6 +76,7 @@ export default function NamePlateDesignerPage() {
   const [activeField, setActiveField] = useState(null); // which field the font/colour pickers edit
   const [symbolId, setSymbolId] = useState(null);   // chosen element id
   const [symbolColor, setSymbolColor] = useState('#c8a04d'); // colour for recolourable symbols
+  const [sizeId, setSizeId] = useState(null);                 // chosen plate size
   const [backgroundId, setBackgroundId] = useState(null);    // customer-chosen backdrop
   const [bgGroup, setBgGroup] = useState('');                // which background section is open
   const [customBg, setCustomBg] = useState(null);             // customer-uploaded background URL
@@ -131,6 +132,12 @@ export default function NamePlateDesignerPage() {
   // Customer-chosen backgrounds (photo plates), grouped by meta.group.
   const backgrounds = useMemo(() => (data?.options.backgrounds || []).filter((b) => elImg(b)), [data]);
   const bgAllowed = Boolean(template?.backgroundEnabled);
+  const sizes = data?.options.sizes || [];
+  const sizeLabel = (z) => {
+    const m = z?.meta || {};
+    const dims = [m.height, m.width].filter((v) => v !== undefined && v !== '' && v !== null);
+    return dims.length === 2 ? `${dims[0]} × ${dims[1]} ${m.unit || 'inch'}` : '';
+  };
   // "Name only" plates are hand-crafted: collect the text, don't restyle a preview.
   const textOnly = Boolean(template?.textOnly);
   const bgGroups = useMemo(() => {
@@ -138,6 +145,13 @@ export default function NamePlateDesignerPage() {
     for (const b of backgrounds) { const k = b.meta?.group || 'Backgrounds'; (g[k] ||= []).push(b); }
     return Object.entries(g);
   }, [backgrounds]);
+
+  // Default to the first offered size.
+  useEffect(() => {
+    if (!sizes.length) return;
+    if (sizeId && sizes.some((z) => z._id === sizeId)) return;
+    setSizeId(sizes[0]._id);
+  }, [sizes, sizeId]);
 
   // Default to the first background once the template offers them.
   useEffect(() => {
@@ -304,13 +318,13 @@ export default function NamePlateDesignerPage() {
   useEffect(() => {
     if (!template) return;
     const rep = styles[Object.keys(styles)[0]] || {};
-    const design = { fields, selections: { font: fontIdFor(rep.font), color: colorIdFor(rep.color), background: bgAllowed ? backgroundId : undefined }, elements: symbolId ? [{ id: symbolId }] : [] };
+    const design = { fields, selections: { font: fontIdFor(rep.font), color: colorIdFor(rep.color), size: sizeId || undefined, background: bgAllowed ? backgroundId : undefined }, elements: symbolId ? [{ id: symbolId }] : [] };
     const t = setTimeout(() => {
       quoteNpDesign(slug, design).then((qd) => { setPrice(qd.pricePaise); setErrors(qd.errors || []); }).catch(() => {});
     }, 300);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fields, styles, symbolId, slug, template]);
+  }, [fields, styles, symbolId, sizeId, slug, template]);
 
   const capturePreview = () => {
     const fc = fcRef.current;
@@ -334,7 +348,7 @@ export default function NamePlateDesignerPage() {
       const rep = styles[Object.keys(styles)[0]] || {};
       const design = {
         fields,
-        selections: { font: fontIdFor(rep.font), color: colorIdFor(rep.color), fontFamily: rep.font, colorHex: rep.color, background: bgAllowed && !customBg ? backgroundId : undefined, customBackgroundUrl: bgAllowed ? customBg || undefined : undefined },
+        selections: { font: fontIdFor(rep.font), color: colorIdFor(rep.color), size: sizeId || undefined, sizeName: sizes.find((z) => z._id === sizeId)?.name, sizeLabel: sizeLabel(sizes.find((z) => z._id === sizeId)), fontFamily: rep.font, colorHex: rep.color, background: bgAllowed && !customBg ? backgroundId : undefined, customBackgroundUrl: bgAllowed ? customBg || undefined : undefined },
         fieldStyles,
         elements: symbolId ? [{ id: symbolId, colorHex: symbolColor }] : [],
       };
@@ -344,7 +358,7 @@ export default function NamePlateDesignerPage() {
     } catch (err) { setError(apiErrorMessage(err, 'Could not add to cart')); }
     finally { setAdding(false); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [template, fields, styles, symbolId, slug, isAuthed, customBg, backgroundId, bgAllowed]);
+  }, [template, fields, styles, symbolId, sizeId, sizes, slug, isAuthed, customBg, backgroundId, bgAllowed]);
 
   const activeFields = useMemo(() => (template?.textFields || []).filter((f) => f.status !== 'inactive'), [template]);
   const activeStyle = styles[activeField] || {};
@@ -440,6 +454,26 @@ export default function NamePlateDesignerPage() {
                     className={`h-9 w-9 rounded-full border-2 transition ${activeStyle.color === c.meta.hex ? 'scale-110 border-indigo-600' : 'border-black/10 hover:scale-105'}`}
                     style={{ background: c.meta.hex }} />
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Choose size */}
+          {sizes.length > 0 && (
+            <div className="rounded-2xl border border-gray-200 bg-white p-5">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-indigo-600">Choose size</h3>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {sizes.map((z) => {
+                  const on = sizeId === z._id;
+                  const dims = sizeLabel(z);
+                  return (
+                    <button key={z._id} onClick={() => setSizeId(z._id)}
+                      className={`rounded-xl border px-3 py-2 text-left transition ${on ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-indigo-300'}`}>
+                      <span className="block text-sm font-semibold text-gray-800">{z.name}</span>
+                      {dims && <span className="block text-xs text-gray-500">{dims}</span>}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}

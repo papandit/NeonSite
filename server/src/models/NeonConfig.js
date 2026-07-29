@@ -32,9 +32,10 @@ const SizeSchema = new Schema({
   basePricePaise: paiseField({ required: true }),
   perCharPaise: paiseField({ default: 0 }),
   fontSizePx: { type: Number, default: 46, min: 8 },
-  // Physical sign dimensions. heightCm = height of one line at this size (0 =
-  // derive from fontSizePx). perCharCm = width added per character (0 = auto,
-  // from the actual rendered text). Both drive the storefront dimension guides.
+  // Physical sign dimensions, expressed in `unit`. heightCm = height of one line
+  // (0 = derive from fontSizePx); `cm` above is the width/length. perCharCm adds
+  // width per character (0 = auto-fit the rendered text).
+  unit: { type: String, enum: ['cm', 'inch', 'mm'], default: 'cm' },
   heightCm: { type: Number, default: 0, min: 0 },
   perCharCm: { type: Number, default: 0, min: 0 },
   active: { type: Boolean, default: true },

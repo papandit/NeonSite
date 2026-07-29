@@ -190,6 +190,20 @@ export default function NpCrudPage() {
                 if (f.input === 'file') {
                   return <FileUpload key={f.key} label={f.label} kind={f.kind} folder={`nameplate/${key}`} value={meta[f.key] || ''} onChange={(v) => setMetaField(f.key, v)} onUploaded={(_url, suggested) => suggestName(suggested)} />;
                 }
+                if (f.input === 'select') {
+                  return (
+                    <div key={f.key}>
+                      <label className="block text-sm font-medium text-slate-700">{f.label}</label>
+                      <select
+                        value={meta[f.key] ?? f.options?.[0] ?? ''}
+                        onChange={(e) => setMetaField(f.key, e.target.value)}
+                        className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                      >
+                        {(f.options || []).map((o) => <option key={o} value={o}>{o}</option>)}
+                      </select>
+                    </div>
+                  );
+                }
                 if (f.input === 'color') {
                   return (
                     <div key={f.key}>

@@ -36,8 +36,9 @@ export const NP_COLLECTIONS = [
     { key: 'description', label: 'Description', input: 'text' },
   ] },
   { key: 'sizes', label: 'Sizes', metaFields: [
-    { key: 'widthMm', label: 'Width (mm)', input: 'number' },
-    { key: 'heightMm', label: 'Height (mm)', input: 'number' },
+    { key: 'height', label: 'Height', input: 'number' },
+    { key: 'width', label: 'Width', input: 'number' },
+    { key: 'unit', label: 'Unit', input: 'select', options: ['inch', 'cm', 'mm'] },
   ] },
   { key: 'backgrounds', label: 'Backgrounds', metaFields: [
     { key: 'image', label: 'Image / texture', input: 'file', kind: 'image' },

@@ -227,8 +227,8 @@ export default function NeonPage() {
                 >
                   {lines.map((l, i) => <span key={i} className="neon-line">{l || ' '}</span>)}
                 </div>
-                <div className="neon-dim-y"><span>{heightCm} cm</span></div>
-                <div className="neon-dim-x"><span>{widthCm} cm</span></div>
+                <div className="neon-dim-y"><span>{heightCm} {sizeUnit}</span></div>
+                <div className="neon-dim-x"><span>{widthCm} {sizeUnit}</span></div>
               </div>
             </div>
             <p className="mt-3 text-xs leading-relaxed text-slate-500">
@@ -301,7 +301,7 @@ export default function NeonPage() {
                     const h = s.heightCm > 0 ? s.heightCm : Math.max(1, Math.round((s.fontSizePx || 46) * 0.33));
                     return (
                       <button key={s.key} onClick={() => setSize(s.key)} className={pill(size === s.key)}>
-                        {s.name}<span className="ml-1.5 text-xs text-slate-500">{h} × {s.cm} cm</span>
+                        {s.name}<span className="ml-1.5 text-xs text-slate-500">{h} × {s.cm} {s.unit || 'cm'}</span>
                         <span className="ml-1.5 text-xs text-indigo-300">{formatPaise(s.basePricePaise)}+</span>
                       </button>
                     );
@@ -361,7 +361,7 @@ export default function NeonPage() {
             <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
               <Row label="Design" value={text || '—'} />
               <Row label="Colour & font" value={`${colorObj?.name || '—'} · ${fontObj?.name || '—'}`} />
-              <Row label="Dimensions" value={`${widthCm} × ${heightCm} cm`} />
+              <Row label="Dimensions" value={`${heightCm} × ${widthCm} ${sizeUnit}`} />
               <Row label="Backing & adapter" value={`${backObj?.name || '—'} · ${adapterObj?.name || '—'}`} />
               <Row label="Est. tube length" value={`≈ ${tubeMeters.toFixed(1)} m`} />
               <div className="mt-4 flex items-baseline justify-between">

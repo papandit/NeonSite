@@ -197,12 +197,12 @@ export default function TemplateCanvasBuilder({
       fc.requestRenderAll();
     };
 
-    // A clean, always-centred slot marker (never cut) showing where + how big the
-    // customer's chosen symbol will sit. The actual symbol is picked on the
-    // storefront; here we only set its box.
-    const rect = new fabric.Rect({ left: 0, top: 0, width: 100, height: 100, rx: 14, ry: 14, fill: 'rgba(79,70,229,0.12)', stroke: '#4f46e5', strokeDashArray: [6, 4], strokeWidth: 2 });
-    const star = new fabric.Text('✦', { left: 50, top: 50, originX: 'center', originY: 'center', fontSize: 44, fill: '#4f46e5' });
-    place(new fabric.Group([rect, star]), 100);
+    // A plain dashed square marking where + how big the customer's chosen symbol
+    // will sit. The symbol itself is picked on the storefront.
+    place(new fabric.Rect({
+      left: 0, top: 0, width: 100, height: 100, rx: 10, ry: 10,
+      fill: 'rgba(79,70,229,0.08)', stroke: '#4f46e5', strokeDashArray: [6, 4], strokeWidth: 2,
+    }), 100);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [symbol?.x, symbol?.y, symbol?.scale, H]);
 

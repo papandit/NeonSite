@@ -61,6 +61,17 @@ function RowEditor({ title, description, items, columns, onChange, makeEmpty, ad
         </div>
       );
     }
+    if (col.type === 'select') {
+      return (
+        <select
+          value={v ?? col.options?.[0] ?? ''}
+          onChange={(e) => setCell(i, col.key, e.target.value)}
+          className="w-full min-w-20 rounded-md border border-slate-300 px-2 py-1.5 text-sm"
+        >
+          {(col.options || []).map((o) => <option key={o} value={o}>{o}</option>)}
+        </select>
+      );
+    }
     return (
       <input
         type={col.type === 'number' ? 'number' : 'text'}
@@ -270,19 +281,17 @@ export default function NeonPage() {
         />
 
         <RowEditor
-          title="Sizes" description="Shown to customers as Height × Length (cm). Height = sign height per line (0 = auto from font px). Length = nominal sign length. Per-char width (cm) makes length grow by character count (0 = auto-fit to the actual text). Price = base ₹ + (per-char ₹ × non-space characters)."
+          title="Sizes" description="Name the size, pick its unit, and set Height × Width. Price = base ₹ + (per-char ₹ × non-space characters)."
           items={cfg.sizes} onChange={(v) => set('sizes', v)}
-          makeEmpty={() => ({ key: '', name: '', cm: 60, basePricePaise: 260000, perCharPaise: 13000, fontSizePx: 46, heightCm: 15, perCharCm: 0, active: true })}
+          makeEmpty={() => ({ key: '', name: '', unit: 'cm', heightCm: 15, cm: 60, basePricePaise: 260000, perCharPaise: 13000, fontSizePx: 46, perCharCm: 0, active: true })}
           addLabel="Add size"
           columns={[
-            { key: 'key', label: 'Key', type: 'text' },
             { key: 'name', label: 'Name', type: 'text' },
-            { key: 'heightCm', label: 'Height (cm)', type: 'number' },
-            { key: 'cm', label: 'Length (cm)', type: 'number' },
-            { key: 'perCharCm', label: 'Per-char width (cm)', type: 'number' },
+            { key: 'heightCm', label: 'Height', type: 'number' },
+            { key: 'cm', label: 'Width', type: 'number' },
+            { key: 'unit', label: 'Unit', type: 'select', options: ['cm', 'inch', 'mm'] },
             { key: 'basePricePaise', label: 'Base (₹)', type: 'money' },
             { key: 'perCharPaise', label: 'Per char (₹)', type: 'money' },
-            { key: 'fontSizePx', label: 'Font px', type: 'number' },
             { key: 'active', label: 'Active', type: 'bool' },
           ]}
         />
