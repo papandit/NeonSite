@@ -235,6 +235,29 @@ export default function NeonPage() {
               Live preview on a laser-cut acrylic backboard. The dimensions match your selected size; toggle day/night and power
               to see how it reads in a real room.
             </p>
+
+            {/* Background scene — sits under the preview so you see the room change live */}
+            {cfg.scenes.length > 0 && (
+              <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Background scene</div>
+                <div className="flex flex-wrap gap-2">
+                  {cfg.scenes.map((s) => (
+                    <button
+                      key={s.key}
+                      onClick={() => setScene(s.key)}
+                      className={`flex flex-col overflow-hidden rounded-xl border transition ${scene === s.key ? 'border-indigo-500' : 'border-white/10 hover:border-white/25'}`}
+                    >
+                      {s.imageUrl ? (
+                        <img src={s.imageUrl} alt={s.name} className="h-12 w-20 object-cover" />
+                      ) : (
+                        <span className={`neon-thumb ${s.key}`} />
+                      )}
+                      <span className="px-2 py-1 text-[11px] text-slate-300">{s.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* ---------- CONTROLS ---------- */}
@@ -335,26 +358,6 @@ export default function NeonPage() {
                 </div>
               )}
 
-              {/* scene */}
-              <div>
-                <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Background scene</div>
-                <div className="flex flex-wrap gap-2">
-                  {cfg.scenes.map((s) => (
-                    <button
-                      key={s.key}
-                      onClick={() => setScene(s.key)}
-                      className={`flex flex-col overflow-hidden rounded-xl border transition ${scene === s.key ? 'border-indigo-500' : 'border-white/10 hover:border-white/25'}`}
-                    >
-                      {s.imageUrl ? (
-                        <img src={s.imageUrl} alt={s.name} className="h-12 w-20 object-cover" />
-                      ) : (
-                        <span className={`neon-thumb ${s.key}`} />
-                      )}
-                      <span className="px-2 py-1 text-[11px] text-slate-300">{s.name}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
             </div>
 
             {/* summary */}
