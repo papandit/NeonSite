@@ -5,6 +5,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import NeonBoxDiagram from './NeonBoxDiagram';
 
 const rise = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: 'easeOut' } } };
 
@@ -83,6 +84,12 @@ export default function NeonInfoSections({ info }) {
           <motion.section id="neon-box" variants={rise} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} className="scroll-mt-32">
             <Heading>{box.heading}</Heading>
             {box.body && <p className="mt-4 max-w-3xl leading-relaxed text-slate-400">{box.body}</p>}
+
+            {/* Anatomy diagram — every part that ships, labelled */}
+            <div className="mt-6">
+              <NeonBoxDiagram />
+            </div>
+
             {(box.items || []).length > 0 && (
               <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {box.items.map((it, i) => (

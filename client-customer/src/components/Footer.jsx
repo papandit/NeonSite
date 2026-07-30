@@ -71,15 +71,19 @@ export default function Footer({ categories = [] }) {
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
           <div>
-            <Link to="/" className="flex items-center gap-2">
+            {/* Full wordmark logo stands alone; the name is the no-logo fallback.
+                The mark is near-black, so it sits on a light chip here. */}
+            <Link to="/" className="flex items-center gap-2" aria-label={storeName}>
               {settings.logoUrl ? (
-                <img src={settings.logoUrl} alt={storeName} className="h-10 w-10 rounded-xl object-cover" />
+                <img src={settings.logoUrl} alt={storeName} className="h-12 w-auto max-w-48 rounded-xl bg-white/95 object-contain px-2 py-1" />
               ) : (
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 font-display text-lg font-semibold text-white">
-                  {initial}
-                </span>
+                <>
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 font-display text-lg font-semibold text-white">
+                    {initial}
+                  </span>
+                  <span className="font-display text-lg font-medium text-white">{storeName}</span>
+                </>
               )}
-              <span className="font-display text-lg font-medium text-white">{storeName}</span>
             </Link>
             <p className="mt-4 max-w-xs text-sm text-gray-400">{about}</p>
             {(settings.supportEmail || settings.supportPhone) && (

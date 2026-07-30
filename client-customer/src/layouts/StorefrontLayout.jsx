@@ -56,16 +56,20 @@ export default function StorefrontLayout() {
   // Close the mobile menu on navigation.
   useEffect(() => { setMenuOpen(false); }, [location.pathname, location.search]);
 
+  // The uploaded logo is a full wordmark, so it stands alone — the store name is
+  // only rendered as a fallback when no logo is set.
   const Brand = (
-    <Link to="/" className="flex min-w-0 items-center gap-2">
+    <Link to="/" className="flex min-w-0 items-center gap-2" aria-label={storeName}>
       {settings.logoUrl ? (
-        <img src={settings.logoUrl} alt={storeName} className="h-9 w-9 shrink-0 rounded-lg object-cover" />
+        <img src={settings.logoUrl} alt={storeName} className="h-11 w-auto max-w-44 shrink-0 object-contain sm:h-12" />
       ) : (
-        <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white font-display text-lg font-semibold">
-          {storeName.charAt(0).toUpperCase()}
-        </span>
+        <>
+          <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white font-display text-lg font-semibold">
+            {storeName.charAt(0).toUpperCase()}
+          </span>
+          <span className="truncate font-display text-base font-medium tracking-tight text-gray-900 sm:text-xl">{storeName}</span>
+        </>
       )}
-      <span className="truncate font-display text-base font-medium tracking-tight text-gray-900 sm:text-xl">{storeName}</span>
     </Link>
   );
 
