@@ -6,6 +6,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import NeonBoxDiagram from './NeonBoxDiagram';
+import { CompareTable, CraftedSection } from './NeonCompare';
+
+const LIGHT_TYPES = [
+  { key: 'neon', name: 'Neon Light', desc: 'Classic single-colour LED neon', dot: 'bg-pink-500' },
+  { key: 'floro', name: 'FloRo Light', desc: 'RGBIC — any colour, app control', dot: 'bg-linear-to-r from-cyan-400 via-fuchsia-400 to-amber-300' },
+];
 
 const rise = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: 'easeOut' } } };
 
@@ -13,7 +19,7 @@ function Heading({ children }) {
   return <h2 className="font-display text-2xl font-medium text-emerald-400 sm:text-3xl">{children}</h2>;
 }
 
-export default function NeonInfoSections({ info }) {
+export default function NeonInfoSections({ info, compare, crafted, lightType, onLightType }) {
   const about = info?.about || {};
   const box = info?.box || {};
   const install = info?.install || {};
@@ -24,9 +30,10 @@ export default function NeonInfoSections({ info }) {
     about.body && { id: 'neon-about', label: 'Product details' },
     (box.body || (box.items || []).length) && { id: 'neon-box', label: "What's in the box" },
     (install.steps || []).length && { id: 'neon-install', label: 'How to install' },
+    (compare?.rows || []).length && { id: 'neon-compare', label: 'Compare' },
     reviews.length && { id: 'neon-reviews', label: 'Reviews' },
     faqs.length && { id: 'neon-faqs', label: 'FAQs' },
-  ].filter(Boolean), [about, box, install, reviews, faqs]);
+  ].filter(Boolean), [about, box, install, reviews, faqs, compare]);
 
   const [active, setActive] = useState(sections[0]?.id || '');
   const [openFaq, setOpenFaq] = useState(null);
@@ -52,6 +59,37 @@ export default function NeonInfoSections({ info }) {
 
   return (
     <div ref={rootRef} className="bg-[#0a0a0f] text-slate-300">
+      {/* Light type — sits above the sub-nav; switching it swaps every section
+          below (about / box / install / reviews / FAQs) for that light's copy. */}
+      {onLightType && (
+        <div className="border-b border-white/10 bg-[#0d0d13]">
+          <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-2 px-4 py-4 sm:gap-3">
+            <span className="mr-1 hidden text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 sm:block">
+              Light type
+            </span>
+            {LIGHT_TYPES.map((o) => {
+              const on = lightType === o.key;
+              return (
+                <button
+                  key={o.key}
+                  onClick={() => onLightType(o.key)}
+                  aria-pressed={on}
+                  className={`flex items-center gap-2.5 rounded-full border px-4 py-2 text-left transition ${
+                    on ? 'border-emerald-400 bg-emerald-400/10' : 'border-white/15 hover:border-white/40'
+                  }`}
+                >
+                  <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${o.dot}`} />
+                  <span>
+                    <span className={`block text-sm font-semibold ${on ? 'text-white' : 'text-slate-300'}`}>{o.name}</span>
+                    <span className="block text-[11px] leading-tight text-slate-500">{o.desc}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Sticky sub-nav */}
       {/* Sits flush under the 64px site header (h-16), which stays sticky. */}
       <nav className="sticky top-16 z-30 border-b border-white/10 bg-[#111117]/95 backdrop-blur">
@@ -127,6 +165,8 @@ export default function NeonInfoSections({ info }) {
           </motion.section>
         )}
 
+        <CompareTable compare={compare} />
+
         {/* Reviews */}
         {reviews.length > 0 && (
           <motion.section id="neon-reviews" variants={rise} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} className="scroll-mt-32">
@@ -174,6 +214,8 @@ export default function NeonInfoSections({ info }) {
             </div>
           </motion.section>
         )}
+
+        <CraftedSection crafted={crafted} />
       </div>
     </div>
   );

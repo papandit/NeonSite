@@ -84,6 +84,18 @@ export const DEFAULT_CONTENT = {
         { title: 'Power it up', desc: 'Connect the adaptor to the transparent cable — and glow.' },
       ],
     },
+    compare: {
+      heading: 'Go For the best!',
+      usLabel: 'Us',
+      themLabel: 'Them',
+      rows: [
+        'Top notch quality with flawless finishing',
+        'Premium craftsmanship',
+        'Easy repair or replacement, covered by a 2 year warranty',
+        'IP67 technology — waterproof add-on for outdoor usage',
+        '24/7 customer support',
+      ],
+    },
     reviews: [
       { name: 'Aditi R.', quote: 'The glow is gorgeous and it arrived beautifully packed. Installed in 20 minutes.' },
       { name: 'Karan M.', quote: 'Exactly like the live preview — the colour is spot on and it feels premium.' },
@@ -97,6 +109,77 @@ export const DEFAULT_CONTENT = {
       { q: 'Is it safe for outdoors?', a: 'Ask us for the IP67 waterproof add-on and we will build it weather-ready.' },
       { q: 'Can you turn my logo into a neon sign?', a: 'Yes — send us your logo or artwork and we will share a mockup before production.' },
     ],
+  },
+  // FloRo is the upgraded RGBIC light line — same page, its own story.
+  floroInfo: {
+    about: {
+      heading: 'About your FloRo sign',
+      body: 'FloRo signs are handcrafted with 2nd-gen RGBIC LED on high-quality 6mm transparent acrylic. Set it to any colour, pick from 200+ dynamic flow effects, and control every glow from your phone — energy-efficient, durable and easy to install.',
+    },
+    box: {
+      heading: "What's in the box",
+      body: 'Your FloRo sign ships ready to shine, mounted on clear acrylic with pre-drilled holes and a stainless-steel mounting kit.',
+      items: [
+        'FloRo RGBIC sign on acrylic backing',
+        'Mounting screw kit',
+        '10 ft transparent cable',
+        'Power adaptor + FloRo controller',
+        'Sticker sheet',
+      ],
+    },
+    install: {
+      heading: 'How to install',
+      steps: [
+        { title: 'Mark the spot', desc: 'Use a measuring tape to mark where your sign will sit.' },
+        { title: 'Drill the holes', desc: 'Safely drill small holes on the wall at your marks.' },
+        { title: 'Mount the sign', desc: 'Fix it in place with the stainless-steel mounting screws.' },
+        { title: 'Pair the app', desc: 'Connect the controller and set colours and flow effects from your phone.' },
+      ],
+    },
+    compare: {
+      heading: 'Glow smarter with FloRo',
+      usLabel: 'FloRo',
+      themLabel: 'Others',
+      rows: [
+        'Set it to any colour with RGBIC technology',
+        '200+ dynamic flow modes and multi-colour effects',
+        'Fully controllable from your smartphone',
+        'Top notch quality with flawless finishing',
+        'Easy repair or replacement, covered by a 2 year warranty',
+        '24/7 customer support',
+      ],
+    },
+    reviews: [
+      { name: 'Rhea T.', quote: 'Being able to change the colour from my phone is the best part — every room, a new mood.' },
+      { name: 'Sameer J.', quote: 'The flow effects look incredible on video. Worth the upgrade over plain neon.' },
+      { name: 'Ananya B.', quote: 'Setup took minutes and the app just worked. Brilliant finish too.' },
+    ],
+    faqs: [
+      { q: 'What makes FloRo different from classic neon?', a: 'FloRo uses RGBIC LED, so a single sign can show many colours at once, with 200+ dynamic flow effects and full app control.' },
+      { q: 'Do I need the app?', a: 'No — it lights up out of the box. The app simply unlocks colour changes, effects and scheduling.' },
+      { q: 'Can I still pick one fixed colour?', a: 'Absolutely. Set any colour you like and leave it there.' },
+      { q: 'Is FloRo dimmable?', a: 'Yes, brightness is adjustable from the controller and the app.' },
+    ],
+  },
+  // "Glow smarter" comparison shown under both light types.
+  compare: {
+    heading: 'Glow smarter with FloRo',
+    usLabel: 'FloRo',
+    themLabel: 'Others',
+    rows: [
+      'Set it to any colour with RGBIC technology',
+      '200+ dynamic flow modes and multi-colour effects',
+      'Fully controllable from your smartphone',
+      'Top-notch quality with flawless finishing',
+      'Easy repair or replacement, covered by a 2 year warranty',
+      '24/7 customer support',
+    ],
+  },
+  // Workshop / made-in-India story.
+  crafted: {
+    heading: '100% homegrown, expertly crafted',
+    body: 'Every sign is handmade in India with flawless finishing. That lets us build fully customised pieces exactly the way you want them — just reach out and we will take care of it.',
+    images: [],
   },
   promo: {
     heading: 'Ready to design yours?',
@@ -149,6 +232,15 @@ function withDefaults(data) {
         box: { ...DEFAULT_CONTENT.neonInfo.box, ...(c.neonInfo?.box || {}) },
         install: { ...DEFAULT_CONTENT.neonInfo.install, ...(c.neonInfo?.install || {}) },
       },
+      floroInfo: {
+        ...DEFAULT_CONTENT.floroInfo,
+        ...(c.floroInfo || {}),
+        about: { ...DEFAULT_CONTENT.floroInfo.about, ...(c.floroInfo?.about || {}) },
+        box: { ...DEFAULT_CONTENT.floroInfo.box, ...(c.floroInfo?.box || {}) },
+        install: { ...DEFAULT_CONTENT.floroInfo.install, ...(c.floroInfo?.install || {}) },
+      },
+      compare: { ...DEFAULT_CONTENT.compare, ...(c.compare || {}) },
+      crafted: { ...DEFAULT_CONTENT.crafted, ...(c.crafted || {}) },
       promo: { ...DEFAULT_CONTENT.promo, ...(c.promo || {}) },
       newsletter: { ...DEFAULT_CONTENT.newsletter, ...(c.newsletter || {}) },
       footer: { ...DEFAULT_CONTENT.footer, ...(c.footer || {}) },

@@ -85,6 +85,8 @@ export default function NeonPage() {
   const isAuthed = useSelector(selectIsAuthenticated);
   const { settings } = useSiteSettings();
   const shipDates = useMemo(() => deliveryWindow(), []);
+  const [lightType, setLightType] = useState('neon'); // 'neon' | 'floro'
+  const infoBlock = lightType === 'floro' ? settings.content?.floroInfo : settings.content?.neonInfo;
 
   const [cfg, setCfg] = useState(null);
   const [text, setText] = useState('good vibes only');
@@ -482,7 +484,13 @@ export default function NeonPage() {
 
 
       {/* Product story: about / box / install / reviews / FAQs (admin-editable) */}
-      <NeonInfoSections info={settings.content?.neonInfo} />
+      <NeonInfoSections
+        lightType={lightType}
+        onLightType={setLightType}
+        info={infoBlock}
+        compare={infoBlock?.compare || settings.content?.compare}
+        crafted={settings.content?.crafted}
+      />
     </div>
   );
 }

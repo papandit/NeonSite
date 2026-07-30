@@ -19,7 +19,9 @@ const EMPTY = {
   faqs: [],
   video: { heading: '', subheading: '', url: '', ctaText: '', ctaLink: '' },
   videoNameplate: { heading: '', subheading: '', url: '', ctaText: '', ctaLink: '' },
-  neonInfo: { about: {}, box: {}, install: {}, reviews: [], faqs: [] },
+  neonInfo: { about: {}, box: {}, install: {}, compare: {}, reviews: [], faqs: [] },
+  floroInfo: { about: {}, box: {}, install: {}, compare: {}, reviews: [], faqs: [] },
+  crafted: {},
   promo: { heading: '', subheading: '', ctaText: '' },
   newsletter: { heading: '', subheading: '' },
   footer: { about: '', tagline: '' },
@@ -131,6 +133,82 @@ function listToPages(list = []) {
     if (slug) out[slug] = { title: p.title || '', intro: p.intro || '', body: p.body || '' };
   }
   return out;
+}
+
+// The Neon and FloRo product stories share a shape, so one component edits
+// either (`k` is the content key: neonInfo | floroInfo).
+function LightStory({ label, k, content, setNested, setDeep }) {
+  return (
+    <>
+      <Card title={`${label} — About`} description="The long-form section under the Neon Studio customizer.">
+        <Field label="Heading" value={content[k]?.about?.heading} onChange={(v) => setDeep(k, 'about', 'heading', v)} />
+        <Field label="Body" value={content[k]?.about?.body} textarea onChange={(v) => setDeep(k, 'about', 'body', v)} />
+      </Card>
+
+      <Card title={`${label} — What's in the box`} description="One item per line.">
+        <Field label="Heading" value={content[k]?.box?.heading} onChange={(v) => setDeep(k, 'box', 'heading', v)} />
+        <Field label="Intro" value={content[k]?.box?.body} textarea onChange={(v) => setDeep(k, 'box', 'body', v)} />
+        <Field
+          label="Items (one per line)"
+          value={(content[k]?.box?.items || []).join(NL)}
+          textarea
+          onChange={(v) => setDeep(k, 'box', 'items', v.split(NL).map((x) => x.trim()).filter(Boolean))}
+        />
+      </Card>
+
+      <ListSection
+        title={`${label} — How to install`}
+        description="Steps shown as cards. Leave the image blank to show a numbered tile."
+        items={content[k]?.install?.steps}
+        onChange={(v) => setDeep(k, 'install', 'steps', v)}
+        makeEmpty={() => ({ title: '', desc: '', image: '' })}
+        addLabel="Add step"
+        fields={[
+          { key: 'title', label: 'Title' },
+          { key: 'image', label: 'Image URL (optional)' },
+          { key: 'desc', label: 'Description', width: 'full', textarea: true },
+        ]}
+      />
+
+      <Card title={`${label} — Comparison table`} description="The green 'Us vs Them' table. One claim per line; empty hides the table.">
+        <Field label="Heading" value={content[k]?.compare?.heading} placeholder="Go For the best!" onChange={(v) => setDeep(k, 'compare', 'heading', v)} />
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field label="Our column label" value={content[k]?.compare?.usLabel} placeholder="Us" onChange={(v) => setDeep(k, 'compare', 'usLabel', v)} />
+          <Field label="Their column label" value={content[k]?.compare?.themLabel} placeholder="Them" onChange={(v) => setDeep(k, 'compare', 'themLabel', v)} />
+        </div>
+        <Field
+          label="Rows (one per line)"
+          value={(content[k]?.compare?.rows || []).join(NL)}
+          textarea
+          onChange={(v) => setDeep(k, 'compare', 'rows', v.split(NL).map((x) => x.trim()).filter(Boolean))}
+        />
+      </Card>
+
+      <ListSection
+        title={`${label} — Reviews`}
+        items={content[k]?.reviews}
+        onChange={(v) => setNested(k, 'reviews', v)}
+        makeEmpty={() => ({ name: '', quote: '' })}
+        addLabel="Add review"
+        fields={[
+          { key: 'name', label: 'Name' },
+          { key: 'quote', label: 'Quote', width: 'full', textarea: true },
+        ]}
+      />
+
+      <ListSection
+        title={`${label} — FAQs`}
+        items={content[k]?.faqs}
+        onChange={(v) => setNested(k, 'faqs', v)}
+        makeEmpty={() => ({ q: '', a: '' })}
+        addLabel="Add FAQ"
+        fields={[
+          { key: 'q', label: 'Question', width: 'full' },
+          { key: 'a', label: 'Answer', width: 'full', textarea: true },
+        ]}
+      />
+    </>
+  );
 }
 
 export default function ContentEditor() {
@@ -271,60 +349,20 @@ export default function ContentEditor() {
         </div>
       </Card>
 
-      {/* Neon Studio product story */}
-      <Card title="Neon page — About" description="The long-form section under the Neon Studio customizer.">
-        <Field label="Heading" value={content.neonInfo?.about?.heading} onChange={(v) => setDeep('neonInfo', 'about', 'heading', v)} />
-        <Field label="Body" value={content.neonInfo?.about?.body} textarea onChange={(v) => setDeep('neonInfo', 'about', 'body', v)} />
-      </Card>
+      {/* Neon Studio product story — one block per light type */}
+      <LightStory label="Neon page" k="neonInfo" content={content} setNested={setNested} setDeep={setDeep} />
+      <LightStory label="FloRo page" k="floroInfo" content={content} setNested={setNested} setDeep={setDeep} />
 
-      <Card title="Neon page — What's in the box" description="One item per line.">
-        <Field label="Heading" value={content.neonInfo?.box?.heading} onChange={(v) => setDeep('neonInfo', 'box', 'heading', v)} />
-        <Field label="Intro" value={content.neonInfo?.box?.body} textarea onChange={(v) => setDeep('neonInfo', 'box', 'body', v)} />
+      <Card title="Neon page — Expertly crafted" description="The workshop story at the end of the neon page. One image URL per line (up to 4).">
+        <Field label="Heading" value={content.crafted?.heading} onChange={(v) => setNested('crafted', 'heading', v)} />
+        <Field label="Body" value={content.crafted?.body} textarea onChange={(v) => setNested('crafted', 'body', v)} />
         <Field
-          label="Items (one per line)"
-          value={(content.neonInfo?.box?.items || []).join(NL)}
+          label="Image URLs (one per line)"
+          value={(content.crafted?.images || []).join(NL)}
           textarea
-          onChange={(v) => setDeep('neonInfo', 'box', 'items', v.split(NL).map((x) => x.trim()).filter(Boolean))}
+          onChange={(v) => setNested('crafted', 'images', v.split(NL).map((x) => x.trim()).filter(Boolean))}
         />
       </Card>
-
-      <ListSection
-        title="Neon page — How to install"
-        description="Steps shown as cards. Leave the image blank to show a numbered tile."
-        items={content.neonInfo?.install?.steps}
-        onChange={(v) => setDeep('neonInfo', 'install', 'steps', v)}
-        makeEmpty={() => ({ title: '', desc: '', image: '' })}
-        addLabel="Add step"
-        fields={[
-          { key: 'title', label: 'Title' },
-          { key: 'image', label: 'Image URL (optional)' },
-          { key: 'desc', label: 'Description', width: 'full', textarea: true },
-        ]}
-      />
-
-      <ListSection
-        title="Neon page — Reviews"
-        items={content.neonInfo?.reviews}
-        onChange={(v) => setNested('neonInfo', 'reviews', v)}
-        makeEmpty={() => ({ name: '', quote: '' })}
-        addLabel="Add review"
-        fields={[
-          { key: 'name', label: 'Name' },
-          { key: 'quote', label: 'Quote', width: 'full', textarea: true },
-        ]}
-      />
-
-      <ListSection
-        title="Neon page — FAQs"
-        items={content.neonInfo?.faqs}
-        onChange={(v) => setNested('neonInfo', 'faqs', v)}
-        makeEmpty={() => ({ q: '', a: '' })}
-        addLabel="Add FAQ"
-        fields={[
-          { key: 'q', label: 'Question', width: 'full' },
-          { key: 'a', label: 'Answer', width: 'full', textarea: true },
-        ]}
-      />
 
       <Card title="Promo band" description="The coloured call-to-action band.">
         <Field label="Heading" value={content.promo?.heading} onChange={(v) => setNested('promo', 'heading', v)} />
