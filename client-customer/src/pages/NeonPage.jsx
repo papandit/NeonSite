@@ -15,6 +15,8 @@ import { selectIsAuthenticated } from '../store/authSlice';
 import { formatPaise } from '../utils/money';
 import { apiErrorMessage } from '../services/api';
 import Seo from '../components/Seo';
+import NeonInfoSections from '../components/NeonInfoSections';
+import { useSiteSettings } from '../context/SiteSettings';
 import './neon.css';
 
 export const PENDING_NEON_KEY = 'nc_pending_neon';
@@ -38,6 +40,7 @@ export default function NeonPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const isAuthed = useSelector(selectIsAuthenticated);
+  const { settings } = useSiteSettings();
 
   const [cfg, setCfg] = useState(null);
   const [text, setText] = useState('good vibes only');
@@ -395,6 +398,9 @@ export default function NeonPage() {
           </button>
         </div>
       </div>
+
+      {/* Product story: about / box / install / reviews / FAQs (admin-editable) */}
+      <NeonInfoSections info={settings.content?.neonInfo} />
     </div>
   );
 }

@@ -9,6 +9,8 @@ import { settingsApi } from '../services/ops';
 import { apiErrorMessage } from '../services/api';
 import { toast } from '../lib/toast';
 
+const NL = String.fromCharCode(10); // newline — used for the "one per line" fields
+
 const EMPTY = {
   hero: { heading: '', subheading: '', ctaText: '' },
   features: [],
@@ -17,6 +19,7 @@ const EMPTY = {
   faqs: [],
   video: { heading: '', subheading: '', url: '', ctaText: '', ctaLink: '' },
   videoNameplate: { heading: '', subheading: '', url: '', ctaText: '', ctaLink: '' },
+  neonInfo: { about: {}, box: {}, install: {}, reviews: [], faqs: [] },
   promo: { heading: '', subheading: '', ctaText: '' },
   newsletter: { heading: '', subheading: '' },
   footer: { about: '', tagline: '' },
@@ -151,6 +154,7 @@ export default function ContentEditor() {
 
   const set = (key, val) => { setContent((c) => ({ ...c, [key]: val })); setSaved(false); };
   const setNested = (key, subKey, val) => { setContent((c) => ({ ...c, [key]: { ...c[key], [subKey]: val } })); setSaved(false); };
+  const setDeep = (key, subKey, leaf, val) => { setContent((c) => ({ ...c, [key]: { ...c[key], [subKey]: { ...(c[key]?.[subKey] || {}), [leaf]: val } } })); setSaved(false); };
 
   const onSave = async () => {
     setSaving(true);
@@ -266,6 +270,61 @@ export default function ContentEditor() {
           <Field label="Button link" value={content.videoNameplate?.ctaLink} placeholder="/nameplates" onChange={(v) => setNested('videoNameplate', 'ctaLink', v)} />
         </div>
       </Card>
+
+      {/* Neon Studio product story */}
+      <Card title="Neon page — About" description="The long-form section under the Neon Studio customizer.">
+        <Field label="Heading" value={content.neonInfo?.about?.heading} onChange={(v) => setDeep('neonInfo', 'about', 'heading', v)} />
+        <Field label="Body" value={content.neonInfo?.about?.body} textarea onChange={(v) => setDeep('neonInfo', 'about', 'body', v)} />
+      </Card>
+
+      <Card title="Neon page — What's in the box" description="One item per line.">
+        <Field label="Heading" value={content.neonInfo?.box?.heading} onChange={(v) => setDeep('neonInfo', 'box', 'heading', v)} />
+        <Field label="Intro" value={content.neonInfo?.box?.body} textarea onChange={(v) => setDeep('neonInfo', 'box', 'body', v)} />
+        <Field
+          label="Items (one per line)"
+          value={(content.neonInfo?.box?.items || []).join(NL)}
+          textarea
+          onChange={(v) => setDeep('neonInfo', 'box', 'items', v.split(NL).map((x) => x.trim()).filter(Boolean))}
+        />
+      </Card>
+
+      <ListSection
+        title="Neon page — How to install"
+        description="Steps shown as cards. Leave the image blank to show a numbered tile."
+        items={content.neonInfo?.install?.steps}
+        onChange={(v) => setDeep('neonInfo', 'install', 'steps', v)}
+        makeEmpty={() => ({ title: '', desc: '', image: '' })}
+        addLabel="Add step"
+        fields={[
+          { key: 'title', label: 'Title' },
+          { key: 'image', label: 'Image URL (optional)' },
+          { key: 'desc', label: 'Description', width: 'full', textarea: true },
+        ]}
+      />
+
+      <ListSection
+        title="Neon page — Reviews"
+        items={content.neonInfo?.reviews}
+        onChange={(v) => setNested('neonInfo', 'reviews', v)}
+        makeEmpty={() => ({ name: '', quote: '' })}
+        addLabel="Add review"
+        fields={[
+          { key: 'name', label: 'Name' },
+          { key: 'quote', label: 'Quote', width: 'full', textarea: true },
+        ]}
+      />
+
+      <ListSection
+        title="Neon page — FAQs"
+        items={content.neonInfo?.faqs}
+        onChange={(v) => setNested('neonInfo', 'faqs', v)}
+        makeEmpty={() => ({ q: '', a: '' })}
+        addLabel="Add FAQ"
+        fields={[
+          { key: 'q', label: 'Question', width: 'full' },
+          { key: 'a', label: 'Answer', width: 'full', textarea: true },
+        ]}
+      />
 
       <Card title="Promo band" description="The coloured call-to-action band.">
         <Field label="Heading" value={content.promo?.heading} onChange={(v) => setNested('promo', 'heading', v)} />

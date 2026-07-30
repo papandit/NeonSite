@@ -57,6 +57,47 @@ export const DEFAULT_CONTENT = {
     ctaText: 'Create your name plate',
     ctaLink: '/nameplates',
   },
+  // The long-form section under the Neon Studio customizer. Rendered with a
+  // sticky sub-nav; any list left empty simply hides its section.
+  neonInfo: {
+    about: {
+      heading: 'About your neon sign',
+      body: 'Handcrafted with advanced 2nd-gen LED on high-quality 6mm transparent acrylic — energy-efficient, durable and easy to install. Twice as bright and 80% more energy-efficient than traditional neon, with adjustable brightness and an optional waterproof finish for outdoors.',
+    },
+    box: {
+      heading: "What's in the box",
+      body: 'Your sign ships ready to shine. Each one is mounted on clear acrylic with pre-drilled holes, and the stainless-steel mounting kit is included.',
+      items: [
+        'Neon sign on acrylic backing',
+        'Mounting screw kit',
+        '10 ft transparent cable',
+        'Power adaptor + brightness controller',
+        'Sticker sheet',
+      ],
+    },
+    install: {
+      heading: 'How to install',
+      steps: [
+        { title: 'Mark the spot', desc: 'Use a measuring tape to mark where your sign will sit.' },
+        { title: 'Drill the holes', desc: 'Safely drill small holes on the wall at your marks.' },
+        { title: 'Mount the sign', desc: 'Fix it in place with the stainless-steel mounting screws.' },
+        { title: 'Power it up', desc: 'Connect the adaptor to the transparent cable — and glow.' },
+      ],
+    },
+    reviews: [
+      { name: 'Aditi R.', quote: 'The glow is gorgeous and it arrived beautifully packed. Installed in 20 minutes.' },
+      { name: 'Karan M.', quote: 'Exactly like the live preview — the colour is spot on and it feels premium.' },
+      { name: 'Neha S.', quote: 'Bought it for our café counter. Customers keep asking where we got it.' },
+    ],
+    faqs: [
+      { q: 'How much does a custom neon sign cost?', a: 'Pricing starts from the Mini size and scales with the size and number of characters — the live estimate updates as you type.' },
+      { q: 'How long will delivery take?', a: 'Every sign is handmade to order. Standard orders ship in 10–14 working days; express in 4–6.' },
+      { q: 'What size will my sign be?', a: 'The height comes from the size you pick and the length grows with your text — the preview shows the exact measurements.' },
+      { q: 'Does the neon sign buzz?', a: 'No. These are LED neon, so they are completely silent.' },
+      { q: 'Is it safe for outdoors?', a: 'Ask us for the IP67 waterproof add-on and we will build it weather-ready.' },
+      { q: 'Can you turn my logo into a neon sign?', a: 'Yes — send us your logo or artwork and we will share a mockup before production.' },
+    ],
+  },
   promo: {
     heading: 'Ready to design yours?',
     subheading: 'Create a one-of-a-kind name plate in minutes — or grab a ready design as-is.',
@@ -101,6 +142,13 @@ function withDefaults(data) {
       faqs: c.faqs?.length ? c.faqs : DEFAULT_CONTENT.faqs,
       video: { ...DEFAULT_CONTENT.video, ...(c.video || {}) },
       videoNameplate: { ...DEFAULT_CONTENT.videoNameplate, ...(c.videoNameplate || {}) },
+      neonInfo: {
+        ...DEFAULT_CONTENT.neonInfo,
+        ...(c.neonInfo || {}),
+        about: { ...DEFAULT_CONTENT.neonInfo.about, ...(c.neonInfo?.about || {}) },
+        box: { ...DEFAULT_CONTENT.neonInfo.box, ...(c.neonInfo?.box || {}) },
+        install: { ...DEFAULT_CONTENT.neonInfo.install, ...(c.neonInfo?.install || {}) },
+      },
       promo: { ...DEFAULT_CONTENT.promo, ...(c.promo || {}) },
       newsletter: { ...DEFAULT_CONTENT.newsletter, ...(c.newsletter || {}) },
       footer: { ...DEFAULT_CONTENT.footer, ...(c.footer || {}) },
