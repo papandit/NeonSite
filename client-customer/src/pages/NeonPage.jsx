@@ -228,9 +228,9 @@ export default function NeonPage() {
     }}>
       <Seo title="Neon Sign Studio" description="Design your own LED neon sign — text, font, colour, size — with a live glowing preview and instant pricing." path="/neon" />
 
-      <div className="mx-auto max-w-6xl px-4 pb-40 pt-10">
+      <div className="mx-auto max-w-6xl px-4 pb-14 pt-10">
         <header className="mb-8 text-center">
-          <h1 className="font-display text-4xl font-semibold" style={{ color: '#ffe4d1', textShadow: '0 0 6px #d4541f,0 0 16px #d4541f,0 0 34px #d4541f' }}>
+          <h1 className="font-display text-4xl font-semibold" style={{ color: '#e4fff2', textShadow: '0 0 6px #589c80,0 0 16px #589c80,0 0 34px #589c80' }}>
             Neon Sign Studio
           </h1>
           <p className="mt-2 text-sm text-slate-400">Design a custom LED neon sign — live preview, size-based pricing, crafted to order.</p>
@@ -441,7 +441,7 @@ export default function NeonPage() {
                 onClick={handleAdd}
                 disabled={adding}
                 className="mt-4 w-full rounded-xl px-6 py-3.5 font-display text-sm font-bold text-white transition hover:-translate-y-0.5 disabled:opacity-60"
-                style={{ background: 'linear-gradient(90deg,#d4541f,#e8703a)', boxShadow: '0 8px 26px -8px rgba(212,84,31,.55)' }}
+                style={{ background: 'linear-gradient(90deg,#589c80,#6fae93)', boxShadow: '0 8px 26px -8px rgba(88,156,128,.55)' }}
               >
                 {adding ? 'Adding…' : `Add to cart · ${formatPaise(estPaise)}`}
               </button>
@@ -490,6 +490,7 @@ export default function NeonPage() {
         info={infoBlock}
         compare={infoBlock?.compare || settings.content?.compare}
         crafted={settings.content?.crafted}
+        assurance={settings.content?.assurance}
       />
     </div>
   );

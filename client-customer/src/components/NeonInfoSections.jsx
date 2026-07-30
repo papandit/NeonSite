@@ -7,7 +7,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import NeonBoxDiagram from './NeonBoxDiagram';
 import FloroBoxDiagram from './FloroBoxDiagram';
-import { CompareTable, CraftedSection } from './NeonCompare';
+import { AssuranceBar, CompareTable, CraftedSection } from './NeonCompare';
 
 const LIGHT_TYPES = [
   { key: 'neon', name: 'Neon Light', desc: 'Classic single-colour LED neon', dot: 'bg-pink-500' },
@@ -20,7 +20,7 @@ function Heading({ children }) {
   return <h2 className="font-display text-2xl font-medium text-emerald-400 sm:text-3xl">{children}</h2>;
 }
 
-export default function NeonInfoSections({ info, compare, crafted, lightType, onLightType }) {
+export default function NeonInfoSections({ info, compare, crafted, assurance, lightType, onLightType }) {
   const about = info?.about || {};
   const box = info?.box || {};
   const install = info?.install || {};
@@ -63,11 +63,13 @@ export default function NeonInfoSections({ info, compare, crafted, lightType, on
       {/* Light type — sits above the sub-nav; switching it swaps every section
           below (about / box / install / reviews / FAQs) for that light's copy. */}
       {onLightType && (
-        <div className="border-b border-white/10 bg-[#0d0d13]">
-          <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-2 px-4 py-4 sm:gap-3">
-            <span className="mr-1 hidden text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 sm:block">
-              Light type
-            </span>
+        <div className="border-b border-white/10 bg-[#0d0d13] py-7">
+          {/* The label sits above rather than beside the buttons, so the pair
+              stays optically centred in the band. */}
+          <div className="mb-3 text-center text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+            Light type
+          </div>
+          <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-2.5 px-4 sm:gap-3">
             {LIGHT_TYPES.map((o) => {
               const on = lightType === o.key;
               return (
@@ -218,6 +220,7 @@ export default function NeonInfoSections({ info, compare, crafted, lightType, on
         )}
 
         <CraftedSection crafted={crafted} />
+        <AssuranceBar items={assurance} />
       </div>
     </div>
   );

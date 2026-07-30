@@ -154,10 +154,16 @@ export const DEFAULT_SITE_CONTENT = {
       { name: 'Ananya B.', quote: 'Setup took minutes and the app just worked. Brilliant finish too.' },
     ],
     faqs: [
-      { q: 'What makes FloRo different from classic neon?', a: 'FloRo uses RGBIC LED, so a single sign can show many colours at once, with 200+ dynamic flow effects and full app control.' },
-      { q: 'Do I need the app?', a: 'No — it lights up out of the box. The app simply unlocks colour changes, effects and scheduling.' },
-      { q: 'Can I still pick one fixed colour?', a: 'Absolutely. Set any colour you like and leave it there.' },
-      { q: 'Is FloRo dimmable?', a: 'Yes, brightness is adjustable from the controller and the app.' },
+      { q: 'What is FloRo?', a: 'FloRo is an RGB neon sign made with revolutionary chromatic technology. That means you can now select from a countless range of shades and over 200+ flow modes to enjoy your neon sign in the best manner. That is not all — with FloRo you can even control the speed and brightness of your personalised neon sign, all with your smartphone app remote.' },
+      { q: 'What are flow modes?', a: 'Flow modes are the best and most unique feature of FloRo colour-changing neon signs. All your FloRo signs come with over 200+ unique light settings that let you change the dynamics and colour effects of your sign. The colours of your sign, truly flow with FloRo!' },
+      { q: 'I have my own design/logo. Can I get it customised into a FloRo neon sign?', a: 'Yes, we can customise your logo or any design into a FloRo RGB neon sign. Reach out to us on WhatsApp with your logo, reference image or design and we will share a virtual mockup of the FloRo neon sign with you.' },
+      { q: 'How long will it take to deliver my FloRo neon sign?', a: 'All our unique custom neon signs are handmade after your order is received. That is why it takes around 2-3 weeks to deliver your FloRo to your doorstep. We provide free shipping on all orders, regardless of the total value.' },
+      { q: 'Can you do a rush order?', a: 'Yes, we can make your order on priority and send it via express shipping at an additional cost. Since all our custom neon signs are made to order, it takes us around 10-12 days to deliver your rush order. To avail a priority order, you can state your preference during checkout.' },
+      { q: 'If I customize a sign using the online neon sign maker, what will be its exact size?', a: 'The size of your customised neon sign depends on the font you choose. Generally the height of our large signs is between 14-16 inches and medium signs are around 11-13 inches. The length of the sign is determined by the number of letters and the font you use. For further details, refer to our size chart.' },
+      { q: 'What are the small marks on my sign?', a: 'Since FloRo neon signs are handmade, sometimes there are small marks on the acrylic or glue marks where the PVC tube has been attached to the acrylic. In these rare instances where the marks are evident, they are always minor and invisible when the sign is switched on.' },
+      { q: 'Does the neon sign buzz?', a: 'Nope! Bees buzz, FloRo neon signs do not.' },
+      { q: 'How do I make sure that I mount my FloRo neon sign in a safe and secure manner?', a: 'Installation is always done best in a small group. Even though the weight of our high-quality neon signs is on the lighter side, we still recommend taking the help of 1 or 2 people so that it does not fall. Please also make sure the neon sign is mounted securely before plugging it in and using it.' },
+      { q: 'Can you have quality LED neon signs without the cords?', a: 'FloRo signs come with a slim transparent cable which is required to power the neon sign. A few customers have hidden these by hard-wiring the cable into the wall with the help of an electrician. Please note that you may not be able to use your smart app if the controller is in the wall, because the receiver will not be able to read it.' },
     ],
   },
   // "Glow smarter" comparison shown under both light types.
@@ -176,9 +182,34 @@ export const DEFAULT_SITE_CONTENT = {
   },
   // Workshop / made-in-India story.
   crafted: {
-    heading: '100% homegrown, expertly crafted',
-    body: 'Every sign is handmade in India with flawless finishing. That lets us build fully customised pieces exactly the way you want them — just reach out and we will take care of it.',
-    images: [],
+    heading: '100% Homegrown, Expertly Crafted',
+    // Blank line = paragraph break in the rendered panel.
+    body: 'All our products are handmade in India with flawless finishing.\n\nThat enables us to create 100% customized signs as per your preference. Just reach out to us and we will take care of it!',
+    // Up to 4 photos, laid out as a tilted 2x2 cross collage. These are
+    // placeholders from the catalogue — replace with real workshop shots in
+    // Admin > Settings > Site content.
+    images: ['/crafted/craft-1.jpg', '/crafted/craft-2.jpg', '/crafted/craft-3.jpg', '/crafted/craft-4.jpg'],
+  },
+  // Closing assurance strip under the "expertly crafted" band. `icon` is one of
+  // delivery | guarantee | handcrafted | rated.
+  assurance: [
+    { icon: 'delivery', title: 'Fast & Free delivery', desc: 'Express shipping available' },
+    { icon: 'guarantee', title: 'Satisfaction Guaranteed', desc: '100% customer satisfaction rate' },
+    { icon: 'handcrafted', title: 'Handcrafted To Perfection', desc: 'Premium quality neon signs and art' },
+    { icon: 'rated', title: 'Rated Excellent', desc: '1500+ five star reviews' },
+  ],
+  // Story-reel circles + shipping note shown under the buy button on product
+  // and name-plate pages. An entry with no image is skipped.
+  highlights: [
+    { label: 'Meet FloRo', image: '/highlights/hl-1.jpg', link: '/neon' },
+    { label: 'Features', image: '/highlights/hl-2.jpg', link: '/neon' },
+    { label: 'Reviews', image: '/highlights/hl-3.jpg', link: '' },
+    { label: 'Influencers', image: '/highlights/hl-4.jpg', link: '' },
+    { label: 'BTS', image: '/highlights/hl-5.jpg', link: '' },
+  ],
+  shipping: {
+    heading: 'Free Shipping',
+    express: 'Express Shipping option available at checkout ( 3-5 Working Days )',
   },
   promo: {
     heading: 'Ready to design yours?',
@@ -231,6 +262,9 @@ export function mergeSiteContent(stored = {}) {
     },
     compare: { ...d.compare, ...(s.compare || {}) },
     crafted: { ...d.crafted, ...(s.crafted || {}) },
+    assurance: Array.isArray(s.assurance) && s.assurance.length ? s.assurance : d.assurance,
+    highlights: Array.isArray(s.highlights) ? s.highlights : d.highlights,
+    shipping: { ...d.shipping, ...(s.shipping || {}) },
     promo: { ...d.promo, ...(s.promo || {}) },
     newsletter: { ...d.newsletter, ...(s.newsletter || {}) },
     footer: { ...d.footer, ...(s.footer || {}) },

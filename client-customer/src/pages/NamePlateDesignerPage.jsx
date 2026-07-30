@@ -16,6 +16,8 @@ import { selectIsAuthenticated } from '../store/authSlice';
 import { formatPaise } from '../utils/money';
 import { apiErrorMessage } from '../services/api';
 import Seo from '../components/Seo';
+import ProductAssurance from '../components/ProductAssurance';
+import { useSiteSettings } from '../context/SiteSettings';
 
 export const PENDING_NAMEPLATE_KEY = 'nc_pending_nameplate';
 const CANVAS_W = 560;
@@ -69,6 +71,7 @@ export default function NamePlateDesignerPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const isAuthed = useSelector(selectIsAuthenticated);
+  const { settings } = useSiteSettings();
 
   const [data, setData] = useState(null);          // { template, options }
   const [fields, setFields] = useState({});         // { fieldKey: value }
@@ -639,6 +642,8 @@ export default function NamePlateDesignerPage() {
             <button onClick={handleAdd} disabled={adding} className="mt-4 w-full rounded-full bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-60">
               {adding ? 'Adding…' : 'Add to cart'}
             </button>
+
+            <ProductAssurance highlights={settings.content?.highlights} shipping={settings.content?.shipping} />
           </div>
         </div>
       </div>
