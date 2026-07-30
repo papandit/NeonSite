@@ -70,8 +70,7 @@ export default function LoginPage() {
         <div className="pointer-events-none absolute -bottom-32 -left-16 h-80 w-80 rounded-full bg-amber-500/15 blur-3xl" />
 
         <div className="relative flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-600 font-display text-xl font-semibold shadow-lg">O</span>
-          <span className="font-display text-lg font-medium">OWM NameCraft Ecom</span>
+          <img src="/daxon-logo.svg" alt="Daxon" className="h-10 w-auto rounded-md bg-white/95 object-contain px-2 py-1 shadow-lg" />
         </div>
 
         <div className="relative max-w-md">
@@ -99,8 +98,7 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           {/* Compact brand for small screens */}
           <div className="mb-8 flex items-center gap-3 lg:hidden">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 font-display text-lg font-semibold text-white">O</span>
-            <span className="font-display text-base font-medium text-slate-900">OWM NameCraft Ecom</span>
+            <img src="/daxon-logo.svg" alt="Daxon" className="h-9 w-auto object-contain" />
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">

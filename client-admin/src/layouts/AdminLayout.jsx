@@ -81,13 +81,12 @@ export default function AdminLayout() {
         className={`${collapsed ? 'w-16' : 'w-64'} shrink-0 bg-slate-900 text-white flex flex-col transition-[width] duration-200`}
       >
         <div className="flex h-16 shrink-0 items-center gap-2 border-b border-slate-800 px-3">
-          <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-600 font-display text-lg font-semibold">
-            O
-          </span>
-          {!collapsed && (
-            <span className="flex-1 truncate font-display text-sm font-medium">
-              OWM NameCraft Ecom
-            </span>
+          {/* Wordmark logo — sits on a light plate because the mark is near-black.
+              Collapsed rail shows the square icon instead. */}
+          {collapsed ? (
+            <img src="/favicon.svg" alt="Daxon" className="h-9 w-9 shrink-0 rounded-lg bg-white/95 object-contain p-1" />
+          ) : (
+            <img src="/daxon-logo.svg" alt="Daxon" className="h-9 w-auto min-w-0 flex-1 rounded-md bg-white/95 object-contain px-2 py-1" />
           )}
           <button
             onClick={toggle}
