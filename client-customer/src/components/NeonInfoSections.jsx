@@ -6,6 +6,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import NeonBoxDiagram from './NeonBoxDiagram';
+import FloroBoxDiagram from './FloroBoxDiagram';
 import { CompareTable, CraftedSection } from './NeonCompare';
 
 const LIGHT_TYPES = [
@@ -123,9 +124,10 @@ export default function NeonInfoSections({ info, compare, crafted, lightType, on
             <Heading>{box.heading}</Heading>
             {box.body && <p className="mt-4 max-w-3xl leading-relaxed text-slate-400">{box.body}</p>}
 
-            {/* Anatomy diagram — every part that ships, labelled */}
+            {/* Anatomy diagram — every part that ships, labelled. FloRo ships a
+                different controller and an RGBIC tube, so it has its own comp. */}
             <div className="mt-6">
-              <NeonBoxDiagram />
+              {lightType === 'floro' ? <FloroBoxDiagram /> : <NeonBoxDiagram />}
             </div>
 
             {(box.items || []).length > 0 && (
