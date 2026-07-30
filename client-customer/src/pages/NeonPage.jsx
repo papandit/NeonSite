@@ -390,7 +390,9 @@ export default function NeonPage() {
                 </div>
               </div>
 
-              {/* backing */}
+              {/* backing — hidden on the storefront. The first active backing is
+                  still applied and priced by the server; un-comment to offer the
+                  choice again.
               <div className="mb-6">
                 <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Backboard</div>
                 <div className="flex flex-wrap gap-2">
@@ -401,6 +403,7 @@ export default function NeonPage() {
                   ))}
                 </div>
               </div>
+              */}
 
               {/* power adapter */}
               {cfg.adapters?.length > 0 && (
@@ -423,7 +426,7 @@ export default function NeonPage() {
               <Row label="Design" value={text || '—'} />
               <Row label="Colour & font" value={`${colorObj?.name || '—'} · ${fontObj?.name || '—'}`} />
               <Row label="Dimensions" value={`${heightCm} × ${widthCm} ${sizeUnit}`} />
-              <Row label="Backing & adapter" value={`${backObj?.name || '—'} · ${adapterObj?.name || '—'}`} />
+              <Row label="Power adapter" value={adapterObj?.name || '—'} />
               <Row label="Est. tube length" value={`≈ ${tubeMeters.toFixed(1)} m`} />
               <div className="mt-4 flex items-baseline justify-between">
                 <span className="text-xs uppercase tracking-[0.14em] text-slate-400">Estimated total</span>
