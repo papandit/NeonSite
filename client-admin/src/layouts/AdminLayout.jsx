@@ -26,6 +26,7 @@ const GROUPS = [
     title: 'Neon Studio',
     items: [
       { to: '/neon', label: 'Neon Studio', icon: 'sparkle' },
+      { to: '/neon/config', label: 'Neon Configuration', icon: 'settings' },
     ],
   },
   {
@@ -109,7 +110,7 @@ export default function AdminLayout() {
               {group.title && collapsed && gi > 0 && <div className="mx-2 mb-2 border-t border-slate-800" />}
               <div className="space-y-1">
                 {group.items.map((item) => (
-                  <NavLink key={item.to} to={item.to} title={item.label} className={linkClass}>
+                  <NavLink key={item.to} to={item.to} end title={item.label} className={linkClass}>
                     <Icon name={item.icon} className="h-5 w-5 shrink-0" />
                     {!collapsed && <span className="truncate">{item.label}</span>}
                   </NavLink>

@@ -21,6 +21,7 @@ import SettingsPage from './pages/SettingsPage';
 import ReviewsPage from './pages/ReviewsPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import NeonPage from './pages/NeonPage';
+import NeonConfigPage from './pages/NeonConfigPage';
 import NpDashboardPage from './pages/nameplate/NpDashboardPage';
 import NpCrudPage from './pages/nameplate/NpCrudPage';
 import NpTemplatesPage from './pages/nameplate/NpTemplatesPage';
@@ -58,6 +59,7 @@ export default function App() {
           <Route path="products/new" element={<ProductBuilderPage />} />
           <Route path="products/:id/edit" element={<ProductBuilderPage />} />
           <Route path="neon" element={<NeonPage />} />
+          <Route path="neon/config" element={<NeonConfigPage />} />
 
           {/* Name Plate Studio (independent module) */}
           <Route path="nameplate/dashboard" element={<NpDashboardPage />} />
