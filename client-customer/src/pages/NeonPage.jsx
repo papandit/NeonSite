@@ -23,6 +23,49 @@ export const PENDING_NEON_KEY = 'nc_pending_neon';
 
 const charCountOf = (t) => (t || '').replace(/\s/g, '').length;
 
+// ---- trust badges + delivery timeline icons ----
+const ic = 'h-6 w-6';
+const ShieldIcon = () => (
+  <svg className={ic} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l7 3v6c0 4.4-3 8-7 9-4-1-7-4.6-7-9V6z" /><path d="M9 12l2 2 4-4" /></svg>
+);
+const BadgeIcon = () => (
+  <svg className={ic} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="8" /><path d="M9 12l2 2 4-4" /></svg>
+);
+const SparkleIcon = () => (
+  <svg className={ic} viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.9 5.6L19.5 9l-5.6 1.9L12 16.5l-1.9-5.6L4.5 9l5.6-1.4z" /><path d="M18.5 14l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z" opacity=".7" /></svg>
+);
+const TruckIcon = () => (
+  <svg className={ic} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z" /><circle cx="7" cy="18" r="1.6" /><circle cx="17.5" cy="18" r="1.6" /></svg>
+);
+const CartIcon = () => (
+  <svg className="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3 4h2l2.2 10.4a2 2 0 0 0 2 1.6h7.2a2 2 0 0 0 2-1.55L20 8H6" /><circle cx="10" cy="19" r="1.4" /><circle cx="17" cy="19" r="1.4" /></svg>
+);
+const BagIcon = () => (
+  <svg className="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M5 7h14l-1 13H6z" /><path d="M9 7a3 3 0 0 1 6 0" /><path d="M9.5 13l2 2 3.5-3.5" /></svg>
+);
+const BoxIcon = () => (
+  <svg className="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3 8l9-4 9 4-9 4z" /><path d="M3 8v8l9 4 9-4V8" /><path d="M12 12v8" /></svg>
+);
+
+const TRUST = [
+  { label: '2 year warranty', icon: <ShieldIcon /> },
+  { label: 'Top-notch quality', icon: <BadgeIcon /> },
+  { label: 'Flawless finishing', icon: <SparkleIcon /> },
+  { label: 'Free shipping', icon: <TruckIcon /> },
+];
+
+// Order today -> ready in 2-4 days -> delivered 10-12 days out.
+const fmtDate = (d) => d.toLocaleDateString('en-IN', { month: 'short', day: '2-digit' });
+function deliveryWindow() {
+  const day = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return d; };
+  return {
+    today: fmtDate(day(0)),
+    ready: `${fmtDate(day(2))} – ${fmtDate(day(4))}`,
+    delivery: `${fmtDate(day(10))} – ${fmtDate(day(12))}`,
+  };
+}
+
+
 function SunIcon() {
   return (
     <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round">
@@ -41,6 +84,7 @@ export default function NeonPage() {
   const navigate = useNavigate();
   const isAuthed = useSelector(selectIsAuthenticated);
   const { settings } = useSiteSettings();
+  const shipDates = useMemo(() => deliveryWindow(), []);
 
   const [cfg, setCfg] = useState(null);
   const [text, setText] = useState('good vibes only');
@@ -322,14 +366,24 @@ export default function NeonPage() {
 
               {/* size */}
               <div className="mb-6">
-                <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Size (height × length)</div>
-                <div className="flex flex-wrap gap-2">
+                <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Select size</div>
+                <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
                   {cfg.sizes.map((s) => {
                     const h = s.heightCm > 0 ? s.heightCm : Math.max(1, Math.round((s.fontSizePx || 46) * 0.33));
+                    const u = s.unit || 'cm';
+                    const on = size === s.key;
                     return (
-                      <button key={s.key} onClick={() => setSize(s.key)} className={pill(size === s.key)}>
-                        {s.name}<span className="ml-1.5 text-xs text-slate-500">{h} × {s.cm} {s.unit || 'cm'}</span>
-                        <span className="ml-1.5 text-xs text-indigo-300">{formatPaise(s.basePricePaise)}+</span>
+                      <button
+                        key={s.key}
+                        onClick={() => setSize(s.key)}
+                        className={`overflow-hidden rounded-lg border text-center transition ${on ? 'border-indigo-500 ring-1 ring-indigo-500/40' : 'border-white/15 hover:border-white/35'}`}
+                      >
+                        <span className={`block px-2 py-1.5 text-sm font-semibold ${on ? 'bg-indigo-500 text-white' : 'bg-white/8 text-slate-200'}`}>
+                          {s.name}
+                        </span>
+                        <span className="block border-t border-white/10 px-2 py-1 text-xs text-slate-300">Height: {h}{u}</span>
+                        <span className="block border-t border-white/10 px-2 py-1 text-xs text-slate-300">Width: {s.cm}{u}</span>
+                        <span className="block border-t border-white/10 px-2 py-1 text-[11px] font-medium text-indigo-300">{formatPaise(s.basePricePaise)}+</span>
                       </button>
                     );
                   })}
@@ -375,30 +429,54 @@ export default function NeonPage() {
                 <span className="text-xs uppercase tracking-[0.14em] text-slate-400">Estimated total</span>
                 <span className="font-display text-3xl font-bold text-white">{formatPaise(estPaise)}</span>
               </div>
-              <p className="mt-1 text-[11.5px] text-slate-500">Final price confirmed at checkout · incl. taxes/shipping per store settings · crafted in 5–7 days.</p>
+              <p className="mt-1 text-[11.5px] text-slate-500">Final price confirmed at checkout · incl. taxes/shipping per store settings.</p>
               {error && <div className="mt-3 rounded-lg bg-red-500/15 px-3 py-2 text-sm text-red-300">{error}</div>}
+
+              <button
+                onClick={handleAdd}
+                disabled={adding}
+                className="mt-4 w-full rounded-xl px-6 py-3.5 font-display text-sm font-bold text-white transition hover:-translate-y-0.5 disabled:opacity-60"
+                style={{ background: 'linear-gradient(90deg,#d4541f,#e8703a)', boxShadow: '0 8px 26px -8px rgba(212,84,31,.55)' }}
+              >
+                {adding ? 'Adding…' : `Add to cart · ${formatPaise(estPaise)}`}
+              </button>
+
+              {/* trust badges */}
+              <div className="mt-4 grid grid-cols-2 gap-2 border-t border-white/10 pt-4 sm:grid-cols-4">
+                {TRUST.map((t) => (
+                  <div key={t.label} className="flex flex-col items-center gap-1.5 text-center">
+                    <span className="text-emerald-400">{t.icon}</span>
+                    <span className="text-[11px] font-medium leading-tight text-slate-300">{t.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* delivery timeline */}
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+              <div className="text-center text-sm font-semibold text-white">Free shipping</div>
+              <div className="mt-4 flex items-start justify-between gap-2">
+                {[
+                  { icon: <CartIcon />, title: 'Order today', when: shipDates.today },
+                  { icon: <BagIcon />, title: 'Order ready', when: shipDates.ready },
+                  { icon: <BoxIcon />, title: 'Estimated delivery', when: shipDates.delivery },
+                ].map((st, i) => (
+                  <div key={st.title} className="relative flex flex-1 flex-col items-center text-center">
+                    {i > 0 && <span className="absolute -left-1/2 top-4 -z-0 hidden h-px w-full border-t border-dashed border-emerald-500/40 sm:block" />}
+                    <span className="relative z-10 text-emerald-400">{st.icon}</span>
+                    <span className="mt-2 text-[11.5px] font-semibold text-slate-200">{st.title}</span>
+                    <span className="text-[11px] text-slate-400">{st.when}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-4 rounded-lg bg-white/5 px-3 py-2 text-center text-[11.5px] text-slate-400">
+                Need it sooner? Ask us about express production.
+              </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* sticky buy bar */}
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-[#0c0c12]/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3.5">
-          <div>
-            <div className="text-[11px] uppercase tracking-[0.1em] text-slate-400">Estimated total</div>
-            <div className="font-display text-2xl font-bold text-white">{formatPaise(estPaise)}</div>
-          </div>
-          <button
-            onClick={handleAdd}
-            disabled={adding}
-            className="max-w-sm flex-1 rounded-xl px-6 py-3.5 font-display text-sm font-bold text-white transition disabled:opacity-60"
-            style={{ background: 'linear-gradient(90deg,#d4541f,#e8703a)', boxShadow: '0 8px 26px -8px rgba(212,84,31,.55)' }}
-          >
-            {adding ? 'Adding…' : 'Add to cart'}
-          </button>
-        </div>
-      </div>
 
       {/* Product story: about / box / install / reviews / FAQs (admin-editable) */}
       <NeonInfoSections info={settings.content?.neonInfo} />
