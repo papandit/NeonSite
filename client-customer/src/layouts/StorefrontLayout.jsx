@@ -61,7 +61,7 @@ export default function StorefrontLayout() {
   const Brand = (
     <Link to="/" className="flex min-w-0 items-center gap-2" aria-label={storeName}>
       {settings.logoUrl ? (
-        <img src={settings.logoUrl} alt={storeName} className="h-11 w-auto max-w-44 shrink-0 object-contain sm:h-12" />
+        <img src={settings.logoUrl} alt={storeName} className="h-12 w-auto shrink-0 object-contain sm:h-14" />
       ) : (
         <>
           <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white font-display text-lg font-semibold">

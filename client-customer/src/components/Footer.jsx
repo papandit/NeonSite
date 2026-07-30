@@ -75,7 +75,7 @@ export default function Footer({ categories = [] }) {
                 The mark is near-black, so it sits on a light chip here. */}
             <Link to="/" className="flex items-center gap-2" aria-label={storeName}>
               {settings.logoUrl ? (
-                <img src={settings.logoUrl} alt={storeName} className="h-12 w-auto max-w-48 rounded-xl bg-white/95 object-contain px-2 py-1" />
+                <img src={settings.logoUrl} alt={storeName} className="h-14 w-auto rounded-md bg-white/95 object-contain p-1.5" />
               ) : (
                 <>
                   <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 font-display text-lg font-semibold text-white">

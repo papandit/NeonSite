@@ -3,11 +3,12 @@
 // cable, adaptor, controller, outlet).
 //
 // Adapted from the Claude Design "Neon Sign Diagram" comp. The original is a
-// fixed 1200x640 stage; here it's wrapped in a container-query box and scaled by
-// `100cqw / 1200`, so the whole composition stays pixel-proportional at any
-// width without a resize listener.
+// fixed 1200x640 stage; we measure the container and scale it down so the whole
+// composition stays pixel-proportional at any width. (A pure-CSS `scale(calc(
+// 100cqw / 1200))` can't work — dividing a length by a number yields a length,
+// and scale() needs a unitless number.)
 
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { ensureGoogleFont } from '../lib/loadFont';
 
 const W = 1200;
@@ -17,8 +18,22 @@ const LABEL = { fontSize: 19, fontWeight: 500, lineHeight: 1.25, color: '#cfff4a
 
 export default function NeonBoxDiagram({ word = 'Neon Sign', tagline = '10ft cable · dimmable · ships flat' }) {
   const [i, setI] = useState(0);
+  const wrapRef = useRef(null);
+  const [scale, setScale] = useState(1);
 
   useEffect(() => { ensureGoogleFont('Kaushan Script'); }, []);
+
+  // Scale the fixed 1200x640 stage down to whatever width we're given.
+  useLayoutEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return undefined;
+    const fit = () => setScale(Math.min(1, el.clientWidth / W));
+    fit();
+    if (typeof ResizeObserver === 'undefined') return undefined;
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   // Colour cycle — paused for visitors who prefer reduced motion.
   useEffect(() => {
@@ -37,11 +52,8 @@ export default function NeonBoxDiagram({ word = 'Neon Sign', tagline = '10ft cab
   const tube = { fontFamily: "'Kaushan Script', cursive", fontSize: 118, lineHeight: 1.4, whiteSpace: 'nowrap' };
 
   return (
-    <div className="nbd-wrap overflow-hidden rounded-2xl border border-white/10 bg-[#050506]">
+    <div ref={wrapRef} className="overflow-hidden rounded-2xl border border-white/10 bg-[#050506]">
       <style>{`
-        .nbd-wrap { container-type: inline-size; }
-        .nbd-stage { transform-origin: top left; transform: scale(calc(100cqw / ${W})); }
-        .nbd-fit { height: calc(${H}px * (100cqw / ${W})); }
         @keyframes nbdBreathe { 0%,100%{opacity:1} 47%{opacity:.97} 52%{opacity:.9} 56%{opacity:1} }
         @keyframes nbdDash { to { stroke-dashoffset: -220 } }
         @media (prefers-reduced-motion: reduce) {
@@ -49,10 +61,10 @@ export default function NeonBoxDiagram({ word = 'Neon Sign', tagline = '10ft cab
         }
       `}</style>
 
-      <div className="nbd-fit relative w-full">
+      <div className="relative w-full" style={{ height: H * scale }}>
         <div
-          className="nbd-stage absolute left-0 top-0"
-          style={{ width: W, height: H, background: 'radial-gradient(120% 90% at 50% 28%, #0b0b10 0%, #030304 70%)', color: '#fff', fontFamily: "Helvetica, 'Helvetica Neue', Arial, sans-serif" }}
+          className="absolute left-0 top-0"
+          style={{ width: W, height: H, transformOrigin: 'top left', transform: `scale(${scale})`, background: 'radial-gradient(120% 90% at 50% 28%, #0b0b10 0%, #030304 70%)', color: '#fff', fontFamily: "Helvetica, 'Helvetica Neue', Arial, sans-serif" }}
         >
           <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H} style={{ position: 'absolute', inset: 0, overflow: 'visible' }}>
             {/* leader lines */}
@@ -120,11 +132,11 @@ export default function NeonBoxDiagram({ word = 'Neon Sign', tagline = '10ft cab
           </div>
 
           {/* callouts */}
-          <div style={{ ...LABEL, position: 'absolute', left: 20, top: 20 }}>Acrylic<br />Backing</div>
-          <div style={{ ...LABEL, position: 'absolute', left: 20, top: 208 }}>Neon<br />Light</div>
-          <div style={{ ...LABEL, position: 'absolute', left: 1014, top: 74 }}>Mounting<br />Screw Kit</div>
-          <div style={{ ...LABEL, position: 'absolute', left: 1014, top: 182 }}>Stickers<br />Sheet</div>
-          <div style={{ ...LABEL, position: 'absolute', left: 886, top: 402 }}>10 Feet<br />Transparent<br />Cable</div>
+          <div style={{ ...LABEL, position: 'absolute', left: 20, top: 20, width: 120 }}>Acrylic<br />Backing</div>
+          <div style={{ ...LABEL, position: 'absolute', left: 20, top: 208, width: 120 }}>Neon<br />Light</div>
+          <div style={{ ...LABEL, position: 'absolute', left: 1014, top: 74, width: 170 }}>Mounting<br />Screw Kit</div>
+          <div style={{ ...LABEL, position: 'absolute', left: 1014, top: 182, width: 170 }}>Stickers<br />Sheet</div>
+          <div style={{ ...LABEL, position: 'absolute', left: 886, top: 402, width: 150 }}>10 Feet<br />Transparent<br />Cable</div>
           <div style={{ ...LABEL, position: 'absolute', left: 138, top: 500, width: 120, textAlign: 'center' }}>Power<br />Outlet</div>
           <div style={{ ...LABEL, position: 'absolute', left: 376, top: 500, width: 120, textAlign: 'center' }}>Power<br />Adaptor</div>
           <div style={{ ...LABEL, position: 'absolute', left: 527, top: 500, width: 160, textAlign: 'center' }}>Brightness<br />Controller</div>
