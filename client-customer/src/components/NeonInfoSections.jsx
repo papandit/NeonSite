@@ -52,7 +52,8 @@ export default function NeonInfoSections({ info }) {
   return (
     <div ref={rootRef} className="bg-[#0a0a0f] text-slate-300">
       {/* Sticky sub-nav */}
-      <nav className="sticky top-16 z-30 border-y border-white/10 bg-[#111117]/95 backdrop-blur">
+      {/* Sits flush under the 64px site header (h-16), which stays sticky. */}
+      <nav className="sticky top-16 z-30 border-b border-white/10 bg-[#111117]/95 backdrop-blur">
         <div className="mx-auto flex max-w-5xl gap-1 overflow-x-auto px-4 py-2.5 [scrollbar-width:none] sm:justify-center [&::-webkit-scrollbar]:hidden">
           {sections.map((s) => (
             <button
