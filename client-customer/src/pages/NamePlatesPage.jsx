@@ -138,7 +138,7 @@ export default function NamePlatesPage() {
                     {t.compareAtPricePaise > t.basePricePaise && (
                       <>
                         <span className="text-gray-400 line-through">{formatPaise(t.compareAtPricePaise)}</span>
-                        <span className="rounded-full bg-green-600 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                        <span className="rounded-full bg-gold-500 px-1.5 py-0.5 text-[10px] font-bold text-black">
                           {Math.round(((t.compareAtPricePaise - t.basePricePaise) / t.compareAtPricePaise) * 100)}% OFF
                         </span>
                       </>

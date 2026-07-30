@@ -79,7 +79,7 @@ export default function StorefrontLayout() {
   return (
     <div className="flex min-h-screen flex-col overflow-x-clip bg-gray-50 text-gray-900">
       <ScrollProgress />
-      <header className="sticky top-0 z-40 border-b border-gray-200 bg-[#fffdf9]/90 backdrop-blur">
+      <header className="sticky top-0 z-40 border-b border-gray-200 bg-[#fbfdfc]/90 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-4">
           {Brand}
 
@@ -166,7 +166,7 @@ export default function StorefrontLayout() {
 
         {/* Mobile menu panel */}
         {menuOpen && (
-          <div className="border-t border-gray-200 bg-[#fffdf9] md:hidden">
+          <div className="border-t border-gray-200 bg-[#fbfdfc] md:hidden">
             <nav className="mx-auto max-w-6xl space-y-1 px-4 py-3">
               <NavLink to="/" end className={mobileLinkClass}>Home</NavLink>
               <NavLink to="/products" className={mobileLinkClass}>Shop</NavLink>

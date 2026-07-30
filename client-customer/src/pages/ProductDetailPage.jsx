@@ -9,7 +9,9 @@ import { selectIsAuthenticated } from '../store/authSlice';
 import Rating from '../components/Rating';
 import ProductGrid from '../components/ProductGrid';
 import Reviews from '../components/Reviews';
+import ProductAssurance from '../components/ProductAssurance';
 import Seo from '../components/Seo';
+import { useSiteSettings } from '../context/SiteSettings';
 
 // Split an admin multiline field into trimmed, non-empty lines.
 const toLines = (s) => (s || '').split('\n').map((x) => x.trim()).filter(Boolean);
@@ -39,6 +41,7 @@ export default function ProductDetailPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const isAuthed = useSelector(selectIsAuthenticated);
+  const { settings } = useSiteSettings();
   const [product, setProduct] = useState(null);
   const [related, setRelated] = useState([]);
   const [recommended, setRecommended] = useState([]);
@@ -174,7 +177,7 @@ export default function ProductDetailPage() {
             {product.compareAtPricePaise > product.basePricePaise && (
               <>
                 <span className="text-lg text-gray-400 line-through">{formatPaise(product.compareAtPricePaise)}</span>
-                <span className="rounded-full bg-green-600 px-2 py-0.5 text-xs font-bold text-white">
+                <span className="rounded-full bg-gold-500 px-2 py-0.5 text-xs font-bold text-black">
                   {Math.round(((product.compareAtPricePaise - product.basePricePaise) / product.compareAtPricePaise) * 100)}% OFF
                 </span>
               </>
@@ -246,6 +249,8 @@ export default function ProductDetailPage() {
             </button>
           </div>
           <p className="mt-3 text-xs text-gray-400">Looking to personalize? Try our <Link to="/nameplates" className="font-medium text-indigo-600 hover:underline">Name Plate Studio</Link> or <Link to="/neon" className="font-medium text-indigo-600 hover:underline">Neon Studio</Link>.</p>
+
+          <ProductAssurance highlights={settings.content?.highlights} shipping={settings.content?.shipping} />
         </div>
       </div>
 

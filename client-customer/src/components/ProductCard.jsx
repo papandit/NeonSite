@@ -41,7 +41,7 @@ export default function ProductCard({ product, wishlisted = false, onWishlist, o
     <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white transition hover:shadow-md">
       <div className="relative aspect-square overflow-hidden">
         {hasOffer && (
-          <span className="absolute left-2 top-2 z-10 rounded-full bg-green-600 px-2 py-0.5 text-xs font-bold text-white shadow-sm">
+          <span className="absolute left-2 top-2 z-10 rounded-full bg-gold-500 px-2 py-0.5 text-xs font-bold text-black shadow-sm">
             {discountPct}% OFF
           </span>
         )}
@@ -120,7 +120,7 @@ export default function ProductCard({ product, wishlisted = false, onWishlist, o
           {hasOffer && (
             <>
               <span className="text-sm text-gray-400 line-through">{formatPaise(mrp)}</span>
-              <span className="text-xs font-semibold text-green-600">{discountPct}% off</span>
+              <span className="text-xs font-semibold text-gold-700">{discountPct}% off</span>
             </>
           )}
         </div>

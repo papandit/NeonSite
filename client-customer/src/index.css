@@ -3,8 +3,10 @@
 /* ============================================================================
    Nukkad Tales — warm editorial theme.
    Tailwind's default scales are remapped to the brand palette so every existing
-   component reskins at once: indigo -> saffron orange, gray/slate -> warm
+   component reskins at once: indigo -> brand green, gray/slate -> warm
    parchment/cocoa neutrals, red -> warm error, cool accents -> warm tints.
+   Nothing in the components says "green" — they all say indigo-600, so the CTA
+   colour is changed in exactly one place: the ramp below.
    ========================================================================== */
 @theme {
   /* Fonts */
@@ -18,48 +20,55 @@
   --radius-xl: 24px;
 
   /* Brand tokens (for new components) */
-  --color-primary: #d4541f;
-  --color-secondary: #6f5b46;
-  --color-tertiary: #3a2b1d;
-  --color-parchment: #f4ece1;
-  --color-sand: #e9ddca;
-  --color-muted: #bca58a;
+  --color-primary: #589c80;
+  --color-secondary: #536b5b;
+  --color-tertiary: #24322a;
+  --color-parchment: #eff5f1;
+  --color-sand: #dae5de;
+  --color-muted: #9ab0a2;
+  /* discount / savings — golden chip with black text */
+  --color-gold-100: #fdf0cd;
+  --color-gold-400: #e8bf4d;
+  --color-gold-500: #d9a520;
+  --color-gold-700: #96700d;
 
-  /* indigo -> saffron orange (CTAs, links, focus, accents) */
-  --color-indigo-50: #fdefe8;
-  --color-indigo-100: #f9d9c9;
-  --color-indigo-200: #f2b99e;
-  --color-indigo-300: #e9946b;
-  --color-indigo-400: #e07645;
-  --color-indigo-500: #d96a38;
-  --color-indigo-600: #d4541f;
-  --color-indigo-700: #c84b18;
-  --color-indigo-800: #9b3813;
-  --color-indigo-900: #7c2f12;
+  /* indigo -> brand green (CTAs, links, focus, accents), anchored at 600 */
+  --color-indigo-50: #eef7f3;
+  --color-indigo-100: #d8ece3;
+  --color-indigo-200: #b4d9c9;
+  --color-indigo-300: #8ec4ac;
+  --color-indigo-400: #6faf93;
+  --color-indigo-500: #61a487;
+  --color-indigo-600: #589c80;
+  --color-indigo-700: #487f68;
+  --color-indigo-800: #396552;
+  --color-indigo-900: #2d5041;
 
-  /* gray -> warm neutrals (text, light bg, borders) */
-  --color-gray-50: #f5eee3;
-  --color-gray-100: #efe6d8;
-  --color-gray-200: #e9ddca;
-  --color-gray-300: #dccdb4;
-  --color-gray-400: #bca58a;
-  --color-gray-500: #93805f;
-  --color-gray-600: #6f5b46;
-  --color-gray-700: #574430;
-  --color-gray-800: #43331f;
-  --color-gray-900: #3a2b1d;
+  /* gray -> sage neutrals (text, light bg, borders). Same lightness steps as
+     the old warm ramp, hue pulled to the brand green so nothing goes muddy
+     next to a green CTA. */
+  --color-gray-50: #f2f6f3;
+  --color-gray-100: #e8efea;
+  --color-gray-200: #dae5de;
+  --color-gray-300: #c2d3c8;
+  --color-gray-400: #9ab0a2;
+  --color-gray-500: #6f8a78;
+  --color-gray-600: #536b5b;
+  --color-gray-700: #3f5346;
+  --color-gray-800: #2e3f35;
+  --color-gray-900: #24322a;
 
-  /* slate -> warm neutrals + deep cocoa (admin sidebar) */
-  --color-slate-50: #f6f0e6;
-  --color-slate-100: #f2eade;
-  --color-slate-200: #e9ddca;
-  --color-slate-300: #dccdb4;
-  --color-slate-400: #bca58a;
-  --color-slate-500: #93805f;
-  --color-slate-600: #6f5b46;
-  --color-slate-700: #4e3d2a;
-  --color-slate-800: #362819;
-  --color-slate-900: #241a0f;
+  /* slate -> sage neutrals + deep forest (footer, dark panels) */
+  --color-slate-50: #f4f8f5;
+  --color-slate-100: #eaf1ec;
+  --color-slate-200: #dae5de;
+  --color-slate-300: #c2d3c8;
+  --color-slate-400: #9ab0a2;
+  --color-slate-500: #6f8a78;
+  --color-slate-600: #536b5b;
+  --color-slate-700: #38493d;
+  --color-slate-800: #26332a;
+  --color-slate-900: #17211a;
 
   /* red -> warm error */
   --color-red-50: #fbebe7;
@@ -69,16 +78,16 @@
   --color-red-700: #b23e30;
 
   /* neutralize cool accents used in status chips */
-  --color-blue-50: #efe7da;
-  --color-blue-700: #6f5b46;
-  --color-sky-50: #efe7da;
-  --color-sky-700: #6f5b46;
-  --color-cyan-50: #ecebd9;
-  --color-cyan-700: #5e5a3e;
-  --color-teal-50: #e7ecdd;
-  --color-teal-700: #556149;
-  --color-purple-50: #f1e7de;
-  --color-purple-700: #7a5844;
+  --color-blue-50: #e8f1ec;
+  --color-blue-700: #446554;
+  --color-sky-50: #e8f1ec;
+  --color-sky-700: #446554;
+  --color-cyan-50: #e4f0ea;
+  --color-cyan-700: #3f6354;
+  --color-teal-50: #e3f0e8;
+  --color-teal-700: #3d6b55;
+  --color-purple-50: #eaf0ea;
+  --color-purple-700: #55684f;
 }
 
 @layer base {
@@ -92,7 +101,7 @@
     text-rendering: optimizeLegibility;
   }
   body {
-    background-color: #f4ece1;
+    background-color: #eff5f1;
     color: #3a2b1d;
     font-family: var(--font-sans);
     letter-spacing: 0.2px;

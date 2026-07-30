@@ -144,7 +144,7 @@ export default function HomePage() {
       )}
 
       {/* Features / trust strip */}
-      <section className="border-b border-gray-200 bg-linear-to-b from-[#fffdf9] to-[#f7f1e7]">
+      <section className="border-b border-gray-200 bg-linear-to-b from-[#fbfdfc] to-[#eaf1ec]">
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-4 px-4 py-12 sm:grid-cols-2 lg:grid-cols-4">
           {c.features.map((f, i) => (
             <Reveal key={`${f.title}-${i}`} delay={i * 0.06}>
@@ -246,7 +246,7 @@ export default function HomePage() {
       <VideoShowcase video={c.videoNameplate} badge="Name plate craft" reverse />
 
       {/* Promo — light, modern, animated */}
-      <section className="bg-linear-to-b from-white to-[#f4ece1] px-4 py-16">
+      <section className="bg-linear-to-b from-white to-[#eff5f1] px-4 py-16">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -278,7 +278,7 @@ export default function HomePage() {
       </section>
 
       {/* How it works — modern step cards, staggered */}
-      <section id="how" className="bg-linear-to-b from-[#f4ece1] to-[#fffdf9]">
+      <section id="how" className="bg-linear-to-b from-[#eff5f1] to-[#fbfdfc]">
         <div className="mx-auto max-w-6xl px-4 py-16">
           <Reveal><h2 className="text-center font-display text-3xl font-semibold text-gray-900">How it works</h2></Reveal>
           <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} className="mt-10 grid gap-6 sm:grid-cols-3">
@@ -311,7 +311,7 @@ export default function HomePage() {
       </Section>
 
       {/* Newsletter — light modern card */}
-      <section className="bg-[#fffdf9] px-4 py-16">
+      <section className="bg-[#fbfdfc] px-4 py-16">
         <motion.div
           initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.5 }}
           className="mx-auto max-w-3xl overflow-hidden rounded-3xl border border-indigo-100 bg-linear-to-br from-indigo-50 to-white p-10 text-center shadow-sm"
