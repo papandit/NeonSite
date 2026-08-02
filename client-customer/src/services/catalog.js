@@ -52,6 +52,10 @@ export function createReview(payload) {
 // Attachments upload first and come back as { type, url, bytes } descriptors,
 // which are then posted with the review. Content-Type is left undefined so the
 // browser sets the multipart boundary itself.
+export function deleteReview(id) {
+  return api.delete(`/reviews/${id}`).then((r) => r.data.data);
+}
+
 export function uploadReviewMedia(files) {
   const form = new FormData();
   [...files].forEach((f) => form.append('files', f));

@@ -2,6 +2,7 @@
 // routes live under /products.
 
 import { Router } from 'express';
+import { optionalAuth } from '../middleware/auth.js';
 import {
   listCategories,
   listProducts,
@@ -22,7 +23,8 @@ router.get('/products', listProducts);
 // Literal route must come before /products/:slug so it isn't captured as a slug.
 router.get('/products/recommended', getRecommendedProducts);
 router.get('/products/:slug/related', getRelatedProducts);
-router.get('/products/:slug/reviews', listProductReviews);
+// optionalAuth so a signed-in visitor's own reviews come back flagged.
+router.get('/products/:slug/reviews', optionalAuth, listProductReviews);
 router.get('/products/:slug', getProductBySlug);
 
 export default router;

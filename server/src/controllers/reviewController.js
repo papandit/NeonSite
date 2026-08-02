@@ -84,9 +84,35 @@ export const listProductReviews = asyncHandler(async (req, res) => {
   if (!product) throw ApiError.notFound('Product not found');
   const reviews = await Review.find({ product: product._id, status: 'approved' })
     .sort('-createdAt')
-    .select('rating title comment media userNameSnapshot createdAt')
+    .select('rating title comment media userNameSnapshot createdAt user')
     .lean();
-  return sendSuccess(res, reviews);
+
+  // `mine` lets the client offer a Remove button without exposing whose review
+  // belongs to which account — the raw user id never leaves the server.
+  const viewer = req.user?.id ? String(req.user.id) : null;
+  const shaped = reviews.map(({ user, ...r }) => ({ ...r, mine: viewer !== null && String(user) === viewer }));
+
+  return sendSuccess(res, shaped);
+});
+
+// DELETE /api/reviews/:id  (auth) — a customer removes their own review; an
+// admin may remove any. The product's rating and count are recomputed so the
+// listing never keeps counting a review that no longer exists.
+export const deleteReview = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  if (!mongoose.isValidObjectId(id)) throw ApiError.notFound('Review not found');
+
+  const review = await Review.findById(id);
+  if (!review) throw ApiError.notFound('Review not found');
+
+  const isOwner = String(review.user) === String(req.user.id);
+  if (!isOwner && req.user.role !== 'admin') throw ApiError.forbidden('You can only remove your own review');
+
+  const productId = review.product;
+  await review.deleteOne();
+  const { rating, count } = await Review.recomputeProductRating(productId);
+
+  return sendSuccess(res, { removed: true, productRating: rating, approvedCount: count });
 });
 
 // --- Admin moderation ---
