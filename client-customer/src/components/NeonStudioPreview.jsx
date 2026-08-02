@@ -198,7 +198,7 @@ export default function NeonStudioPreview() {
                     <span
                       key={label}
                       className={`rounded-lg px-3.5 py-1.5 text-xs font-medium transition ${
-                        active ? (on ? 'bg-indigo-600 text-[#06110d]' : 'bg-[#3a4b43] text-[#eaf5f0]') : 'text-[#7d9b8f]'
+                        active ? (on ? 'bg-indigo-600 text-white' : 'bg-[#3a4b43] text-[#eaf5f0]') : 'text-[#7d9b8f]'
                       }`}
                     >
                       {label}
@@ -302,7 +302,7 @@ export default function NeonStudioPreview() {
               </span>
               <Link
                 to="/neon"
-                className="rounded-xl bg-indigo-600 px-5 py-3.5 text-sm font-semibold text-[#06110d] transition hover:bg-indigo-500 active:scale-[0.98]"
+                className="rounded-xl bg-indigo-600 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-indigo-700 active:scale-[0.98]"
               >
                 Design yours
               </Link>

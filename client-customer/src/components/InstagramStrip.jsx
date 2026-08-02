@@ -1,5 +1,5 @@
-// "Join our community on Instagram" — a scrolling strip of vertical clips and
-// photos on the home page. Each tile links out to its reel.
+// "Join our community on Instagram" — a grid of vertical reels on the home
+// page. Each tile links out to its reel.
 //
 // Only tiles that actually have media render, so an admin who fills in six of
 // the fifteen slots gets six tiles rather than six tiles and nine grey holes.
@@ -69,7 +69,7 @@ function Tile({ item }) {
     </>
   );
 
-  const shell = 'relative aspect-9/16 w-[63vw] max-w-[248px] shrink-0 snap-start overflow-hidden rounded-xl bg-gray-100 sm:w-[210px] lg:w-[236px]';
+  const shell = 'relative aspect-9/16 w-full overflow-hidden rounded-xl bg-gray-100';
 
   return item.link ? (
     <a href={item.link} target="_blank" rel="noopener noreferrer" className={`${shell} block transition hover:opacity-95`}>
@@ -81,18 +81,10 @@ function Tile({ item }) {
 }
 
 export default function InstagramStrip({ data }) {
-  const scrollerRef = useRef(null);
   // A tile with neither a clip nor a photo is a half-filled row in the
   // editor, not something to render as a grey hole.
   const items = (data?.items || []).filter((i) => i?.video || i?.image).slice(0, MAX_TILES);
   if (!items.length) return null;
-
-  const nudge = (dir) => {
-    const el = scrollerRef.current;
-    if (!el) return;
-    // One tile plus its gap, so a click lands cleanly on the next tile.
-    el.scrollBy({ left: dir * (el.clientWidth * 0.8), behavior: 'smooth' });
-  };
 
   return (
     <section className="bg-white px-4 py-14">
@@ -110,35 +102,9 @@ export default function InstagramStrip({ data }) {
           </p>
         )}
 
-        <div className="relative mt-8">
-          {/* Arrows sit over the strip; on touch you just swipe. */}
-          {items.length > 2 && (
-            <>
-              <button
-                type="button"
-                onClick={() => nudge(-1)}
-                aria-label="Previous"
-                className="absolute left-1 top-1/2 z-10 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-gray-700 shadow-md transition hover:bg-white sm:flex"
-              >
-                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 6l-6 6 6 6" /></svg>
-              </button>
-              <button
-                type="button"
-                onClick={() => nudge(1)}
-                aria-label="Next"
-                className="absolute right-1 top-1/2 z-10 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-gray-700 shadow-md transition hover:bg-white sm:flex"
-              >
-                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 6l6 6-6 6" /></svg>
-              </button>
-            </>
-          )}
-
-          <div
-            ref={scrollerRef}
-            className="flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          >
-            {items.map((item, i) => <Tile key={i} item={item} />)}
-          </div>
+        {/* Five across on desktop, so a full fifteen reads as 3 clean rows. */}
+        <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          {items.map((item, i) => <Tile key={i} item={item} />)}
         </div>
 
         {data.profileUrl && (
