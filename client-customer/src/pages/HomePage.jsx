@@ -251,9 +251,12 @@ export default function HomePage() {
         </Section>
       )}
 
-      {/* How to create — videos (neon + name plate), admin-editable */}
-      <VideoShowcase video={c.video} badge="Neon craft" />
-      <VideoShowcase video={c.videoNameplate} badge="Name plate craft" reverse />
+      {/* How to create — videos (neon + name plate), admin-editable.
+          Hidden for now; the live nameplate demo above covers the same ground.
+          Uncomment to bring them back — the admin fields and the VideoShowcase
+          component are untouched. */}
+      {/* <VideoShowcase video={c.video} badge="Neon craft" /> */}
+      {/* <VideoShowcase video={c.videoNameplate} badge="Name plate craft" reverse /> */}
 
       {/* Promo — light, modern, animated */}
       <section className="bg-linear-to-b from-white to-[#eff5f1] px-4 py-16">
