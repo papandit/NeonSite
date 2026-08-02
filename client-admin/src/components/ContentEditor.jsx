@@ -146,13 +146,16 @@ export default function ContentEditor() {
 
       <ListSection
         title="Testimonials"
-        description="The 'What customers say' cards on the home page."
+        description="The 'What customers say' wall on the home page. Rating, date and photo are optional."
         items={content.testimonials}
         onChange={(v) => set('testimonials', v)}
-        makeEmpty={() => ({ name: '', quote: '' })}
+        makeEmpty={() => ({ name: '', quote: '', rating: 5, date: '', image: '' })}
         addLabel="Add testimonial"
         fields={[
           { key: 'name', label: 'Name' },
+          { key: 'rating', label: 'Rating (1-5)' },
+          { key: 'date', label: 'Date shown (optional)' },
+          { key: 'image', label: 'Photo (optional)', type: 'image', folder: 'testimonials' },
           { key: 'quote', label: 'Quote', width: 'full', textarea: true },
         ]}
       />

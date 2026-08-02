@@ -8,6 +8,8 @@ import Reveal from '../components/Reveal';
 import TrustMarquee from '../components/TrustMarquee';
 import InstagramStrip from '../components/InstagramStrip';
 import NameplateLivePreview from '../components/NameplateLivePreview';
+import NeonStudioPreview from '../components/NeonStudioPreview';
+import ReviewWall from '../components/ReviewWall';
 import Seo from '../components/Seo';
 import { useLiveCatalog } from '../hooks/useLiveCatalog';
 import { useSiteSettings } from '../context/SiteSettings';
@@ -150,7 +152,10 @@ export default function HomePage() {
           feature cards, so it's the first thing after the banner. */}
       <TrustMarquee items={c.marquee} />
 
-      {/* Features / trust strip */}
+      {/* Features / trust strip — hidden for now; the scrolling promises
+          ribbon above covers the same claims. Uncomment to restore; the
+          admin "Trust features" fields are untouched.
+
       <section className="border-b border-gray-200 bg-linear-to-b from-[#fbfdfc] to-[#eaf1ec]">
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-4 px-4 py-12 sm:grid-cols-2 lg:grid-cols-4">
           {c.features.map((f, i) => (
@@ -176,6 +181,7 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+      */}
 
       {/* Featured categories — circular tiles */}
       <Section title="Shop by category" cta={<Link to="/products" className="text-sm font-medium text-indigo-600 hover:underline">View all</Link>}>
@@ -230,9 +236,6 @@ export default function HomePage() {
         )}
       </Section>
 
-      {/* Live nameplate demo — types itself, links into the studio. */}
-      <NameplateLivePreview />
-
       {/* Recently added */}
       <Section title="Recently added" subtitle="Fresh designs from our catalog" cta={<Link to="/products" className="text-sm font-medium text-indigo-600 hover:underline">Browse all</Link>}>
         {loading ? (
@@ -250,6 +253,11 @@ export default function HomePage() {
           <ProductGrid products={recommended} />
         </Section>
       )}
+
+      {/* Studio demos — placed after the product rows, so someone who has
+          just browsed the catalogue is shown how to make their own. */}
+      <NeonStudioPreview />
+      <NameplateLivePreview />
 
       {/* How to create — videos (neon + name plate), admin-editable.
           Hidden for now; the live nameplate demo above covers the same ground.
@@ -308,19 +316,19 @@ export default function HomePage() {
 
       {/* Reviews — modern cards, staggered + hover */}
       <Section title="What customers say">
-        <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.15 }} className="grid gap-5 sm:grid-cols-3">
-          {c.testimonials.map((t, i) => (
-            <motion.figure key={`${t.name}-${i}`} variants={rise} whileHover={{ y: -6 }} className="relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition hover:shadow-lg">
-              <span className="absolute right-4 top-1 font-display text-5xl leading-none text-indigo-100 select-none">”</span>
-              <div className="text-amber-400">★★★★★</div>
-              <blockquote className="relative mt-2 text-sm leading-relaxed text-gray-700">“{t.quote}”</blockquote>
-              <figcaption className="mt-4 flex items-center gap-2.5">
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-700">{t.name?.charAt(0)}</span>
-                <span className="text-xs font-medium text-gray-500">{t.name}</span>
-              </figcaption>
-            </motion.figure>
-          ))}
-        </motion.div>
+        {/* Same wall as the product and studio pages — an even three-up grid
+            gave every card the tallest one's height, so short quotes sat in a
+            box of dead space. */}
+        <ReviewWall
+          items={c.testimonials.map((t, i) => ({
+            id: i,
+            name: t.name,
+            rating: Number(t.rating) || 5,
+            text: t.quote,
+            media: t.image ? [{ type: 'image', url: t.image }] : [],
+            date: t.date || '',
+          }))}
+        />
       </Section>
 
       {/* Community reels — hides itself when no tiles are configured. */}
