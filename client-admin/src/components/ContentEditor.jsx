@@ -211,6 +211,42 @@ export default function ContentEditor() {
         ]}
       />
 
+      <ListSection
+        title="Home — Scrolling promises"
+        description="The dark ribbon that slides under the hero. Icon must be one of: delivery, warranty, rating, quality, value, install."
+        items={content.marquee}
+        onChange={(v) => set('marquee', v)}
+        makeEmpty={() => ({ icon: 'quality', label: '' })}
+        addLabel="Add promise"
+        fields={[
+          { key: 'label', label: 'Text' },
+          { key: 'icon', label: 'Icon (delivery / warranty / rating / quality / value / install)' },
+        ]}
+      />
+
+      <Card title="Home — Instagram community" description="The reel strip near the bottom of the home page. Leave the tiles empty to hide the whole section.">
+        <Field label="Heading" value={content.instagram?.heading} placeholder="Join our community on Instagram" onChange={(v) => setNested('instagram', 'heading', v)} />
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field label="Followers line" value={content.instagram?.followers} placeholder="197k followers" onChange={(v) => setNested('instagram', 'followers', v)} />
+          <Field label="Profile URL" value={content.instagram?.profileUrl} placeholder="https://instagram.com/yourhandle" onChange={(v) => setNested('instagram', 'profileUrl', v)} />
+        </div>
+      </Card>
+
+      <ListSection
+        title="Home — Instagram tiles"
+        description="Up to 15. Paste an Instagram reel URL and the real post plays in place — nothing to upload. Or upload your own clip instead, which autoplays muted (an Instagram embed cannot). Only filled tiles show, so a half-filled list never leaves gaps."
+        items={content.instagram?.items}
+        onChange={(v) => setNested('instagram', 'items', v)}
+        makeEmpty={() => ({ video: '', image: '', link: '', caption: '' })}
+        addLabel="Add tile"
+        fields={[
+          { key: 'link', label: 'Instagram reel URL — e.g. https://www.instagram.com/reel/ABC123/', width: 'full' },
+          { key: 'video', label: 'Or upload a clip instead (autoplays muted)', type: 'video', folder: 'instagram' },
+          { key: 'image', label: 'Or a photo — also used as an uploaded clip’s first frame', type: 'image', folder: 'instagram' },
+          { key: 'caption', label: 'Caption (optional)', width: 'full' },
+        ]}
+      />
+
       </Group>
 
       <Group id="reviews" label="Reviews & FAQs">
@@ -268,42 +304,6 @@ export default function ContentEditor() {
 
       {/* The Neon + FloRo product story, the crafted band and the assurance
           strip are edited on the Neon Studio page, next to the neon catalogue. */}
-
-      <ListSection
-        title="Home — Scrolling promises"
-        description="The dark ribbon that slides under the hero. Icon must be one of: delivery, warranty, rating, quality, value, install."
-        items={content.marquee}
-        onChange={(v) => set('marquee', v)}
-        makeEmpty={() => ({ icon: 'quality', label: '' })}
-        addLabel="Add promise"
-        fields={[
-          { key: 'label', label: 'Text' },
-          { key: 'icon', label: 'Icon (delivery / warranty / rating / quality / value / install)' },
-        ]}
-      />
-
-      <Card title="Home — Instagram community" description="The reel strip near the bottom of the home page. Leave the tiles empty to hide the whole section.">
-        <Field label="Heading" value={content.instagram?.heading} placeholder="Join our community on Instagram" onChange={(v) => setNested('instagram', 'heading', v)} />
-        <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Followers line" value={content.instagram?.followers} placeholder="197k followers" onChange={(v) => setNested('instagram', 'followers', v)} />
-          <Field label="Profile URL" value={content.instagram?.profileUrl} placeholder="https://instagram.com/yourhandle" onChange={(v) => setNested('instagram', 'profileUrl', v)} />
-        </div>
-      </Card>
-
-      <ListSection
-        title="Home — Instagram tiles"
-        description="Up to 15. Add a clip or a photo (or both — the photo becomes the clip’s poster) and link it to the reel. Only filled tiles show, so a half-filled list never leaves gaps."
-        items={content.instagram?.items}
-        onChange={(v) => setNested('instagram', 'items', v)}
-        makeEmpty={() => ({ video: '', image: '', link: '', caption: '' })}
-        addLabel="Add tile"
-        fields={[
-          { key: 'video', label: 'Video clip (plays muted on loop)', type: 'video', folder: 'instagram' },
-          { key: 'image', label: 'Photo — used alone, or as the clip’s first frame', type: 'image', folder: 'instagram' },
-          { key: 'link', label: 'Instagram reel URL', width: 'full' },
-          { key: 'caption', label: 'Caption (optional)', width: 'full' },
-        ]}
-      />
 
       </Group>
 
