@@ -7,6 +7,7 @@ import HeroBanner from '../components/HeroBanner';
 import Reveal from '../components/Reveal';
 import TrustMarquee from '../components/TrustMarquee';
 import InstagramStrip from '../components/InstagramStrip';
+import NameplateLivePreview from '../components/NameplateLivePreview';
 import Seo from '../components/Seo';
 import { useLiveCatalog } from '../hooks/useLiveCatalog';
 import { useSiteSettings } from '../context/SiteSettings';
@@ -228,6 +229,9 @@ export default function HomePage() {
           </div>
         )}
       </Section>
+
+      {/* Live nameplate demo — types itself, links into the studio. */}
+      <NameplateLivePreview />
 
       {/* Recently added */}
       <Section title="Recently added" subtitle="Fresh designs from our catalog" cta={<Link to="/products" className="text-sm font-medium text-indigo-600 hover:underline">Browse all</Link>}>
