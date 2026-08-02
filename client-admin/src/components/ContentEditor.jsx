@@ -51,6 +51,28 @@ function listToPages(list = []) {
   return out;
 }
 
+// One titled block of related cards. `scroll-mt` clears the sticky header so a
+// jump lands on the heading rather than under it.
+function Group({ id, label, children }) {
+  return (
+    <section id={`sc-${id}`} className="scroll-mt-24 space-y-6">
+      <h3 className="border-b border-slate-200 pb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">
+        {label}
+      </h3>
+      {children}
+    </section>
+  );
+}
+
+const SECTIONS = [
+  { id: 'home', label: 'Home page' },
+  { id: 'reviews', label: 'Reviews & FAQs' },
+  { id: 'videos', label: 'Videos' },
+  { id: 'product', label: 'Product pages' },
+  { id: 'promo', label: 'Promo & footer' },
+  { id: 'pages', label: 'Info pages' },
+];
+
 export default function ContentEditor() {
   const [content, setContent] = useState(EMPTY);
   const [pageList, setPageList] = useState([]);
@@ -58,6 +80,7 @@ export default function ContentEditor() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState(null);
+  const [active, setActive] = useState(SECTIONS[0].id);
 
   useEffect(() => {
     settingsApi.get()
@@ -69,6 +92,27 @@ export default function ContentEditor() {
       .catch((e) => setError(apiErrorMessage(e)))
       .finally(() => setLoading(false));
   }, []);
+
+  // Highlight whichever group is on screen, so the rail tracks scrolling as
+  // well as clicking.
+  useEffect(() => {
+    if (loading) return undefined;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        const seen = entries.filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (seen[0]) setActive(seen[0].target.id.replace('sc-', ''));
+      },
+      { rootMargin: '-20% 0px -70% 0px' },
+    );
+    SECTIONS.forEach((sec) => {
+      const el = document.getElementById(`sc-${sec.id}`);
+      if (el) obs.observe(el);
+    });
+    return () => obs.disconnect();
+  }, [loading]);
+
+  const go = (id) => document.getElementById(`sc-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   const set = (key, val) => { setContent((c) => ({ ...c, [key]: val })); setSaved(false); };
   const setNested = (key, subKey, val) => { setContent((c) => ({ ...c, [key]: { ...c[key], [subKey]: val } })); setSaved(false); };
@@ -111,6 +155,29 @@ export default function ContentEditor() {
 
       {error && <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}
 
+      <div className="grid gap-6 lg:grid-cols-[180px_1fr] lg:items-start">
+        {/* Jump nav — this page is long, and hunting for the footer fields by
+            scrolling is the main thing that made it unpleasant. */}
+        <nav className="lg:sticky lg:top-6">
+          <ul className="flex gap-1 overflow-x-auto lg:flex-col lg:overflow-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {SECTIONS.map((sec) => (
+              <li key={sec.id}>
+                <button
+                  type="button"
+                  onClick={() => go(sec.id)}
+                  className={`w-full whitespace-nowrap rounded-lg px-3 py-2 text-left text-sm font-medium transition ${
+                    active === sec.id ? 'bg-indigo-50 text-indigo-700' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'
+                  }`}
+                >
+                  {sec.label}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <div className="min-w-0 space-y-10">
+      <Group id="home" label="Home page">
       <Card title="Hero" description="Shown when no home banner is set.">
         <Field label="Heading" value={content.hero?.heading} onChange={(v) => setNested('hero', 'heading', v)} />
         <Field label="Subheading" value={content.hero?.subheading} textarea onChange={(v) => setNested('hero', 'subheading', v)} />
@@ -144,6 +211,9 @@ export default function ContentEditor() {
         ]}
       />
 
+      </Group>
+
+      <Group id="reviews" label="Reviews & FAQs">
       <ListSection
         title="Testimonials"
         description="The 'What customers say' wall on the home page. Rating, date and photo are optional."
@@ -173,6 +243,9 @@ export default function ContentEditor() {
         ]}
       />
 
+      </Group>
+
+      <Group id="videos" label="Videos">
       <Card title="Neon video section" description="The neon 'Behind the craft' video on the home page. Leave the URL blank to hide it.">
         <Field label="Heading" value={content.video?.heading} onChange={(v) => setNested('video', 'heading', v)} />
         <Field label="Subheading" value={content.video?.subheading} textarea onChange={(v) => setNested('video', 'subheading', v)} />
@@ -232,6 +305,9 @@ export default function ContentEditor() {
         ]}
       />
 
+      </Group>
+
+      <Group id="product" label="Product pages">
       <ListSection
         title="Product page — Story highlights"
         description="The circular reel under the buy button on product and name-plate pages. An entry with no image is skipped; an empty list hides the reel."
@@ -251,6 +327,9 @@ export default function ContentEditor() {
         <Field label="Express note (blank hides it)" value={content.shipping?.express} textarea onChange={(v) => setNested('shipping', 'express', v)} />
       </Card>
 
+      </Group>
+
+      <Group id="promo" label="Promo & footer">
       <Card title="Promo band" description="The coloured call-to-action band.">
         <Field label="Heading" value={content.promo?.heading} onChange={(v) => setNested('promo', 'heading', v)} />
         <Field label="Subheading" value={content.promo?.subheading} textarea onChange={(v) => setNested('promo', 'subheading', v)} />
@@ -267,6 +346,9 @@ export default function ContentEditor() {
         <Field label="Bottom tagline" value={content.footer?.tagline} onChange={(v) => setNested('footer', 'tagline', v)} />
       </Card>
 
+      </Group>
+
+      <Group id="pages" label="Info pages">
       <ListSection
         title="Info pages"
         description={`Footer 'Quick links' pages. Use a known slug (${KNOWN_PAGES.map((p) => p[0]).join(', ')}) to override a built-in page. Leave blank to keep the built-in default. Blank lines separate paragraphs in the body.`}
@@ -281,6 +363,10 @@ export default function ContentEditor() {
           { key: 'body', label: 'Body (blank line = new paragraph)', width: 'full', textarea: true },
         ]}
       />
+
+      </Group>
+        </div>
+      </div>
 
       <div className="flex justify-end">
         <button onClick={onSave} disabled={saving} className="rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60">

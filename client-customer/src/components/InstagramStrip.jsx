@@ -12,6 +12,7 @@
 // IntersectionObserver pauses whatever has scrolled away.
 
 import { useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 
 const MAX_TILES = 15;
 
@@ -77,12 +78,19 @@ function Tile({ item }) {
     'relative aspect-9/16 shrink-0 snap-start overflow-hidden rounded-xl bg-gray-100 '
     + 'basis-[72%] sm:basis-[calc(50%-6px)] md:basis-[calc(33.333%-8px)] lg:basis-[calc(20%-10px)]';
 
-  return item.link ? (
+  if (!item.link) return <div className={shell}>{body}</div>;
+
+  // A reel lives on instagram.com, but a seeded tile can point at one of our
+  // own pages — those should navigate in place, not spawn a tab.
+  const external = /^https?:\/\//i.test(item.link);
+  return external ? (
     <a href={item.link} target="_blank" rel="noopener noreferrer" className={`${shell} block transition hover:opacity-95`}>
       {body}
     </a>
   ) : (
-    <div className={shell}>{body}</div>
+    <Link to={item.link} className={`${shell} block transition hover:opacity-95`}>
+      {body}
+    </Link>
   );
 }
 

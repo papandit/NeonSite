@@ -6,6 +6,7 @@ import { applyCoupon } from '../services/commerce';
 import { apiErrorMessage } from '../services/api';
 import { formatPaise } from '../utils/money';
 import { toast } from '../lib/toast';
+import { useSiteSettings } from '../context/SiteSettings';
 
 // Everything the customer chose, per kind — text, detail rows, colour swatches, symbols.
 function itemDetails(design, fallback = {}) {
@@ -73,6 +74,14 @@ export default function CartPage() {
   const [couponMsg, setCouponMsg] = useState(null);
   const [couponErr, setCouponErr] = useState(null);
   const [discountPaise, setDiscountPaise] = useState(0);
+  const { settings } = useSiteSettings();
+
+  const itemCount = cart.items.reduce((n, it) => n + (it.quantity || 1), 0);
+  // How much more to qualify for free delivery. Shown as encouragement, not a
+  // promise — the shipping line is still computed at checkout.
+  const freeAt = settings.freeShippingAbovePaise || 0;
+  const afterDiscount = Math.max(0, cart.subtotalPaise - discountPaise);
+  const toFreeShipping = freeAt > 0 ? freeAt - afterDiscount : 0;
 
   useEffect(() => {
     dispatch(fetchCart());
@@ -114,8 +123,22 @@ export default function CartPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-bold">Your cart</h1>
-      <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
+      <div className="mb-6 flex flex-wrap items-baseline justify-between gap-3">
+        <h1 className="text-2xl font-bold">
+          Your cart
+          <span className="ml-2 text-base font-normal text-gray-500">
+            {itemCount} item{itemCount === 1 ? '' : 's'}
+          </span>
+        </h1>
+        <Link to="/products" className="group inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-600 hover:text-indigo-700">
+          <svg viewBox="0 0 24 24" className="h-4 w-4 transition group-hover:-translate-x-0.5" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M19 12H5M11 18l-6-6 6-6" />
+          </svg>
+          Continue shopping
+        </Link>
+      </div>
+
+      <div className="grid items-start gap-8 lg:grid-cols-[1fr_340px]">
         {/* Items */}
         <div className="space-y-4">
           {cart.items.map((it) => {
@@ -189,7 +212,9 @@ export default function CartPage() {
         </div>
 
         {/* Summary */}
-        <div className="h-fit rounded-xl border border-gray-200 bg-white p-6">
+        {/* Sticky so the total and the checkout button stay reachable while
+            you scroll a long cart. */}
+        <div className="h-fit rounded-xl border border-gray-200 bg-white p-6 lg:sticky lg:top-24">
           <h2 className="font-semibold">Order summary</h2>
 
           <div className="mt-4">
@@ -224,12 +249,59 @@ export default function CartPage() {
             </div>
           </dl>
 
+          {freeAt > 0 && (
+            <div className="mt-4 rounded-lg bg-indigo-50/70 px-3 py-2.5">
+              {toFreeShipping > 0 ? (
+                <>
+                  <p className="text-xs text-indigo-900">
+                    Add <span className="font-semibold">{formatPaise(toFreeShipping)}</span> more for free delivery
+                  </p>
+                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-indigo-100">
+                    <div
+                      className="h-full rounded-full bg-indigo-600 transition-[width] duration-500"
+                      style={{ width: `${Math.min(100, (afterDiscount / freeAt) * 100)}%` }}
+                    />
+                  </div>
+                </>
+              ) : (
+                <p className="flex items-center gap-1.5 text-xs font-medium text-indigo-900">
+                  <svg viewBox="0 0 20 20" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.2">
+                    <path d="M4 10.5l4 4 8-9" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  Your order qualifies for free delivery
+                </p>
+              )}
+            </div>
+          )}
+
           <button
             onClick={() => navigate('/checkout')}
             className="mt-5 w-full rounded-full bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700"
           >
             Proceed to checkout
           </button>
+
+          <Link
+            to="/products"
+            className="mt-2.5 block w-full rounded-full border border-gray-300 px-4 py-2.5 text-center text-sm font-medium text-gray-700 transition hover:border-indigo-400 hover:text-indigo-700"
+          >
+            Continue shopping
+          </Link>
+
+          <ul className="mt-5 space-y-2 border-t border-gray-100 pt-4 text-xs text-gray-500">
+            {[
+              'Secure Razorpay checkout',
+              'Made to order — 2 year warranty',
+              'Tracked delivery across India',
+            ].map((line) => (
+              <li key={line} className="flex items-center gap-2">
+                <svg viewBox="0 0 20 20" className="h-3.5 w-3.5 shrink-0 text-indigo-600" fill="none" stroke="currentColor" strokeWidth="2.4">
+                  <path d="M4 10.5l4 4 8-9" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                {line}
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>
