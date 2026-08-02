@@ -100,7 +100,7 @@ export default function Reviews({ productId, slug }) {
   const isAuthed = useSelector(selectIsAuthenticated);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({ rating: 5, title: '', comment: '' });
+  const [form, setForm] = useState({ rating: 5, comment: '' });
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
@@ -127,8 +127,8 @@ export default function Reviews({ productId, slug }) {
       // Upload attachments first so the review is only written once its media
       // is safely stored.
       const media = files.length ? await uploadReviewMedia(files) : [];
-      await createReview({ productId, rating: Number(form.rating), title: form.title, comment: form.comment, media });
-      setForm({ rating: 5, title: '', comment: '' });
+      await createReview({ productId, rating: Number(form.rating), comment: form.comment, media });
+      setForm({ rating: 5, comment: '' });
       setFiles([]);
       setMessage('Thanks! Your review is now live. 🎉');
       setWriting(false); // collapse back so the list is what you land on
@@ -276,7 +276,7 @@ export default function Reviews({ productId, slug }) {
           {isAuthed && (
             <button
               type="button"
-              onClick={() => setWriting((w) => !w)}
+              onClick={() => { setWriting((w) => !w); setMessage(null); setError(null); }}
               className="rounded-full bg-indigo-600 px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-indigo-700"
             >
               {writing ? 'Cancel' : 'Write a review'}
@@ -298,8 +298,7 @@ export default function Reviews({ productId, slug }) {
               <label className="block text-sm font-medium text-gray-700">Your rating</label>
               <StarInput value={form.rating} onChange={(n) => setForm((f) => ({ ...f, rating: n }))} />
             </div>
-            <input value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} placeholder="Title (optional)" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-            <textarea value={form.comment} onChange={(e) => setForm((f) => ({ ...f, comment: e.target.value }))} placeholder="Your experience…" rows={3} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+            <textarea value={form.comment} onChange={(e) => setForm((f) => ({ ...f, comment: e.target.value }))} placeholder="How did it turn out? What did you use it for?" rows={4} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
 
             {/* Photos & video */}
             <div>
