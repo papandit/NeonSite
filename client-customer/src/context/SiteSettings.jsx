@@ -209,6 +209,16 @@ export const DEFAULT_CONTENT = {
     heading: 'Free Shipping',
     express: 'Express Shipping option available at checkout ( 3-5 Working Days )',
   },
+  // The dark scrolling ribbon of promises on the home page. `icon` is one of
+  // delivery | warranty | rating | quality | value | install.
+  marquee: [
+    { icon: 'delivery', label: '100% Timely Delivery' },
+    { icon: 'warranty', label: '2 Year Warranty' },
+    { icon: 'rating', label: '4.8 Rating by 20K+ Customers' },
+    { icon: 'quality', label: 'Top-Notch Quality' },
+    { icon: 'value', label: 'Value for Money' },
+    { icon: 'install', label: '2 Mins Installation' },
+  ],
   promo: {
     heading: 'Ready to design yours?',
     subheading: 'Create a one-of-a-kind name plate in minutes — or grab a ready design as-is.',
@@ -274,6 +284,7 @@ function withDefaults(data) {
       assurance: Array.isArray(c.assurance) && c.assurance.length ? c.assurance : DEFAULT_CONTENT.assurance,
       highlights: Array.isArray(c.highlights) ? c.highlights : DEFAULT_CONTENT.highlights,
       shipping: { ...DEFAULT_CONTENT.shipping, ...(c.shipping || {}) },
+      marquee: Array.isArray(c.marquee) ? c.marquee : DEFAULT_CONTENT.marquee,
       promo: { ...DEFAULT_CONTENT.promo, ...(c.promo || {}) },
       newsletter: { ...DEFAULT_CONTENT.newsletter, ...(c.newsletter || {}) },
       footer: { ...DEFAULT_CONTENT.footer, ...(c.footer || {}) },

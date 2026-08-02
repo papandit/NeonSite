@@ -208,6 +208,16 @@ export const DEFAULT_SITE_CONTENT = {
     heading: 'Free Shipping',
     express: 'Express Shipping option available at checkout ( 3-5 Working Days )',
   },
+  // The dark scrolling ribbon of promises on the home page. `icon` is one of
+  // delivery | warranty | rating | quality | value | install.
+  marquee: [
+    { icon: 'delivery', label: '100% Timely Delivery' },
+    { icon: 'warranty', label: '2 Year Warranty' },
+    { icon: 'rating', label: '4.8 Rating by 20K+ Customers' },
+    { icon: 'quality', label: 'Top-Notch Quality' },
+    { icon: 'value', label: 'Value for Money' },
+    { icon: 'install', label: '2 Mins Installation' },
+  ],
   promo: {
     heading: 'Ready to design yours?',
     subheading: 'Create a one-of-a-kind name plate in minutes — or grab a ready design as-is.',
@@ -262,6 +272,7 @@ export function mergeSiteContent(stored = {}) {
     assurance: Array.isArray(s.assurance) && s.assurance.length ? s.assurance : d.assurance,
     highlights: Array.isArray(s.highlights) ? s.highlights : d.highlights,
     shipping: { ...d.shipping, ...(s.shipping || {}) },
+    marquee: Array.isArray(s.marquee) ? s.marquee : d.marquee,
     promo: { ...d.promo, ...(s.promo || {}) },
     newsletter: { ...d.newsletter, ...(s.newsletter || {}) },
     footer: { ...d.footer, ...(s.footer || {}) },

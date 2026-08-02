@@ -19,6 +19,7 @@ const EMPTY = {
   video: { heading: '', subheading: '', url: '', ctaText: '', ctaLink: '' },
   videoNameplate: { heading: '', subheading: '', url: '', ctaText: '', ctaLink: '' },
   highlights: [],
+  marquee: [],
   shipping: { heading: '', express: '' },
   promo: { heading: '', subheading: '', ctaText: '' },
   newsletter: { heading: '', subheading: '' },
@@ -189,6 +190,19 @@ export default function ContentEditor() {
 
       {/* The Neon + FloRo product story, the crafted band and the assurance
           strip are edited on the Neon Studio page, next to the neon catalogue. */}
+
+      <ListSection
+        title="Home — Scrolling promises"
+        description="The dark ribbon that slides under the hero. Icon must be one of: delivery, warranty, rating, quality, value, install."
+        items={content.marquee}
+        onChange={(v) => set('marquee', v)}
+        makeEmpty={() => ({ icon: 'quality', label: '' })}
+        addLabel="Add promise"
+        fields={[
+          { key: 'label', label: 'Text' },
+          { key: 'icon', label: 'Icon (delivery / warranty / rating / quality / value / install)' },
+        ]}
+      />
 
       <ListSection
         title="Product page — Story highlights"

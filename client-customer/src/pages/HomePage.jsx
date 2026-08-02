@@ -5,6 +5,7 @@ import { getCategories, getProducts, getRecommendedProducts, getBanners } from '
 import ProductGrid from '../components/ProductGrid';
 import HeroBanner from '../components/HeroBanner';
 import Reveal from '../components/Reveal';
+import TrustMarquee from '../components/TrustMarquee';
 import Seo from '../components/Seo';
 import { useLiveCatalog } from '../hooks/useLiveCatalog';
 import { useSiteSettings } from '../context/SiteSettings';
@@ -142,6 +143,10 @@ export default function HomePage() {
           </div>
         </section>
       )}
+
+      {/* Scrolling promises — sits right under the hero, before the static
+          feature cards, so it's the first thing after the banner. */}
+      <TrustMarquee items={c.marquee} />
 
       {/* Features / trust strip */}
       <section className="border-b border-gray-200 bg-linear-to-b from-[#fbfdfc] to-[#eaf1ec]">
