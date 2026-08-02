@@ -76,9 +76,9 @@ export function ListSection({ title, description, items, fields, onChange, makeE
             <div className="grid gap-3 sm:grid-cols-2">
               {fields.map((f) => (
                 <div key={f.key} className={f.width === 'full' ? 'sm:col-span-2' : ''}>
-                  {f.type === 'image' ? (
+                  {f.type === 'image' || f.type === 'video' ? (
                     <FileUpload
-                      kind="image"
+                      kind={f.type}
                       folder={f.folder || 'content'}
                       label={f.label}
                       value={it[f.key] || ''}

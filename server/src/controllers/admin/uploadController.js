@@ -27,6 +27,19 @@ export const uploadImageAsset = asyncHandler(async (req, res) => {
   return sendSuccess(res, result, 201);
 });
 
+// POST /api/admin/uploads/video  (Instagram strip clips)
+export const uploadVideoAsset = asyncHandler(async (req, res) => {
+  const file = requireFile(req);
+  const result = await persistAsset(file.buffer, {
+    // Stored as a plain asset; contentType is what decides how it serves.
+    kind: 'image',
+    folder: req.query.folder || 'video',
+    contentType: file.mimetype,
+    filename: file.originalname,
+  });
+  return sendSuccess(res, result, 201);
+});
+
 // POST /api/admin/uploads/font  (ttf/otf/woff)
 export const uploadFontAsset = asyncHandler(async (req, res) => {
   const file = requireFile(req);

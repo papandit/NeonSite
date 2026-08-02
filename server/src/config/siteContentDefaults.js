@@ -218,6 +218,15 @@ export const DEFAULT_SITE_CONTENT = {
     { icon: 'value', label: 'Value for Money' },
     { icon: 'install', label: '2 Mins Installation' },
   ],
+  // "Join our community on Instagram" — a strip of vertical clips/photos on the
+  // home page. Up to 15 tiles; only the ones with media render, so a half-full
+  // list never leaves gaps. `link` opens the reel.
+  instagram: {
+    heading: 'Join our community on Instagram',
+    followers: '',
+    profileUrl: '',
+    items: [],
+  },
   promo: {
     heading: 'Ready to design yours?',
     subheading: 'Create a one-of-a-kind name plate in minutes — or grab a ready design as-is.',
@@ -273,6 +282,7 @@ export function mergeSiteContent(stored = {}) {
     highlights: Array.isArray(s.highlights) ? s.highlights : d.highlights,
     shipping: { ...d.shipping, ...(s.shipping || {}) },
     marquee: Array.isArray(s.marquee) ? s.marquee : d.marquee,
+    instagram: { ...d.instagram, ...(s.instagram || {}) },
     promo: { ...d.promo, ...(s.promo || {}) },
     newsletter: { ...d.newsletter, ...(s.newsletter || {}) },
     footer: { ...d.footer, ...(s.footer || {}) },

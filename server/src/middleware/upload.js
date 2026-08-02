@@ -25,6 +25,15 @@ export const uploadImage = multer({
   ),
 }).single('file');
 
+// Short clips for the Instagram strip. Bigger than a review attachment
+// because these are the site's own showreel, but still small enough to live
+// in a Mongo document — anything longer belongs on a video host.
+export const uploadVideo = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 25 * MB },
+  fileFilter: fileFilter(['video/mp4', 'video/webm', 'video/quicktime'], 'video'),
+}).single('file');
+
 // Font files.
 export const uploadFont = multer({
   storage: multer.memoryStorage(),
@@ -89,8 +98,16 @@ export function handleUpload(mw) {
       if (err.code === 'LIMIT_FILE_SIZE') {
         return next(ApiError.badRequest('File too large', { code: 'FILE_TOO_LARGE' }));
       }
-      if (err.code === 'LIMIT_FILE_COUNT' || err.code === 'LIMIT_UNEXPECTED_FILE') {
+      if (err.code === 'LIMIT_FILE_COUNT') {
         return next(ApiError.badRequest(`Too many files — up to ${REVIEW_MEDIA_MAX} allowed`, { code: 'TOO_MANY_FILES' }));
+      }
+      // Multer reports an unknown field name this way too, which is a wiring
+      // mistake rather than the user sending too much — say which it is.
+      if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+        return next(ApiError.badRequest(
+          `Unexpected file field "${err.field || ''}" — send files as "${mw.length ? 'file' : 'files'}"`,
+          { code: 'UNEXPECTED_FILE_FIELD' },
+        ));
       }
       return next(ApiError.badRequest(err.message || 'Upload failed'));
     });

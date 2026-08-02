@@ -20,6 +20,7 @@ const EMPTY = {
   videoNameplate: { heading: '', subheading: '', url: '', ctaText: '', ctaLink: '' },
   highlights: [],
   marquee: [],
+  instagram: { heading: '', followers: '', profileUrl: '', items: [] },
   shipping: { heading: '', express: '' },
   promo: { heading: '', subheading: '', ctaText: '' },
   newsletter: { heading: '', subheading: '' },
@@ -201,6 +202,29 @@ export default function ContentEditor() {
         fields={[
           { key: 'label', label: 'Text' },
           { key: 'icon', label: 'Icon (delivery / warranty / rating / quality / value / install)' },
+        ]}
+      />
+
+      <Card title="Home — Instagram community" description="The reel strip near the bottom of the home page. Leave the tiles empty to hide the whole section.">
+        <Field label="Heading" value={content.instagram?.heading} placeholder="Join our community on Instagram" onChange={(v) => setNested('instagram', 'heading', v)} />
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field label="Followers line" value={content.instagram?.followers} placeholder="197k followers" onChange={(v) => setNested('instagram', 'followers', v)} />
+          <Field label="Profile URL" value={content.instagram?.profileUrl} placeholder="https://instagram.com/yourhandle" onChange={(v) => setNested('instagram', 'profileUrl', v)} />
+        </div>
+      </Card>
+
+      <ListSection
+        title="Home — Instagram tiles"
+        description="Up to 15. Add a clip or a photo (or both — the photo becomes the clip’s poster) and link it to the reel. Only filled tiles show, so a half-filled list never leaves gaps."
+        items={content.instagram?.items}
+        onChange={(v) => setNested('instagram', 'items', v)}
+        makeEmpty={() => ({ video: '', image: '', link: '', caption: '' })}
+        addLabel="Add tile"
+        fields={[
+          { key: 'video', label: 'Video clip (plays muted on loop)', type: 'video', folder: 'instagram' },
+          { key: 'image', label: 'Photo — used alone, or as the clip’s first frame', type: 'image', folder: 'instagram' },
+          { key: 'link', label: 'Instagram reel URL', width: 'full' },
+          { key: 'caption', label: 'Caption (optional)', width: 'full' },
         ]}
       />
 

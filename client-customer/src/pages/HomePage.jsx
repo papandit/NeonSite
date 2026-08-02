@@ -6,6 +6,7 @@ import ProductGrid from '../components/ProductGrid';
 import HeroBanner from '../components/HeroBanner';
 import Reveal from '../components/Reveal';
 import TrustMarquee from '../components/TrustMarquee';
+import InstagramStrip from '../components/InstagramStrip';
 import Seo from '../components/Seo';
 import { useLiveCatalog } from '../hooks/useLiveCatalog';
 import { useSiteSettings } from '../context/SiteSettings';
@@ -314,6 +315,9 @@ export default function HomePage() {
           ))}
         </motion.div>
       </Section>
+
+      {/* Community reels — hides itself when no tiles are configured. */}
+      <InstagramStrip data={c.instagram} />
 
       {/* Newsletter — light modern card */}
       <section className="bg-[#fbfdfc] px-4 py-16">

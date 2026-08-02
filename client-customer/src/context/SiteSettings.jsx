@@ -219,6 +219,15 @@ export const DEFAULT_CONTENT = {
     { icon: 'value', label: 'Value for Money' },
     { icon: 'install', label: '2 Mins Installation' },
   ],
+  // "Join our community on Instagram" — a strip of vertical clips/photos on the
+  // home page. Up to 15 tiles; only the ones with media render, so a half-full
+  // list never leaves gaps. `link` opens the reel.
+  instagram: {
+    heading: 'Join our community on Instagram',
+    followers: '',
+    profileUrl: '',
+    items: [],
+  },
   promo: {
     heading: 'Ready to design yours?',
     subheading: 'Create a one-of-a-kind name plate in minutes — or grab a ready design as-is.',
@@ -285,6 +294,7 @@ function withDefaults(data) {
       highlights: Array.isArray(c.highlights) ? c.highlights : DEFAULT_CONTENT.highlights,
       shipping: { ...DEFAULT_CONTENT.shipping, ...(c.shipping || {}) },
       marquee: Array.isArray(c.marquee) ? c.marquee : DEFAULT_CONTENT.marquee,
+      instagram: { ...DEFAULT_CONTENT.instagram, ...(c.instagram || {}) },
       promo: { ...DEFAULT_CONTENT.promo, ...(c.promo || {}) },
       newsletter: { ...DEFAULT_CONTENT.newsletter, ...(c.newsletter || {}) },
       footer: { ...DEFAULT_CONTENT.footer, ...(c.footer || {}) },

@@ -4,6 +4,7 @@ import { apiErrorMessage } from '../services/api';
 
 const ACCEPT = {
   image: 'image/png,image/jpeg,image/webp,image/gif',
+  video: 'video/mp4,video/webm,video/quicktime',
   font: '.ttf,.otf,.woff,.woff2',
   svg: 'image/svg+xml,.svg',
 };
@@ -92,6 +93,17 @@ export default function FileUpload({
           src={value}
           alt="preview"
           className="mt-2 h-20 w-auto rounded border border-slate-200 object-contain"
+        />
+      )}
+      {preview && value && kind === 'video' && (
+        // Muted + loop so a row of these in the editor stays quiet.
+        <video
+          src={value}
+          muted
+          loop
+          controls
+          playsInline
+          className="mt-2 h-28 w-auto rounded border border-slate-200 bg-black object-contain"
         />
       )}
       {preview && value && kind === 'font' && (
