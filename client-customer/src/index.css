@@ -102,7 +102,7 @@
   }
   body {
     background-color: #eff5f1;
-    color: #3a2b1d;
+    color: #24322a;
     font-family: var(--font-sans);
     letter-spacing: 0.2px;
   }
@@ -111,7 +111,12 @@
     font-family: var(--font-display);
     font-weight: 500;
     letter-spacing: -0.01em;
-    color: #3a2b1d;
     font-feature-settings: 'kern' 1;
   }
+}
+
+/* The wordmark is near-black artwork, so on a dark surface it needs to become
+   white rather than sit on a white plate — the plate reads as a sticker. */
+.logo-on-dark {
+  filter: brightness(0) invert(1);
 }

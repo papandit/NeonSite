@@ -70,11 +70,11 @@ export default function LoginPage() {
         <div className="pointer-events-none absolute -bottom-32 -left-16 h-80 w-80 rounded-full bg-emerald-400/12 blur-3xl" />
 
         <div className="relative flex items-center gap-3">
-          <img src="/daxon-logo.svg" alt="Daxon" className="h-10 w-auto rounded-md bg-white/95 object-contain px-2 py-1 shadow-lg" />
+          <img src="/daxon-logo.svg" alt="Daxon" className="logo-on-dark h-9 w-auto object-contain" />
         </div>
 
         <div className="relative max-w-md">
-          <h2 className="font-display text-4xl font-medium leading-tight">
+          <h2 className="font-display text-4xl font-medium leading-tight text-white">
             Your storefront,<br />under control.
           </h2>
           <p className="mt-4 text-slate-300">

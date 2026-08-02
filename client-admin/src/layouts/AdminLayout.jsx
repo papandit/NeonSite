@@ -86,9 +86,9 @@ export default function AdminLayout() {
           {/* Wordmark logo — sits on a light plate because the mark is near-black.
               Collapsed rail shows the square icon instead. */}
           {collapsed ? (
-            <img src="/favicon.svg" alt="Daxon" className="h-9 w-9 shrink-0 rounded-lg bg-white/95 object-contain p-1" />
+            <img src="/favicon.svg" alt="Daxon" className="logo-on-dark h-9 w-9 shrink-0 object-contain" />
           ) : (
-            <img src="/daxon-logo.svg" alt="Daxon" className="h-9 w-auto min-w-0 flex-1 rounded-md bg-white/95 object-contain px-2 py-1" />
+            <img src="/daxon-logo.svg" alt="Daxon" className="logo-on-dark h-8 w-auto min-w-0 flex-1 object-contain object-left" />
           )}
           <button
             onClick={toggle}

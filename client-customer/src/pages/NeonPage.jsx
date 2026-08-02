@@ -272,7 +272,7 @@ export default function NeonPage() {
                     fontFamily: fontObj?.cssFamily || 'cursive',
                     fontSize: `clamp(22px, 8vw, ${sizeObj?.fontSizePx || 46}px)`,
                     '--neon-fill': colorObj?.fill || '#fff',
-                    '--neon-glow': colorObj?.glow || '#d4541f',
+                    '--neon-glow': colorObj?.glow || '#589c80',
                   }}
                 >
                   {lines.map((l, i) => <span key={i} className="neon-line">{l || ' '}</span>)}
