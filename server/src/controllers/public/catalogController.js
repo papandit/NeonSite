@@ -22,6 +22,8 @@ const SORTS = {
   price_asc: 'basePricePaise',
   price_desc: '-basePricePaise',
   rating: '-rating',
+  popular: '-soldCount',
+  reviewed: '-numReviews',
   name: 'name',
 };
 
@@ -30,7 +32,7 @@ const NON_MATCHING_ID = '000000000000000000000000';
 // Light list projection: everything a card needs, plus the product's colour
 // panel so we can surface swatches — without the heavy full customizationConfig.
 const CARD_SELECT =
-  'name slug images colors basePricePaise compareAtPricePaise rating category subCategory status createdAt customizationConfig.color '
+  'name slug images colors basePricePaise compareAtPricePaise rating numReviews soldCount category subCategory status createdAt customizationConfig.color '
   + 'isNeon lightOnImageUrl lightOffImageUrl sizeText sizeUnits colorText';
 const COLOR_POPULATE = { path: 'customizationConfig.color.options', match: { status: 'active' }, select: 'name meta' };
 

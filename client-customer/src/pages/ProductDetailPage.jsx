@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getProductBySlug, getRelatedProducts, getRecommendedProducts } from '../services/catalog';
+import { getProductBySlug, getRelatedProducts, getRecommendedProducts, getProducts } from '../services/catalog';
 import { formatPaise } from '../utils/money';
 import { quickAddToCart } from '../store/cartSlice';
 import { selectIsAuthenticated } from '../store/authSlice';
@@ -45,6 +45,9 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState(null);
   const [related, setRelated] = useState([]);
   const [recommended, setRecommended] = useState([]);
+  // Feeds the story reel under the buy button.
+  const [popular, setPopular] = useState([]);
+  const [reviewed, setReviewed] = useState([]);
   const [activeImage, setActiveImage] = useState(0);
   const [lightOn, setLightOn] = useState(true); // neon signs: lit by default
   const [selectedColor, setSelectedColor] = useState(null);
@@ -63,6 +66,8 @@ export default function ProductDetailPage() {
       .finally(() => setLoading(false));
     getRelatedProducts(slug).then(setRelated).catch(() => setRelated([]));
     getRecommendedProducts({ exclude: slug, limit: 4 }).then(setRecommended).catch(() => setRecommended([]));
+    getProducts({ sort: 'popular', limit: 4 }).then(({ items }) => setPopular(items)).catch(() => setPopular([]));
+    getProducts({ sort: 'reviewed', limit: 4 }).then(({ items }) => setReviewed(items)).catch(() => setReviewed([]));
   }, [slug]);
 
   const handleAdd = async () => {
@@ -250,7 +255,14 @@ export default function ProductDetailPage() {
           </div>
           <p className="mt-3 text-xs text-gray-400">Looking to personalize? Try our <Link to="/nameplates" className="font-medium text-indigo-600 hover:underline">Name Plate Studio</Link> or <Link to="/neon" className="font-medium text-indigo-600 hover:underline">Neon Studio</Link>.</p>
 
-          <ProductAssurance highlights={settings.content?.highlights} shipping={settings.content?.shipping} />
+          <ProductAssurance
+            highlights={settings.content?.highlights}
+            shipping={settings.content?.shipping}
+            category={product.category}
+            related={related}
+            popular={popular}
+            reviewed={reviewed}
+          />
         </div>
       </div>
 

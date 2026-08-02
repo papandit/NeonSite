@@ -63,6 +63,11 @@ const ProductSchema = new Schema(
     // selling price (basePricePaise). 0 = no compare-at price.
     compareAtPricePaise: paiseField({ default: 0 }),
     rating: { type: Number, default: 0, min: 0, max: 5 },
+    // Denormalised from approved reviews (Review.recomputeProductRating) and
+    // from paid orders, so "top rated" / "most reviewed" / "best selling" are
+    // plain indexed sorts rather than a per-request aggregate.
+    numReviews: { type: Number, default: 0, min: 0, index: true },
+    soldCount: { type: Number, default: 0, min: 0, index: true },
     status: { type: String, enum: ['active', 'hidden'], default: 'active', index: true },
     // Routes cart/checkout repricing: 'neon' -> Neon Studio, 'nameplate' -> Name
     // Plate Studio (quoteNpDesign), else the option engine. Regular = 'plate'.

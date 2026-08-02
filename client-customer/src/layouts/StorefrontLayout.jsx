@@ -41,7 +41,7 @@ export default function StorefrontLayout() {
   const user = useSelector(selectUser);
   const cartCount = useSelector(selectCartCount);
   const { settings } = useSiteSettings();
-  const storeName = settings.storeName || 'OWM NameCraft Ecom';
+  const storeName = settings.storeName || 'Daxon';
   const location = useLocation();
 
   const [categories, setCategories] = useState([]);

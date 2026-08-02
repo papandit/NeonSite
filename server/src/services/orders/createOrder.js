@@ -3,6 +3,7 @@
 // pending -> confirmed. Increments coupon usage and clears the cart.
 
 import Order from '../../models/Order.js';
+import Product from '../../models/Product.js';
 import Coupon from '../../models/Coupon.js';
 import { getSettings } from '../../models/Settings.js';
 import { getNextSequence } from '../../models/Counter.js';
@@ -49,6 +50,23 @@ export async function createOrderFromQuote({ userId, cart, totals, coupon, addre
 
   if (coupon && totals.coupon.applied) {
     await Coupon.updateOne({ _id: coupon._id }, { $inc: { used: 1 } });
+  }
+
+  // Bump the denormalised sales counter that powers the "best selling" sort.
+  // Quantities are summed per product so a cart holding two of the same item
+  // counts twice, and a failure here must never fail an order that is already
+  // paid for and written.
+  const sold = new Map();
+  for (const it of items) {
+    if (!it.product) continue;
+    const key = String(it.product);
+    sold.set(key, (sold.get(key) || 0) + (it.quantity || 1));
+  }
+  if (sold.size) {
+    Product.bulkWrite(
+      [...sold].map(([id, qty]) => ({ updateOne: { filter: { _id: id }, update: { $inc: { soldCount: qty } } } })),
+      { ordered: false },
+    ).catch(() => {});
   }
 
   // Clear the cart.

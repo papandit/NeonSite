@@ -59,7 +59,7 @@ function FooterLink({ to, children }) {
 
 export default function Footer({ categories = [] }) {
   const { settings } = useSiteSettings();
-  const storeName = settings.storeName || 'OWM NameCraft Ecom';
+  const storeName = settings.storeName || 'Daxon';
   const about = settings.content?.footer?.about;
   const tagline = settings.content?.footer?.tagline;
   const socials = settings.socials || {};
@@ -71,8 +71,9 @@ export default function Footer({ categories = [] }) {
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
           <div>
-            {/* Full wordmark logo stands alone; the name is the no-logo fallback.
-                The mark is near-black, so it sits on a light chip here. */}
+            {/* Full wordmark logo stands alone; the name is the no-logo
+                fallback. The mark is near-black, so `logo-on-dark` inverts it
+                to white rather than propping it on a light chip. */}
             <Link to="/" className="flex items-center gap-2" aria-label={storeName}>
               {settings.logoUrl ? (
                 <img src={settings.logoUrl} alt={storeName} className="logo-on-dark h-11 w-auto object-contain object-left" />
@@ -155,8 +156,22 @@ export default function Footer({ categories = [] }) {
       {/* Bottom bar */}
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-6 py-5 text-sm text-gray-400 sm:flex-row">
-          <span>© {new Date().getFullYear()} {storeName} · Onewebmart</span>
-          <span>{tagline}</span>
+          <span>© {new Date().getFullYear()} {storeName}. All rights reserved.</span>
+          <span className="text-center sm:text-right">
+            {tagline}
+            <span className="mx-2 hidden text-gray-600 sm:inline">·</span>
+            <span className="mt-1 block sm:mt-0 sm:inline">
+              Created by{' '}
+              <a
+                href="https://onewebmart.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-gray-300 underline-offset-2 transition hover:text-indigo-400 hover:underline"
+              >
+                Onewebmart Solution
+              </a>
+            </span>
+          </span>
         </div>
       </div>
     </footer>

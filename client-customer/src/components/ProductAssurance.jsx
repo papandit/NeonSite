@@ -1,9 +1,10 @@
 // The trust block under a product's buy button: quality badges, the story
 // highlight reel, and the order -> ready -> delivered timeline.
 //
-// The highlight circles and the express-shipping note are admin-editable
-// (Site content > highlights / shipping); a highlight with no image is skipped
-// and an empty list hides the whole reel.
+// The reel is built from the catalogue, not hand-maintained: it links to more
+// of this product's category, the best sellers and the most-reviewed, each
+// showing a real product photo. `highlights` from Site content overrides it
+// entirely when an admin has set one, for campaign imagery.
 
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -50,8 +51,35 @@ const Tile = ({ children }) => (
   <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-indigo-50 text-indigo-600">{children}</span>
 );
 
-export default function ProductAssurance({ highlights, shipping }) {
-  const reel = (highlights || []).filter((h) => h?.image);
+// Pick a photo for a circle: whichever of these products has one.
+const photoOf = (list = []) => {
+  for (const p of list) {
+    const src = p?.lightOnImageUrl || (p?.images || []).find(Boolean);
+    if (src) return src;
+  }
+  return '';
+};
+
+// Build the reel from live catalogue data. `related` are same-category
+// products, `popular` the best sellers, `reviewed` the most-reviewed — each
+// circle links to the listing that produced it, so it always goes somewhere
+// real. A circle with no photo behind it is dropped rather than shown empty.
+function catalogueReel({ category, related, popular, reviewed }) {
+  return [
+    category && {
+      label: `More ${category.name}`,
+      image: photoOf(related),
+      link: `/products?category=${category.slug}`,
+    },
+    { label: 'Best sellers', image: photoOf(popular), link: '/products?sort=popular' },
+    { label: 'Most reviewed', image: photoOf(reviewed), link: '/products?sort=reviewed' },
+    { label: 'Top rated', image: photoOf([...(reviewed || [])].reverse()), link: '/products?sort=rating' },
+  ].filter((h) => h && h.image);
+}
+
+export default function ProductAssurance({ highlights, shipping, category, related, popular, reviewed }) {
+  const custom = (highlights || []).filter((h) => h?.image);
+  const reel = custom.length ? custom : catalogueReel({ category, related, popular, reviewed });
   const steps = timeline();
 
   return (

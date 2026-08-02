@@ -7,7 +7,7 @@ const CONTENT = {
   'about-us': {
     title: 'About Us',
     intro:
-      'OWM NameCraft Ecom is a made-to-order name-plate studio by Onewebmart. We blend old-world craftsmanship with a modern, live design experience so every plate that leaves our workshop is genuinely one of a kind.',
+      'Daxon is a made-to-order neon sign and name-plate studio. We blend old-world craftsmanship with a modern, live design experience so every piece that leaves our workshop is genuinely one of a kind.',
     sections: [
       { heading: 'Our story', body: [
         'What began as a small workshop crafting wooden door signs has grown into a full customization studio. We noticed customers wanted more than a name on a board — they wanted to see and shape the final piece before it was ever made.',
@@ -110,7 +110,7 @@ const CONTENT = {
         'All prices are in INR and computed server-side; the price shown at checkout is authoritative. We may update prices, options and availability at any time.',
       ] },
       { heading: 'Intellectual property', body: [
-        'Site content, designs and branding belong to Onewebmart. You retain rights to the personal text you provide for your plate.',
+        'Site content, designs and branding belong to Daxon. You retain rights to the personal text you provide for your plate.',
       ] },
       { heading: 'Liability', body: [
         'We are not liable for indirect or consequential losses. Our maximum liability for any order is limited to the amount paid for that order.',

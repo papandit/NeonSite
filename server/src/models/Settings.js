@@ -10,7 +10,7 @@ const { Schema, model } = mongoose;
 const SettingsSchema = new Schema(
   {
     key: { type: String, default: 'global', unique: true },
-    storeName: { type: String, default: 'OWM NameCraft Ecom' },
+    storeName: { type: String, default: 'Daxon' },
     logoUrl: { type: String, default: '' },
     supportEmail: { type: String, default: 'support@namecraft.local' },
     supportPhone: { type: String, default: '' },
@@ -45,7 +45,7 @@ const SettingsSchema = new Schema(
     // Single-HSN store (plan §15). Per-category HSN is a later data change.
     hsnCode: { type: String, default: '8306' }, // decorative base-metal articles
     gstin: { type: String, default: '' },
-    storeAddress: { type: String, default: 'Onewebmart, Ahmedabad, Gujarat' },
+    storeAddress: { type: String, default: 'Daxon, Ahmedabad, Gujarat' },
   },
   { timestamps: true }
 );

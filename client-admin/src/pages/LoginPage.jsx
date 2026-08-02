@@ -90,7 +90,7 @@ export default function LoginPage() {
           </ul>
         </div>
 
-        <p className="relative text-xs text-slate-400">© {new Date().getFullYear()} Onewebmart · Admin console</p>
+        <p className="relative text-xs text-slate-400">© {new Date().getFullYear()} Daxon · Admin console</p>
       </div>
 
       {/* Form panel */}

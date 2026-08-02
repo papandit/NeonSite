@@ -201,13 +201,10 @@ export const DEFAULT_CONTENT = {
   ],
   // Story-reel circles + shipping note shown under the buy button on product
   // and name-plate pages. An entry with no image is skipped.
-  highlights: [
-    { label: 'Meet FloRo', image: '/highlights/hl-1.jpg', link: '/neon' },
-    { label: 'Features', image: '/highlights/hl-2.jpg', link: '/neon' },
-    { label: 'Reviews', image: '/highlights/hl-3.jpg', link: '' },
-    { label: 'Influencers', image: '/highlights/hl-4.jpg', link: '' },
-    { label: 'BTS', image: '/highlights/hl-5.jpg', link: '' },
-  ],
+  // Empty on purpose: the reel is built from the catalogue (this product's
+  // category, best sellers, most reviewed). Fill this in to override it with
+  // campaign imagery instead.
+  highlights: [],
   shipping: {
     heading: 'Free Shipping',
     express: 'Express Shipping option available at checkout ( 3-5 Working Days )',
@@ -222,14 +219,14 @@ export const DEFAULT_CONTENT = {
     subheading: 'Design ideas, new materials and offers — straight to your inbox.',
   },
   footer: {
-    about: 'Handcrafted, personalized name plates — designed by you, crafted to order by Onewebmart.',
+    about: 'Handcrafted, personalized name plates and neon signs — designed by you, crafted to order by Daxon.',
     tagline: 'Custom name plates, crafted to order in India 🇮🇳',
   },
   pages: {},
 };
 
 const DEFAULT_SETTINGS = {
-  storeName: 'OWM NameCraft Ecom',
+  storeName: 'Daxon',
   logoUrl: '',
   supportEmail: 'support@namecraft.local',
   supportPhone: '',

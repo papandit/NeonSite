@@ -65,6 +65,20 @@ const PRODUCTS = [
 async function run() {
   await connectDB();
 
+  // This seed is DESTRUCTIVE: it wipes the catalogue and rebuilds it from the
+  // placeholder list above (picsum photos, invented products). That is fine on
+  // a fresh machine and disastrous on a store with real products, so it only
+  // runs when you ask for it explicitly.
+  if (process.env.SEED_DEMO !== '1') {
+    const products = await Product.countDocuments();
+    console.log(
+      `Refusing to run: this wipes the catalogue (${products} products) and replaces it with demo data.\n` +
+      'Set SEED_DEMO=1 to confirm you want that.',
+    );
+    await disconnectDB();
+    process.exit(0);
+  }
+
   console.log('🧹  Clearing catalog collections…');
   await Promise.all([
     Category.deleteMany({}), SubCategory.deleteMany({}), Product.deleteMany({}), Coupon.deleteMany({}), Banner.deleteMany({}),

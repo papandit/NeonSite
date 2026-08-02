@@ -7,6 +7,8 @@ import { sendSuccess } from '../utils/apiResponse.js';
 import ApiError from '../utils/ApiError.js';
 import Review from '../models/Review.js';
 import Product from '../models/Product.js';
+import { persistAsset } from '../services/assets/assetStore.js';
+import { REVIEW_MEDIA_MAX, reviewMediaLimit } from '../middleware/upload.js';
 
 // POST /api/reviews  (auth)  { productId, rating, title, comment }
 export const createReview = asyncHandler(async (req, res) => {
@@ -18,23 +20,62 @@ export const createReview = asyncHandler(async (req, res) => {
   const product = await Product.findById(productId).select('_id');
   if (!product) throw ApiError.notFound('Product not found');
 
-  try {
-    const review = await Review.create({
-      product: productId,
-      user: req.user.id,
-      userNameSnapshot: req.user.name,
-      rating: r,
-      title,
-      comment,
-      status: 'approved', // visible immediately; admin can still moderate/remove
+  // Attachments are uploaded first (POST /api/reviews/media) and referenced
+  // here by their asset URL, so a slow upload never holds the review open and
+  // a failed submit doesn't lose the files.
+  const media = Array.isArray(req.body?.media) ? req.body.media : [];
+  if (media.length > REVIEW_MEDIA_MAX) throw ApiError.badRequest(`Up to ${REVIEW_MEDIA_MAX} attachments`);
+  const cleanMedia = media
+    .filter((m) => m && (m.type === 'image' || m.type === 'video'))
+    // Only our own asset URLs — never let a review embed a third-party host.
+    .filter((m) => typeof m.url === 'string' && /^\/api\/assets\/[a-f0-9]{24}$/i.test(m.url))
+    .slice(0, REVIEW_MEDIA_MAX)
+    .map((m) => ({ type: m.type, url: m.url, bytes: Number(m.bytes) || 0 }));
+
+  const review = await Review.create({
+    product: productId,
+    user: req.user.id,
+    userNameSnapshot: req.user.name,
+    rating: r,
+    title,
+    comment,
+    media: cleanMedia,
+    status: 'approved', // visible immediately; admin can still moderate/remove
+  });
+  // Reflect the new review in the product's rating and count right away.
+  await Review.recomputeProductRating(productId);
+  return sendSuccess(res, review, 201);
+});
+
+// POST /api/reviews/media  (auth, rate limited) — multipart "files"
+// Stores each attachment through the normal asset pipeline and returns the
+// descriptors the client then posts with the review.
+export const uploadReviewFiles = asyncHandler(async (req, res) => {
+  const files = req.files || [];
+  if (!files.length) throw ApiError.badRequest('No files uploaded');
+
+  const saved = [];
+  for (const file of files) {
+    const limit = reviewMediaLimit(file.mimetype);
+    if (!limit) throw ApiError.badRequest(`Unsupported file type: ${file.mimetype}`);
+    // Multer enforces the larger video ceiling for every file, so the image
+    // limit has to be checked here, now that we know what this one is.
+    if (file.size > limit.max) {
+      throw ApiError.badRequest(
+        `${limit.kind === 'video' ? 'Videos' : 'Photos'} must be under ${Math.round(limit.max / (1024 * 1024))}MB`,
+        { code: 'FILE_TOO_LARGE' },
+      );
+    }
+    const asset = await persistAsset(file.buffer, {
+      kind: 'image', // storage kind; contentType is what decides how it serves
+      folder: 'reviews',
+      contentType: file.mimetype,
+      filename: file.originalname || '',
     });
-    // Reflect the new review in the product's average rating right away.
-    await Review.recomputeProductRating(productId);
-    return sendSuccess(res, review, 201);
-  } catch (err) {
-    if (err.code === 11000) throw ApiError.conflict('You have already reviewed this product');
-    throw err;
+    saved.push({ type: limit.kind, url: asset.url, bytes: asset.bytes });
   }
+
+  return sendSuccess(res, saved, 201);
 });
 
 // GET /api/products/:slug/reviews  (public — approved only)
@@ -43,7 +84,7 @@ export const listProductReviews = asyncHandler(async (req, res) => {
   if (!product) throw ApiError.notFound('Product not found');
   const reviews = await Review.find({ product: product._id, status: 'approved' })
     .sort('-createdAt')
-    .select('rating title comment userNameSnapshot createdAt')
+    .select('rating title comment media userNameSnapshot createdAt')
     .lean();
   return sendSuccess(res, reviews);
 });

@@ -48,3 +48,14 @@ export function getProductReviews(slug) {
 export function createReview(payload) {
   return api.post('/reviews', payload).then((r) => r.data.data);
 }
+
+// Attachments upload first and come back as { type, url, bytes } descriptors,
+// which are then posted with the review. Content-Type is left undefined so the
+// browser sets the multipart boundary itself.
+export function uploadReviewMedia(files) {
+  const form = new FormData();
+  [...files].forEach((f) => form.append('files', f));
+  return api
+    .post('/reviews/media', form, { headers: { 'Content-Type': undefined } })
+    .then((r) => r.data.data);
+}
