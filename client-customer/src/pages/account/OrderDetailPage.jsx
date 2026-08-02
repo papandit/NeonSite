@@ -3,6 +3,7 @@ import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { ordersApi } from '../../services/commerce';
 import { api } from '../../services/api';
 import { formatPaise } from '../../utils/money';
+import OrderConfirmed from '../../components/OrderConfirmed';
 
 const PIPELINE = ['confirmed', 'design_review', 'approved', 'manufacturing', 'packed', 'shipped', 'delivered'];
 const LABEL = {
@@ -33,6 +34,24 @@ function StatusStepper({ statusHistory }) {
       })}
     </ol>
   );
+}
+
+// The celebration rail is four coarse stages; the order's real pipeline is
+// seven. Map one onto the other so the banner never claims more progress than
+// the order has actually made.
+const CONFIRM_STAGES = {
+  confirmed: 0, design_review: 0, approved: 0,
+  manufacturing: 1, packed: 1,
+  shipped: 2,
+  delivered: 3,
+};
+const confirmStage = (history = []) => CONFIRM_STAGES[history[history.length - 1]?.status] ?? 0;
+
+// Made to order: roughly ten days out. Shown as a hint, not a promise.
+function estimatedArrival(placedAt) {
+  const d = new Date(placedAt || Date.now());
+  d.setDate(d.getDate() + 10);
+  return d.toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
 // Everything the customer chose, per product kind (name plate / neon / simple).
@@ -118,10 +137,15 @@ export default function OrderDetailPage() {
   return (
     <div className="space-y-6">
       {isNew && (
-        <div className="rounded-xl border border-green-200 bg-green-50 p-4">
-          <p className="font-semibold text-green-800">🎉 Order placed successfully!</p>
-          <p className="mt-1 text-sm text-green-700">Your payment was verified and your order is confirmed.</p>
-        </div>
+        <OrderConfirmed
+          orderNumber={order.orderNumber}
+          // First name only — "Thanks, Mira" reads better than the full name.
+          name={(order.address?.name || '').trim().split(' ')[0]}
+          arrives={estimatedArrival(order.createdAt)}
+          stageIndex={confirmStage(order.statusHistory)}
+          onTrack={() => document.getElementById('order-progress')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+          onReceipt={downloadInvoice}
+        />
       )}
 
       <div className="flex items-center justify-between">
@@ -132,7 +156,7 @@ export default function OrderDetailPage() {
         <Link to="/account/orders" className="text-sm text-indigo-600 hover:underline">All orders</Link>
       </div>
 
-      <div className="rounded-xl border border-gray-200 bg-white p-5">
+      <div id="order-progress" className="scroll-mt-24 rounded-xl border border-gray-200 bg-white p-5">
         <h3 className="mb-3 text-sm font-semibold text-gray-700">Status</h3>
         <StatusStepper statusHistory={order.statusHistory} />
       </div>
