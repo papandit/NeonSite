@@ -1,11 +1,12 @@
 @import 'tailwindcss';
 
 /* ============================================================================
-   Nukkad Tales — warm editorial theme (admin).
-   Tailwind's default scales are remapped to the brand palette so every existing
-   component reskins at once: indigo -> saffron orange, gray/slate -> warm
-   parchment/cocoa neutrals (slate-900 = the deep cocoa sidebar), red -> warm
-   error, cool accents -> warm tints.
+   Daxon admin — matches the storefront palette exactly, so the console and the
+   shop read as one product. Tailwind's default scales are remapped to the brand
+   so every existing component reskins at once: indigo -> brand green, gray and
+   slate -> sage neutrals (slate-900 = the deep forest sidebar), red -> warm
+   error, cool accents -> green tints. Keep this ramp in sync with
+   client-customer/src/index.css.
    ========================================================================== */
 @theme {
   --font-sans: 'Nunito', ui-sans-serif, system-ui, sans-serif;
@@ -16,48 +17,48 @@
   --radius-lg: 16px;
   --radius-xl: 24px;
 
-  --color-primary: #d4541f;
-  --color-secondary: #6f5b46;
-  --color-tertiary: #3a2b1d;
-  --color-parchment: #f4ece1;
-  --color-sand: #e9ddca;
-  --color-muted: #bca58a;
+  --color-primary: #589c80;
+  --color-secondary: #536b5b;
+  --color-tertiary: #24322a;
+  --color-parchment: #eff5f1;
+  --color-sand: #dae5de;
+  --color-muted: #9ab0a2;
 
-  /* indigo -> saffron orange */
-  --color-indigo-50: #fdefe8;
-  --color-indigo-100: #f9d9c9;
-  --color-indigo-200: #f2b99e;
-  --color-indigo-300: #e9946b;
-  --color-indigo-400: #e07645;
-  --color-indigo-500: #d96a38;
-  --color-indigo-600: #d4541f;
-  --color-indigo-700: #c84b18;
-  --color-indigo-800: #9b3813;
-  --color-indigo-900: #7c2f12;
+  /* indigo -> brand green, anchored at 600 */
+  --color-indigo-50: #eef7f3;
+  --color-indigo-100: #d8ece3;
+  --color-indigo-200: #b4d9c9;
+  --color-indigo-300: #8ec4ac;
+  --color-indigo-400: #6faf93;
+  --color-indigo-500: #61a487;
+  --color-indigo-600: #589c80;
+  --color-indigo-700: #487f68;
+  --color-indigo-800: #396552;
+  --color-indigo-900: #2d5041;
 
-  /* gray -> warm neutrals */
-  --color-gray-50: #f5eee3;
-  --color-gray-100: #efe6d8;
-  --color-gray-200: #e9ddca;
-  --color-gray-300: #dccdb4;
-  --color-gray-400: #bca58a;
-  --color-gray-500: #93805f;
-  --color-gray-600: #6f5b46;
-  --color-gray-700: #574430;
-  --color-gray-800: #43331f;
-  --color-gray-900: #3a2b1d;
+  /* gray -> sage neutrals */
+  --color-gray-50: #f2f6f3;
+  --color-gray-100: #e8efea;
+  --color-gray-200: #dae5de;
+  --color-gray-300: #c2d3c8;
+  --color-gray-400: #9ab0a2;
+  --color-gray-500: #6f8a78;
+  --color-gray-600: #536b5b;
+  --color-gray-700: #3f5346;
+  --color-gray-800: #2e3f35;
+  --color-gray-900: #24322a;
 
-  /* slate -> warm neutrals + deep cocoa sidebar */
-  --color-slate-50: #f6f0e6;
-  --color-slate-100: #f2eade;
-  --color-slate-200: #e9ddca;
-  --color-slate-300: #dccdb4;
-  --color-slate-400: #bca58a;
-  --color-slate-500: #93805f;
-  --color-slate-600: #6f5b46;
-  --color-slate-700: #4e3d2a;
-  --color-slate-800: #362819;
-  --color-slate-900: #241a0f;
+  /* slate -> sage neutrals + deep forest sidebar */
+  --color-slate-50: #f4f8f5;
+  --color-slate-100: #eaf1ec;
+  --color-slate-200: #dae5de;
+  --color-slate-300: #c2d3c8;
+  --color-slate-400: #9ab0a2;
+  --color-slate-500: #6f8a78;
+  --color-slate-600: #536b5b;
+  --color-slate-700: #38493d;
+  --color-slate-800: #26332a;
+  --color-slate-900: #17211a;
 
   /* red -> warm error */
   --color-red-50: #fbebe7;
@@ -66,20 +67,26 @@
   --color-red-600: #c94a3a;
   --color-red-700: #b23e30;
 
-  /* neutralize cool accents */
-  --color-blue-50: #efe7da;
-  --color-blue-700: #6f5b46;
-  --color-sky-50: #efe7da;
-  --color-sky-700: #6f5b46;
-  --color-cyan-50: #ecebd9;
-  --color-cyan-700: #5e5a3e;
-  --color-teal-50: #e7ecdd;
-  --color-teal-700: #556149;
-  --color-purple-50: #f1e7de;
-  --color-purple-700: #7a5844;
-  --color-green-50: #eaf0df;
-  --color-green-600: #5f7a3a;
-  --color-green-700: #4f6631;
+  /* cool accents pulled into the green family */
+  --color-blue-50: #e8f1ec;
+  --color-blue-700: #446554;
+  --color-sky-50: #e8f1ec;
+  --color-sky-700: #446554;
+  --color-cyan-50: #e4f0ea;
+  --color-cyan-700: #3f6354;
+  --color-teal-50: #e3f0e8;
+  --color-teal-700: #3d6b55;
+  --color-purple-50: #eaf0ea;
+  --color-purple-700: #55684f;
+  /* success stays distinct from the brand green so "saved" still reads */
+  --color-green-50: #e7f6ec;
+  --color-green-600: #2f8f4e;
+  --color-green-700: #256f3d;
+  /* discount / savings chips, same gold as the storefront */
+  --color-gold-100: #fdf0cd;
+  --color-gold-400: #e8bf4d;
+  --color-gold-500: #d9a520;
+  --color-gold-700: #96700d;
 }
 
 @layer base {
@@ -93,8 +100,8 @@
     text-rendering: optimizeLegibility;
   }
   body {
-    background-color: #f4ece1;
-    color: #3a2b1d;
+    background-color: #eff5f1;
+    color: #24322a;
     font-family: var(--font-sans);
     letter-spacing: 0.2px;
   }
@@ -102,7 +109,7 @@
     font-family: var(--font-display);
     font-weight: 500;
     letter-spacing: -0.01em;
-    color: #3a2b1d;
+    color: #24322a;
     font-feature-settings: 'kern' 1;
   }
 }
@@ -110,7 +117,7 @@
 /* Thin, subtle scrollbar for the admin sidebar nav */
 .nav-scroll {
   scrollbar-width: thin;
-  scrollbar-color: #4e3d2a transparent;
+  scrollbar-color: #38493d transparent;
 }
 .nav-scroll::-webkit-scrollbar {
   width: 5px;
@@ -119,9 +126,9 @@
   background: transparent;
 }
 .nav-scroll::-webkit-scrollbar-thumb {
-  background: #4e3d2a;
+  background: #38493d;
   border-radius: 9999px;
 }
 .nav-scroll::-webkit-scrollbar-thumb:hover {
-  background: #6f5b46;
+  background: #536b5b;
 }

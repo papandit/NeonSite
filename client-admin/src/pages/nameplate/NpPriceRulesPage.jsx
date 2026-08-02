@@ -44,7 +44,7 @@ export default function NpPriceRulesPage() {
   );
 
   return (
-    <div className="max-w-2xl">
+    <div className="w-full">
       <PageHeader title="Name Plate · Price Rules" subtitle="How the final price is computed from characters and premium options." />
       {error && <div className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}
       {saved && <div className="mb-4 rounded-md bg-green-50 px-3 py-2 text-sm text-green-700">Price rules saved.</div>}

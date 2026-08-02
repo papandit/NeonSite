@@ -11,6 +11,7 @@ import { settingsApi } from '../services/ops';
 import { apiErrorMessage } from '../services/api';
 import { toast } from '../lib/toast';
 import { Card, Field, LightStory, ListSection, NL } from './contentBits';
+import { Badge, InfoTip, TabPanel, Tabs } from './ui';
 import FileUpload from './FileUpload';
 
 const EMPTY = {
@@ -28,6 +29,7 @@ export default function NeonContentEditor() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [dirty, setDirty] = useState(false);
+  const [tab, setTab] = useState('neon');
 
   useEffect(() => {
     settingsApi.get()
@@ -88,47 +90,71 @@ export default function NeonContentEditor() {
 
       {error && <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}
 
-      <LightStory label="Neon Light" k="neonInfo" content={content} setNested={setNested} setDeep={setDeep} />
-      <LightStory label="FloRo Light" k="floroInfo" content={content} setNested={setNested} setDeep={setDeep} />
-
-      <Card
-        title="Expertly crafted band"
-        description="The coloured band at the end of the page. Shown for both light types. Leave a blank line between paragraphs."
-      >
-        <Field label="Heading" value={content.crafted?.heading} onChange={(v) => setNested('crafted', 'heading', v)} />
-        <Field label="Body" value={content.crafted?.body} textarea onChange={(v) => setNested('crafted', 'body', v)} />
-        <div>
-          <span className="mb-2 block text-xs font-medium text-slate-500">
-            Collage photos — four tilted tiles. Upload or paste a URL; empty slots are skipped.
-          </span>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {CRAFT_SLOTS.map((slot, i) => (
-              <FileUpload
-                key={slot}
-                kind="image"
-                folder="crafted"
-                label={slot}
-                value={content.crafted?.images?.[i] || ''}
-                onChange={(url) => setCraftImage(i, url)}
-              />
-            ))}
-          </div>
-        </div>
-      </Card>
-
-      <ListSection
-        title="Assurance strip"
-        description={`The four badges under the crafted band.${NL}Icon must be one of: delivery, guarantee, handcrafted, rated.`}
-        items={content.assurance}
-        onChange={(v) => set('assurance', v)}
-        makeEmpty={() => ({ icon: 'guarantee', title: '', desc: '' })}
-        addLabel="Add badge"
-        fields={[
-          { key: 'title', label: 'Title' },
-          { key: 'icon', label: 'Icon (delivery / guarantee / handcrafted / rated)' },
-          { key: 'desc', label: 'Subtitle', width: 'full' },
+      <Tabs
+        value={tab}
+        onValueChange={setTab}
+        items={[
+          { value: 'neon', label: 'Neon Light' },
+          { value: 'floro', label: 'FloRo Light' },
+          { value: 'crafted', label: 'Crafted band' },
+          { value: 'assurance', label: 'Assurance', badge: (content.assurance || []).length },
         ]}
-      />
+      >
+        <TabPanel value="neon">
+          <LightStory label="Neon Light" k="neonInfo" content={content} setNested={setNested} setDeep={setDeep} />
+        </TabPanel>
+
+        <TabPanel value="floro">
+          <LightStory label="FloRo Light" k="floroInfo" content={content} setNested={setNested} setDeep={setDeep} />
+        </TabPanel>
+
+        <TabPanel value="crafted">
+          <Card
+            title={<>Expertly crafted band <Badge tone="brand">both light types</Badge></>}
+            description="The coloured band at the end of the page. Leave a blank line between paragraphs."
+          >
+            <Field label="Heading" value={content.crafted?.heading} onChange={(v) => setNested('crafted', 'heading', v)} />
+            <Field label="Body" value={content.crafted?.body} textarea onChange={(v) => setNested('crafted', 'body', v)} />
+            <div>
+              <span className="mb-2 flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                Collage photos
+                <InfoTip>
+                  Four tilted tiles arranged in a cross. Leave a slot empty to skip it — the
+                  remaining photos keep their positions.
+                </InfoTip>
+              </span>
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                {CRAFT_SLOTS.map((slot, i) => (
+                  <FileUpload
+                    key={slot}
+                    kind="image"
+                    folder="crafted"
+                    label={slot}
+                    value={content.crafted?.images?.[i] || ''}
+                    onChange={(url) => setCraftImage(i, url)}
+                  />
+                ))}
+              </div>
+            </div>
+          </Card>
+        </TabPanel>
+
+        <TabPanel value="assurance">
+          <ListSection
+            title="Assurance strip"
+            description={`The four badges under the crafted band.${NL}Icon must be one of: delivery, guarantee, handcrafted, rated.`}
+            items={content.assurance}
+            onChange={(v) => set('assurance', v)}
+            makeEmpty={() => ({ icon: 'guarantee', title: '', desc: '' })}
+            addLabel="Add badge"
+            fields={[
+              { key: 'title', label: 'Title' },
+              { key: 'icon', label: 'Icon (delivery / guarantee / handcrafted / rated)' },
+              { key: 'desc', label: 'Subtitle', width: 'full' },
+            ]}
+          />
+        </TabPanel>
+      </Tabs>
     </div>
   );
 }

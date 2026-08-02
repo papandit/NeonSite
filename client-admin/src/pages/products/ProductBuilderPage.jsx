@@ -132,7 +132,7 @@ export default function ProductBuilderPage() {
   if (loading) return <div className="text-slate-400">Loading…</div>;
 
   return (
-    <div className="max-w-3xl">
+    <div className="w-full">
       <PageHeader
         title={isEdit ? 'Edit product' : 'New product'}
         subtitle="A simple store product. For customizable products use the Name Plate Studio."

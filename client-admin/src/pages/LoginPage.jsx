@@ -67,7 +67,7 @@ export default function LoginPage() {
       {/* Brand panel */}
       <div className="relative hidden overflow-hidden bg-slate-900 p-12 text-white lg:flex lg:flex-col lg:justify-between">
         <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-indigo-600/25 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-32 -left-16 h-80 w-80 rounded-full bg-amber-500/15 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-32 -left-16 h-80 w-80 rounded-full bg-emerald-400/12 blur-3xl" />
 
         <div className="relative flex items-center gap-3">
           <img src="/daxon-logo.svg" alt="Daxon" className="h-10 w-auto rounded-md bg-white/95 object-contain px-2 py-1 shadow-lg" />

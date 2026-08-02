@@ -50,3 +50,6 @@ Religion Symbols.html
 
 # Drive download archives (the extracted folders are committed instead)
 drive-download-*.zip
+
+# local asset backups (large binaries)
+backups/

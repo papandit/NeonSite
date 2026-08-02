@@ -7,7 +7,7 @@ import NeonContentEditor from '../components/NeonContentEditor';
 
 export default function NeonConfigPage() {
   return (
-    <div className="max-w-4xl">
+    <div className="w-full">
       <PageHeader
         title="Neon Configuration"
         subtitle="Product story, photos and badges shown under the neon customizer — for both Neon Light and FloRo Light."

@@ -22,6 +22,7 @@ import ReviewsPage from './pages/ReviewsPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import NeonPage from './pages/NeonPage';
 import NeonConfigPage from './pages/NeonConfigPage';
+import { TooltipProvider } from './components/ui';
 import NpDashboardPage from './pages/nameplate/NpDashboardPage';
 import NpCrudPage from './pages/nameplate/NpCrudPage';
 import NpTemplatesPage from './pages/nameplate/NpTemplatesPage';
@@ -39,6 +40,7 @@ export default function App() {
   }, []);
 
   return (
+    <TooltipProvider>
     <>
       <Toaster />
       <Routes>
@@ -83,5 +85,6 @@ export default function App() {
       </Route>
       </Routes>
     </>
+    </TooltipProvider>
   );
 }

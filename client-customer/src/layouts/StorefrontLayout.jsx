@@ -202,7 +202,10 @@ export default function StorefrontLayout() {
         )}
       </header>
 
-      <main className="flex-1">
+      {/* min-h keeps the footer below the fold on short pages: `flex-1` alone
+          only stretches main to the viewport, which parks the footer at the
+          bottom edge where it reads as part of the first screen. */}
+      <main className="min-h-[calc(100vh-4rem)] flex-1">
         <Outlet />
       </main>
 

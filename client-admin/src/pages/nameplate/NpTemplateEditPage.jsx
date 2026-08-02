@@ -146,7 +146,7 @@ export default function NpTemplateEditPage() {
   const cell = 'w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm';
 
   return (
-    <div className="max-w-4xl">
+    <div className="w-full">
       <PageHeader
         title={isEdit ? 'Edit template' : 'New template'}
         subtitle="Define the base plate, the dynamic fields customers fill, and which options they can use."

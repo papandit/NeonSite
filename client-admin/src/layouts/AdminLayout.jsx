@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logout, selectUser } from '../store/authSlice';
 import Icon from '../components/Icon';
 import { toast } from '../lib/toast';
+import { Tooltip } from '../components/ui';
 
 // Three separate verticals: plain E-commerce, Neon Studio, Name Plate Studio.
 const GROUPS = [
@@ -110,10 +111,14 @@ export default function AdminLayout() {
               {group.title && collapsed && gi > 0 && <div className="mx-2 mb-2 border-t border-slate-800" />}
               <div className="space-y-1">
                 {group.items.map((item) => (
-                  <NavLink key={item.to} to={item.to} end title={item.label} className={linkClass}>
-                    <Icon name={item.icon} className="h-5 w-5 shrink-0" />
-                    {!collapsed && <span className="truncate">{item.label}</span>}
-                  </NavLink>
+                  // Collapsed to an icon rail, the label is the only thing
+                  // telling you what a row does — so surface it on hover.
+                  <Tooltip key={item.to} label={collapsed ? item.label : ''} side="right">
+                    <NavLink to={item.to} end className={linkClass}>
+                      <Icon name={item.icon} className="h-5 w-5 shrink-0" />
+                      {!collapsed && <span className="truncate">{item.label}</span>}
+                    </NavLink>
+                  </Tooltip>
                 ))}
               </div>
             </div>

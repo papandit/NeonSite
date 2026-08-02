@@ -242,7 +242,7 @@ export default function NeonPage() {
   if (!cfg) return <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>;
 
   return (
-    <div className="max-w-4xl">
+    <div className="w-full">
       <PageHeader
         title="Neon Studio"
         subtitle="Manage the fonts, colours, sizes and backings customers use to build neon signs."
