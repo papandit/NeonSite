@@ -224,25 +224,25 @@ export default function ContentEditor() {
         ]}
       />
 
-      <Card title="Home — Instagram community" description="The reel strip near the bottom of the home page. Leave the tiles empty to hide the whole section.">
-        <Field label="Heading" value={content.instagram?.heading} placeholder="Join our community on Instagram" onChange={(v) => setNested('instagram', 'heading', v)} />
+      <Card title="Home — Customer videos" description="The clip carousel on the home page. Leave the tiles empty to hide the whole section.">
+        <Field label="Heading" value={content.instagram?.heading} placeholder="Happy customers" onChange={(v) => setNested('instagram', 'heading', v)} />
         <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Followers line" value={content.instagram?.followers} placeholder="197k followers" onChange={(v) => setNested('instagram', 'followers', v)} />
-          <Field label="Profile URL" value={content.instagram?.profileUrl} placeholder="https://instagram.com/yourhandle" onChange={(v) => setNested('instagram', 'profileUrl', v)} />
+          <Field label="Sub-line" value={content.instagram?.followers} placeholder="Real walls, real installs" onChange={(v) => setNested('instagram', 'followers', v)} />
+          <Field label="Instagram profile URL (adds a Follow button)" value={content.instagram?.profileUrl} placeholder="https://instagram.com/yourhandle" onChange={(v) => setNested('instagram', 'profileUrl', v)} />
         </div>
       </Card>
 
       <ListSection
-        title="Home — Instagram tiles"
-        description="Up to 15. Paste an Instagram reel URL and the real post plays in place — nothing to upload. Or upload your own clip instead, which autoplays muted (an Instagram embed cannot). Only filled tiles show, so a half-filled list never leaves gaps."
+        title="Home — Customer video tiles"
+        description="Up to 15 vertical clips, uploaded here so they autoplay muted on loop — an Instagram embed will not autoplay, so posts are linked rather than embedded. Only filled tiles show, so a half-filled list never leaves gaps."
         items={content.instagram?.items}
         onChange={(v) => setNested('instagram', 'items', v)}
         makeEmpty={() => ({ video: '', image: '', link: '', caption: '' })}
         addLabel="Add tile"
         fields={[
-          { key: 'link', label: 'Instagram reel URL — e.g. https://www.instagram.com/reel/ABC123/', width: 'full' },
-          { key: 'video', label: 'Or upload a clip instead (autoplays muted)', type: 'video', folder: 'instagram' },
-          { key: 'image', label: 'Or a photo — also used as an uploaded clip’s first frame', type: 'image', folder: 'instagram' },
+          { key: 'video', label: 'Customer video (autoplays muted on loop)', type: 'video', folder: 'instagram' },
+          { key: 'image', label: 'Poster image — shown before the clip loads, or on its own', type: 'image', folder: 'instagram' },
+          { key: 'link', label: 'Links to (optional) — e.g. the Instagram post', width: 'full' },
           { key: 'caption', label: 'Caption (optional)', width: 'full' },
         ]}
       />

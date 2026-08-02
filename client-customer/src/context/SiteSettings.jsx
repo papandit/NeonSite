@@ -233,9 +233,12 @@ export const DEFAULT_CONTENT = {
   // "Join our community on Instagram" — a strip of vertical clips/photos on the
   // home page. Up to 15 tiles; only the ones with media render, so a half-full
   // list never leaves gaps. `link` opens the reel.
+  // Customer videos on the home page. The key is still `instagram` because
+  // that is what is already stored in every Settings document; the section
+  // itself is admin-uploaded clips, since an Instagram embed cannot autoplay.
   instagram: {
-    heading: 'Join our community on Instagram',
-    followers: '',
+    heading: 'Happy customers',
+    followers: 'Real walls, real installs — filmed by the people who ordered them.',
     profileUrl: '',
     items: [],
   },

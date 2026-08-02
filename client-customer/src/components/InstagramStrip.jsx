@@ -1,15 +1,12 @@
-// "Join our community on Instagram" — a carousel of vertical reels on the home
-// page. Five are on screen at a time and the arrows page through the rest, up
-// to fifteen.
+// Customer videos — a carousel of vertical clips on the home page. Five are on
+// screen at a time and the arrows page through the rest, up to fifteen.
 //
-// A tile can be either of two things, and the admin only has to paste a link
-// for the common case:
-//
-//   * an Instagram reel URL — embedded straight from Instagram, so the real
-//     post plays in place, with its own controls. Instagram will not let an
-//     embed autoplay, so these show a poster and play on click.
-//   * an uploaded clip or photo — served from our own assets. A clip here
-//     autoplays muted on loop, which an embed cannot do.
+// The clips are uploaded by the admin and served from our own assets, so they
+// autoplay muted on loop. Embedding the Instagram posts themselves was the
+// obvious route and was tried, but Instagram does not permit an embed to
+// autoplay — every tile sat on a static poster waiting for a click, which is
+// not what a wall of moving clips is for. A tile may still carry an outbound
+// link to the original post.
 //
 // Only tiles that actually have media render, so an admin who fills in six of
 // the fifteen slots gets six tiles rather than six tiles and nine grey holes.
@@ -25,17 +22,8 @@ import { Link } from 'react-router-dom';
 
 const MAX_TILES = 15;
 
-// Instagram's embed endpoint takes the shortcode from a /reel/, /p/ or /tv/
-// permalink. Anything else is treated as an ordinary outbound link.
-const IG_PERMALINK = /instagram\.com\/(?:reel|reels|p|tv)\/([A-Za-z0-9_-]+)/i;
-const igEmbedUrl = (link = '') => {
-  const m = String(link).match(IG_PERMALINK);
-  return m ? `https://www.instagram.com/reel/${m[1]}/embed/` : null;
-};
-
 function Tile({ item }) {
   const ref = useRef(null);
-  const embed = !item.video && !item.image ? igEmbedUrl(item.link) : null;
   // Five across on desktop, stepping down on narrower screens. The basis is
   // computed from the gap so the fifth tile lands flush with the edge instead
   // of being clipped.
@@ -63,24 +51,6 @@ function Tile({ item }) {
     obs.observe(el);
     return () => obs.disconnect();
   }, [isVideo]);
-
-  if (embed) {
-    return (
-      <div className={`${shellBase} border border-gray-200 bg-white`}>
-        <iframe
-          src={embed}
-          title={item.caption || 'Instagram reel'}
-          loading="lazy"
-          // Instagram's embed handles its own playback controls; we only give
-          // it the room and let it scroll internally if the caption is long.
-          allow="autoplay; encrypted-media; picture-in-picture"
-          allowFullScreen
-          scrolling="no"
-          className="h-full w-full border-0"
-        />
-      </div>
-    );
-  }
 
   const inner = isVideo ? (
     <video
@@ -134,9 +104,7 @@ export default function InstagramStrip({ data }) {
   const scrollerRef = useRef(null);
   // A tile with neither a clip nor a photo is a half-filled row in the
   // editor, not something to render as a grey hole.
-  const items = (data?.items || [])
-    .filter((i) => i?.video || i?.image || igEmbedUrl(i?.link))
-    .slice(0, MAX_TILES);
+  const items = (data?.items || []).filter((i) => i?.video || i?.image).slice(0, MAX_TILES);
   if (!items.length) return null;
 
   // Page by roughly one screenful, so a click advances the row rather than
@@ -150,10 +118,10 @@ export default function InstagramStrip({ data }) {
     <section className="bg-white px-4 py-14">
       <div className="mx-auto max-w-6xl">
         <h2 className="text-center font-display text-2xl font-medium sm:text-3xl">
-          {data.heading || 'Join our community on Instagram'}
+          {data.heading || 'Happy customers'}
         </h2>
         {data.followers && (
-          <p className="mt-2 text-center text-sm text-gray-500">
+          <p className="mx-auto mt-2 max-w-xl text-center text-sm text-gray-500">
             {data.profileUrl ? (
               <a href={data.profileUrl} target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 hover:underline">
                 {data.followers}
