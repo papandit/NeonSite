@@ -151,13 +151,17 @@ export function LightStory({ label, k, content, setNested, setDeep }) {
 
       <ListSection
         title={`${label} — Reviews`}
+        description="Shown as a masonry wall, same as the product pages. Photo and rating are optional."
         items={content[k]?.reviews}
         onChange={(v) => setNested(k, 'reviews', v)}
-        makeEmpty={() => ({ name: '', quote: '' })}
+        makeEmpty={() => ({ name: '', quote: '', rating: 5, date: '', image: '' })}
         addLabel="Add review"
         fields={[
           { key: 'name', label: 'Name' },
-          { key: 'quote', label: 'Quote', width: 'full', textarea: true },
+          { key: 'rating', label: 'Rating (1-5)' },
+          { key: 'date', label: 'Date shown (optional, e.g. Jul 2026)' },
+          { key: 'image', label: 'Photo (optional)', type: 'image', folder: 'reviews' },
+          { key: 'quote', label: 'Review', width: 'full', textarea: true },
         ]}
       />
 

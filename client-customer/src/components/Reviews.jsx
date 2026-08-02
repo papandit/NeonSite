@@ -6,6 +6,7 @@ import { getProductReviews, createReview, deleteReview, uploadReviewMedia } from
 import { selectIsAuthenticated } from '../store/authSlice';
 import { apiErrorMessage } from '../services/api';
 import Rating from './Rating';
+import ReviewWall from './ReviewWall';
 
 // Interactive, animated 5-star input.
 function StarInput({ value, onChange }) {
@@ -179,71 +180,27 @@ export default function Reviews({ productId, slug }) {
         </div>
       )}
 
-      <div className="mt-4 space-y-4">
+      <div className="mt-4">
         {loading ? (
           <p className="text-sm text-gray-400">Loading reviews…</p>
         ) : reviews.length === 0 ? (
           <p className="text-sm text-gray-500">No reviews yet. Be the first to review this product.</p>
         ) : (
-          shown.map((r) => (
-            <motion.div
-              key={r._id}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35 }}
-              className="rounded-xl border border-gray-200 bg-white p-4"
-            >
-              <div className="flex items-start gap-3">
-                <Avatar name={r.userNameSnapshot} />
-                <div className="flex-1">
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="font-medium text-gray-900">
-                      {r.userNameSnapshot || 'Customer'}
-                      {r.mine && <span className="ml-2 rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700">You</span>}
-                    </span>
-                    <span className="flex shrink-0 items-center gap-3">
-                      <span className="text-xs text-gray-400">{new Date(r.createdAt).toLocaleDateString()}</span>
-                      {r.mine && (
-                        <button
-                          type="button"
-                          onClick={() => remove(r._id)}
-                          disabled={removingId === r._id}
-                          className="text-xs font-medium text-red-600 transition hover:underline disabled:opacity-50"
-                        >
-                          {removingId === r._id ? 'Removing…' : 'Remove'}
-                        </button>
-                      )}
-                    </span>
-                  </div>
-                  <div className="mt-0.5"><Rating value={r.rating} /></div>
-                  {r.title && <div className="mt-1 font-medium text-gray-900">{r.title}</div>}
-                  {r.comment && <p className="mt-1 text-sm text-gray-600">{r.comment}</p>}
-                  {(r.media || []).length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {r.media.map((m, i) => (m.type === 'video' ? (
-                        <video
-                          key={i}
-                          src={m.url}
-                          controls
-                          preload="metadata"
-                          className="h-28 w-40 rounded-lg border border-gray-200 bg-black object-cover"
-                        />
-                      ) : (
-                        <a key={i} href={m.url} target="_blank" rel="noopener noreferrer">
-                          <img
-                            src={m.url}
-                            alt=""
-                            loading="lazy"
-                            className="h-28 w-28 rounded-lg border border-gray-200 object-cover transition hover:opacity-90"
-                          />
-                        </a>
-                      )))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          ))
+          <ReviewWall
+            items={shown.map((r) => ({
+              id: r._id,
+              name: r.userNameSnapshot,
+              rating: r.rating,
+              // Old reviews still carry a title; fold it into the text so the
+              // card stays one block instead of growing a heading slot.
+              text: [r.title, r.comment].filter(Boolean).join('\n'),
+              media: r.media || [],
+              date: new Date(r.createdAt).toLocaleDateString(),
+              mine: r.mine,
+            }))}
+            onRemove={remove}
+            removingId={removingId}
+          />
         )}
       </div>
 

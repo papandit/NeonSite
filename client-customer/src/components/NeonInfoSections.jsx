@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import NeonBoxDiagram from './NeonBoxDiagram';
 import FloroBoxDiagram from './FloroBoxDiagram';
 import { AssuranceBar, CompareTable, CraftedSection } from './NeonCompare';
+import ReviewWall from './ReviewWall';
 
 const LIGHT_TYPES = [
   { key: 'neon', name: 'Neon Light', desc: 'Classic single-colour LED neon', dot: 'bg-pink-500' },
@@ -175,19 +176,19 @@ export default function NeonInfoSections({ info, compare, crafted, assurance, li
         {reviews.length > 0 && (
           <motion.section id="neon-reviews" variants={rise} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} className="scroll-mt-32">
             <Heading>Happy customers</Heading>
-            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {reviews.map((r, i) => (
-                <figure key={i} className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-                  <div className="text-amber-400" aria-label="5 out of 5">★★★★★</div>
-                  <blockquote className="mt-3 text-sm leading-relaxed text-slate-300">“{r.quote}”</blockquote>
-                  <figcaption className="mt-4 flex items-center gap-2 text-xs text-slate-400">
-                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-500/25 font-semibold text-indigo-200">
-                      {(r.name || '?').charAt(0).toUpperCase()}
-                    </span>
-                    {r.name}
-                  </figcaption>
-                </figure>
-              ))}
+            <div className="mt-6">
+              {/* Same wall as the product pages, on the dark palette. */}
+              <ReviewWall
+                dark
+                items={reviews.map((r, i) => ({
+                  id: i,
+                  name: r.name,
+                  rating: Number(r.rating) || 5,
+                  text: r.quote,
+                  media: r.image ? [{ type: 'image', url: r.image }] : [],
+                  date: r.date || '',
+                }))}
+              />
             </div>
           </motion.section>
         )}
