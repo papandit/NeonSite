@@ -149,12 +149,13 @@ export default function ContentEditor() {
         description="The 'What customers say' wall on the home page. Rating, date and photo are optional."
         items={content.testimonials}
         onChange={(v) => set('testimonials', v)}
-        makeEmpty={() => ({ name: '', quote: '', rating: 5, date: '', image: '' })}
+        makeEmpty={() => ({ name: '', quote: '', rating: 5, date: '', source: 'Google Review', image: '' })}
         addLabel="Add testimonial"
         fields={[
           { key: 'name', label: 'Name' },
           { key: 'rating', label: 'Rating (1-5)' },
           { key: 'date', label: 'Date shown (optional)' },
+          { key: 'source', label: 'Source badge (e.g. Google Review)' },
           { key: 'image', label: 'Photo (optional)', type: 'image', folder: 'testimonials' },
           { key: 'quote', label: 'Quote', width: 'full', textarea: true },
         ]}

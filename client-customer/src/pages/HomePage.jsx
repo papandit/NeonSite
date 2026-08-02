@@ -327,6 +327,7 @@ export default function HomePage() {
             text: t.quote,
             media: t.image ? [{ type: 'image', url: t.image }] : [],
             date: t.date || '',
+            source: t.source || '',
           }))}
         />
       </Section>
