@@ -102,7 +102,7 @@ export default function NameplateLivePreview() {
 
   const fieldShell = (active) =>
     `flex min-h-13 items-center rounded-xl border-[1.5px] bg-[#fbfdfc] px-4 transition ${
-      active ? 'border-indigo-600 shadow-[0_0_0_4px_rgba(88,156,128,0.14)]' : 'border-[#e0eae6]'
+      active ? 'border-indigo-600 shadow-[0_0_0_4px_rgba(0,175,153,0.14)]' : 'border-[#dcedea]'
     }`;
 
   return (
@@ -116,7 +116,7 @@ export default function NameplateLivePreview() {
         }
       `}</style>
 
-      <div className="np-anim mx-auto grid max-w-6xl overflow-hidden rounded-3xl border border-[#dde8e3] bg-white shadow-[0_30px_80px_-40px_rgba(24,52,43,0.6)] lg:grid-cols-[1.15fr_0.85fr]">
+      <div className="np-anim mx-auto grid max-w-6xl overflow-hidden rounded-3xl border border-[#d6ebe7] bg-white shadow-[0_30px_80px_-40px_rgba(24,52,43,0.6)] lg:grid-cols-[1.15fr_0.85fr]">
         {/* Plate */}
         <div
           className="relative grid place-items-center px-8 py-14 sm:px-14"
@@ -227,8 +227,8 @@ export default function NameplateLivePreview() {
                 onClick={() => setPreset(i)}
                 className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition ${
                   i === preset
-                    ? 'border-indigo-600 bg-indigo-50 text-[#2d5648]'
-                    : 'border-[#e0eae6] bg-white text-[#7a938a] hover:border-indigo-300'
+                    ? 'border-indigo-600 bg-indigo-50 text-[#00594f]'
+                    : 'border-[#dcedea] bg-white text-[#7a938a] hover:border-indigo-300'
                 }`}
               >
                 {p.surname}

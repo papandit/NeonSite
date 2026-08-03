@@ -1,11 +1,11 @@
-// The moment after checkout: a green tick that pops, draws itself, and throws
+// The moment after checkout: a tick that pops, draws itself, and throws
 // a burst of sparks, over a card that rises in and a progress rail that fills.
 //
 // Adapted from the Claude Design "Order Confirmed" comp. It ran as a standalone
 // page; here it is the banner at the top of a real order, so the copy, order
 // number, ETA and stage all come from the order rather than being fixed. The
-// comp's palette was already #589c80, so it needs no recolouring — it uses the
-// brand tokens directly.
+// comp shipped on the old brand green; it now uses the brand tokens, so it
+// follows the palette instead of pinning its own.
 //
 // Everything is CSS keyframes rather than JS animation: the whole thing runs on
 // the compositor, and one `prefers-reduced-motion` rule turns the lot off.
@@ -16,7 +16,7 @@ import { useMemo, useState } from 'react';
 // with a small offset so the burst doesn't line up with the card edges, and
 // distance varies per spark so it reads as a spray, not a wheel.
 function makeSparks(seed = 0) {
-  const tints = ['#589c80', '#8ecdb1', '#c9e6d8', '#589c80'];
+  const tints = ['#00af99', '#5cd6c6', '#bff2ea', '#00af99'];
   return Array.from({ length: 12 }, (_, i) => {
     const angle = (i / 12) * Math.PI * 2 + 0.3;
     const distance = 78 + ((i + seed) % 3) * 20;
@@ -81,9 +81,9 @@ export default function OrderConfirmed({ orderNumber, name, arrives, stageIndex 
         />
 
         <span
-          className="relative grid h-26 w-26 place-items-center rounded-full shadow-[0_14px_34px_-12px_rgba(88,156,128,0.85)]"
+          className="relative grid h-26 w-26 place-items-center rounded-full shadow-[0_14px_34px_-12px_rgba(0,175,153,0.85)]"
           style={{
-            background: 'linear-gradient(150deg, #6cb193, #589c80 55%, #46826a)',
+            background: 'linear-gradient(150deg, #2ec9b5, #00af99 55%, #00806f)',
             animation: 'ocRingPop .8s .15s cubic-bezier(.2,1.2,.3,1) both, ocFloat 4.5s 1s ease-in-out infinite',
           }}
         >
@@ -151,7 +151,7 @@ export default function OrderConfirmed({ orderNumber, name, arrives, stageIndex 
       <div className="oc-rise relative mt-6" style={{ animationDelay: '1.1s' }}>
         <div className="h-1 overflow-hidden rounded-full bg-[#e6eeea]">
           <div
-            className="h-full rounded-full bg-linear-to-r from-indigo-600 to-[#7cbfa2]"
+            className="h-full rounded-full bg-linear-to-r from-indigo-600 to-[#4fd6c4]"
             style={{
               width: `${((stageIndex + 1) / STAGES.length) * 100}%`,
               transformOrigin: 'left',
@@ -189,7 +189,7 @@ export default function OrderConfirmed({ orderNumber, name, arrives, stageIndex 
           {onReceipt && (
             <button
               onClick={onReceipt}
-              className="rounded-xl border border-[#dbe7e2] bg-white px-4 py-3.5 text-sm font-medium text-[#2d5648] transition hover:bg-[#f3f8f6] active:scale-[0.98]"
+              className="rounded-xl border border-[#d3e9e5] bg-white px-4 py-3.5 text-sm font-medium text-[#00594f] transition hover:bg-[#f0faf8] active:scale-[0.98]"
             >
               View receipt
             </button>
@@ -200,7 +200,7 @@ export default function OrderConfirmed({ orderNumber, name, arrives, stageIndex 
       <div className="relative mt-5 flex justify-center">
         <button
           onClick={() => setRunKey((k) => k + 1)}
-          className="inline-flex items-center gap-2 rounded-full border border-[#dde8e3] bg-white/70 px-4.5 py-2 font-mono text-[11px] uppercase tracking-[0.14em] text-[#4d7a6b] transition hover:bg-white hover:text-[#2d5648]"
+          className="inline-flex items-center gap-2 rounded-full border border-[#d6ebe7] bg-white/70 px-4.5 py-2 font-mono text-[11px] uppercase tracking-[0.14em] text-[#4d7a6b] transition hover:bg-white hover:text-[#00594f]"
         >
           Replay animation
         </button>

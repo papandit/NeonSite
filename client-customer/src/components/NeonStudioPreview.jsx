@@ -132,7 +132,7 @@ export default function NeonStudioPreview() {
         style={{ background: 'radial-gradient(90% 70% at 50% -10%, #16211d 0%, #0b0d0c 60%)' }}
       >
         <div className="flex flex-col gap-2 text-center" style={{ animation: 'nsRise .7s cubic-bezier(.2,.8,.25,1) both' }}>
-          <h2 className="m-0 font-display text-3xl font-semibold tracking-tight text-[#eaf5f0] [text-shadow:0_0_22px_rgba(88,156,128,0.6)] sm:text-4xl">
+          <h2 className="m-0 font-display text-3xl font-semibold tracking-tight text-[#eaf5f0] [text-shadow:0_0_22px_rgba(0,175,153,0.6)] sm:text-4xl">
             Neon Sign Studio
           </h2>
           <p className="m-0 text-sm text-[#7d9b8f]">
@@ -224,12 +224,12 @@ export default function NeonStudioPreview() {
           >
             <div className="flex flex-col gap-2.5">
               <div className="flex items-baseline justify-between">
-                <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#7fae97]">Your text</span>
+                <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#5cc4b2]">Your text</span>
                 <span className="font-mono text-[11px] text-[#55705f]">{MAX_CHARS - text.length} left</span>
               </div>
               <div
                 className={`min-h-18 rounded-xl border-[1.5px] bg-[#0c1210] px-4 py-3.5 transition ${
-                  typing ? 'border-indigo-600 shadow-[0_0_0_4px_rgba(88,156,128,0.13)]' : 'border-[#1e2a25]'
+                  typing ? 'border-indigo-600 shadow-[0_0_0_4px_rgba(0,175,153,0.13)]' : 'border-[#1e2a25]'
                 }`}
               >
                 <span className="font-mono text-[15px] text-[#dcece5]">{text}</span>
@@ -240,7 +240,7 @@ export default function NeonStudioPreview() {
             </div>
 
             <div className="flex flex-col gap-2.5">
-              <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#7fae97]">Font style</span>
+              <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#5cc4b2]">Font style</span>
               <div className="grid grid-cols-3 gap-2">
                 {FONTS.map((f, i) => (
                   <div
@@ -250,14 +250,14 @@ export default function NeonStudioPreview() {
                     }`}
                   >
                     <span className={`text-xl leading-none ${i === font ? 'text-[#eaf5f0]' : 'text-[#9ab5a9]'}`} style={{ fontFamily: f.family }}>Ag</span>
-                    <span className={`text-[10.5px] ${i === font ? 'text-[#a9d6c2]' : 'text-[#61806f]'}`}>{f.label}</span>
+                    <span className={`text-[10.5px] ${i === font ? 'text-[#8fe0d2]' : 'text-[#61806f]'}`}>{f.label}</span>
                   </div>
                 ))}
               </div>
             </div>
 
             <div className="flex flex-col gap-2.5">
-              <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#7fae97]">Colour</span>
+              <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#5cc4b2]">Colour</span>
               <div className="flex flex-wrap gap-2.5">
                 {COLOURS.map((c, i) => (
                   <span
@@ -274,7 +274,7 @@ export default function NeonStudioPreview() {
             </div>
 
             <div className="flex flex-col gap-2.5">
-              <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#7fae97]">Select size</span>
+              <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#5cc4b2]">Select size</span>
               <div className="grid grid-cols-3 gap-2">
                 {SIZES.map((z, i) => (
                   <div
@@ -285,7 +285,7 @@ export default function NeonStudioPreview() {
                   >
                     <span className={`text-[12.5px] font-medium ${i === size ? 'text-[#eaf5f0]' : 'text-[#9ab5a9]'}`}>{z.label}</span>
                     <span className="font-mono text-[10.5px] text-[#6b8a7c]">{z.dims}</span>
-                    <span className={`font-mono text-xs ${i === size ? 'text-[#7fd3b0]' : 'text-[#7d9b8f]'}`}>
+                    <span className={`font-mono text-xs ${i === size ? 'text-[#4fd6c4]' : 'text-[#7d9b8f]'}`}>
                       {formatPaise(z.basePaise)}+
                     </span>
                   </div>

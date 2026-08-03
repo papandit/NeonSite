@@ -230,7 +230,7 @@ export default function NeonPage() {
 
       <div className="mx-auto max-w-6xl px-4 pb-14 pt-10">
         <header className="mb-8 text-center">
-          <h1 className="font-display text-4xl font-semibold" style={{ color: '#e4fff2', textShadow: '0 0 6px #589c80,0 0 16px #589c80,0 0 34px #589c80' }}>
+          <h1 className="font-display text-4xl font-semibold" style={{ color: '#e4fff2', textShadow: '0 0 6px #00af99,0 0 16px #00af99,0 0 34px #00af99' }}>
             Neon Sign Studio
           </h1>
           <p className="mt-2 text-sm text-slate-400">Design a custom LED neon sign — live preview, size-based pricing, crafted to order.</p>
@@ -272,7 +272,7 @@ export default function NeonPage() {
                     fontFamily: fontObj?.cssFamily || 'cursive',
                     fontSize: `clamp(22px, 8vw, ${sizeObj?.fontSizePx || 46}px)`,
                     '--neon-fill': colorObj?.fill || '#fff',
-                    '--neon-glow': colorObj?.glow || '#589c80',
+                    '--neon-glow': colorObj?.glow || '#00af99',
                   }}
                 >
                   {lines.map((l, i) => <span key={i} className="neon-line">{l || ' '}</span>)}
@@ -441,7 +441,7 @@ export default function NeonPage() {
                 onClick={handleAdd}
                 disabled={adding}
                 className="mt-4 w-full rounded-xl px-6 py-3.5 font-display text-sm font-bold text-white transition hover:-translate-y-0.5 disabled:opacity-60"
-                style={{ background: 'linear-gradient(90deg,#589c80,#6fae93)', boxShadow: '0 8px 26px -8px rgba(88,156,128,.55)' }}
+                style={{ background: 'linear-gradient(90deg,#00af99,#6fae93)', boxShadow: '0 8px 26px -8px rgba(0,175,153,.55)' }}
               >
                 {adding ? 'Adding…' : `Add to cart · ${formatPaise(estPaise)}`}
               </button>
