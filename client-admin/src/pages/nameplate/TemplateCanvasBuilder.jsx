@@ -40,7 +40,7 @@ export default function TemplateCanvasBuilder({
     const fc = new fabric.Canvas(elRef.current, {
       selection: false,
       preserveObjectStacking: true,
-      backgroundColor: '#eef2f7',
+      backgroundColor: '#eff6f5',
       uniformScaling: true, // corner scaling stays proportional (font scales cleanly)
     });
     fcRef.current = fc;
@@ -122,8 +122,8 @@ export default function TemplateCanvasBuilder({
         textAlign: f.align || 'center',
         angle: f.rotation || 0,
         editable: true, // double-click to edit the text on the plate
-        borderColor: '#4f46e5',
-        cornerColor: '#4f46e5',
+        borderColor: '#00af99',
+        cornerColor: '#00af99',
         cornerStyle: 'circle',
         cornerSize: 10,
         transparentCorners: false,
@@ -183,7 +183,7 @@ export default function TemplateCanvasBuilder({
 
     const style = {
       left: bx, top: by, originX: 'center', originY: 'center',
-      borderColor: '#0ea5e9', cornerColor: '#0ea5e9', cornerStyle: 'circle',
+      borderColor: '#ffb003', cornerColor: '#ffb003', cornerStyle: 'circle',
       cornerSize: 10, transparentCorners: false,
     };
     const place = (obj) => {
@@ -204,9 +204,9 @@ export default function TemplateCanvasBuilder({
           img.clipPath = new fabric.Rect({ width: bw / s, height: bh / s, originX: 'center', originY: 'center' });
           place(img);
         })
-        .catch(() => place(new fabric.Rect({ width: bw, height: bh, fill: 'rgba(14,165,233,0.12)', stroke: '#0ea5e9', strokeDashArray: [6, 4], strokeWidth: 2 })));
+        .catch(() => place(new fabric.Rect({ width: bw, height: bh, fill: 'rgba(255,176,3,0.12)', stroke: '#ffb003', strokeDashArray: [6, 4], strokeWidth: 2 })));
     } else {
-      place(new fabric.Rect({ width: bw, height: bh, fill: 'rgba(14,165,233,0.12)', stroke: '#0ea5e9', strokeDashArray: [6, 4], strokeWidth: 2 }));
+      place(new fabric.Rect({ width: bw, height: bh, fill: 'rgba(255,176,3,0.12)', stroke: '#ffb003', strokeDashArray: [6, 4], strokeWidth: 2 }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bgSlot?.x, bgSlot?.y, bgSlot?.width, bgSlot?.height, bgPreviewUrl, H]);
@@ -237,8 +237,8 @@ export default function TemplateCanvasBuilder({
         originY: 'center',
         scaleX: s,
         scaleY: s,
-        borderColor: '#4f46e5',
-        cornerColor: '#4f46e5',
+        borderColor: '#00af99',
+        cornerColor: '#00af99',
         cornerStyle: 'circle',
         cornerSize: 10,
         transparentCorners: false,
@@ -254,7 +254,7 @@ export default function TemplateCanvasBuilder({
     // will sit. The symbol itself is picked on the storefront.
     place(new fabric.Rect({
       left: 0, top: 0, width: 100, height: 100, rx: 10, ry: 10,
-      fill: 'rgba(79,70,229,0.08)', stroke: '#4f46e5', strokeDashArray: [6, 4], strokeWidth: 2,
+      fill: 'rgba(79,70,229,0.08)', stroke: '#00af99', strokeDashArray: [6, 4], strokeWidth: 2,
     }), 100);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [symbol?.x, symbol?.y, symbol?.scale, H]);

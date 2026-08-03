@@ -21,15 +21,15 @@ const STATUS_STYLE = {
 
 // Donut colours per order status (falls back to slate).
 const STATUS_COLOR = {
-  confirmed: '#3b82f6',
-  design_review: '#f59e0b',
-  approved: '#6366f1',
-  manufacturing: '#a855f7',
-  packed: '#06b6d4',
-  shipped: '#14b8a6',
+  confirmed: '#4dd8c8',
+  design_review: '#ffb003',
+  approved: '#00af99',
+  manufacturing: '#009083',
+  packed: '#1ac6b3',
+  shipped: '#05b8a4',
   delivered: '#22c55e',
   cancelled: '#ef4444',
-  pending: '#94a3b8',
+  pending: '#97b3ae',
 };
 
 const QUICK_ACTIONS = [
@@ -113,7 +113,7 @@ export default function DashboardPage() {
   const salesSeries = (analytics?.salesByDay || []).map((d) => ({ label: d.date.slice(5), value: d.salesPaise }));
   const statusSegments = (analytics?.statusDistribution || [])
     .filter((s) => s.status)
-    .map((s) => ({ label: s.status.replace('_', ' '), value: s.count, color: STATUS_COLOR[s.status] || '#94a3b8' }));
+    .map((s) => ({ label: s.status.replace('_', ' '), value: s.count, color: STATUS_COLOR[s.status] || '#97b3ae' }));
   const topProducts = (analytics?.topProducts || []).map((p) => ({ label: p.name, value: p.revenuePaise, sub: `· ${p.qty} sold` }));
 
   return (

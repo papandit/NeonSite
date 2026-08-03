@@ -59,13 +59,18 @@ export default function NpDashboardPage() {
   return (
     <div>
       {/* Hero */}
-      <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-slate-900 via-slate-900 to-slate-800 p-7 text-white shadow-lg sm:p-9">
-        <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-indigo-600/25 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-28 left-1/4 h-72 w-72 rounded-full bg-amber-500/15 blur-3xl" />
+      <div
+        className="relative overflow-hidden rounded-3xl p-7 text-white shadow-xl sm:p-9"
+        // A flat near-black panel read as muddy; a deep teal gradient carries
+        // the brand and gives the stat cards something to sit on.
+        style={{ background: 'linear-gradient(135deg, #00584e 0%, #0b3f39 45%, #14211f 100%)' }}
+      >
+        <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-indigo-400/30 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-28 left-1/4 h-72 w-72 rounded-full bg-gold-500/15 blur-3xl" />
 
         <div className="relative flex flex-wrap items-start justify-between gap-4">
           <div>
-            <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-300">Name Plate Studio</div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gold-400">Name Plate Studio</div>
             <h1 className="mt-2 font-display text-3xl font-medium text-white! sm:text-4xl">Design studio overview</h1>
             <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/70">
               A fully dynamic, Canva-style name-plate designer — every template, field, font and price is admin-controlled.
@@ -73,7 +78,7 @@ export default function NpDashboardPage() {
           </div>
           <Link
             to="/nameplate/templates/new"
-            className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-slate-900! shadow-lg transition hover:-translate-y-0.5 hover:bg-slate-100"
+            className="rounded-full bg-gold-500 px-5 py-2.5 text-sm font-semibold text-slate-900! shadow-lg transition hover:-translate-y-0.5 hover:bg-gold-400"
           >
             + New template
           </Link>
@@ -81,8 +86,8 @@ export default function NpDashboardPage() {
 
         <div className="relative mt-7 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {HERO_STATS.map((s) => (
-            <div key={s.label} className="rounded-2xl border border-white/10 bg-white/8 p-4 backdrop-blur transition hover:bg-white/12">
-              <div className="flex items-center gap-2 text-white/60">
+            <div key={s.label} className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur transition hover:border-white/30 hover:bg-white/15">
+              <div className="flex items-center gap-2 text-white/70">
                 <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/10"><Icon name={s.icon} className="h-4 w-4" /></span>
                 <span className="text-xs font-medium">{s.label}</span>
               </div>

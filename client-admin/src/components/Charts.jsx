@@ -3,7 +3,7 @@
 // (money callers pass paise and format labels themselves via tooltips).
 
 // Smooth-ish area + line chart over a series of { label, value }.
-export function AreaChart({ data = [], height = 160, stroke = '#6366f1', fill = 'rgba(99,102,241,0.15)', formatValue = (v) => v }) {
+export function AreaChart({ data = [], height = 160, stroke = '#00af99', fill = 'rgba(0,175,153,0.15)', formatValue = (v) => v }) {
   const W = 640;
   const H = height;
   const pad = { top: 12, right: 8, bottom: 22, left: 8 };
@@ -92,7 +92,7 @@ export function Donut({ segments = [], size = 168, thickness = 22 }) {
 }
 
 // Horizontal bars over { label, value, sub? }.
-export function BarList({ items = [], color = '#6366f1', formatValue = (v) => v }) {
+export function BarList({ items = [], color = '#00af99', formatValue = (v) => v }) {
   const max = Math.max(1, ...items.map((i) => i.value));
   if (items.length === 0) return <p className="py-6 text-center text-sm text-slate-400">No data.</p>;
   return (
