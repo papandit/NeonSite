@@ -351,7 +351,7 @@ export default function ContentEditor() {
       <Group id="pages" label="Info pages">
       <ListSection
         title="Info pages"
-        description={`Footer 'Quick links' pages. Use a known slug (${KNOWN_PAGES.map((p) => p[0]).join(', ')}) to override a built-in page. Leave blank to keep the built-in default. Blank lines separate paragraphs in the body.`}
+        description={`Every footer 'Quick links' page, loaded with its live text — edit in place. Blank line = new paragraph; a line starting '## ' becomes a heading. Known slugs: ${KNOWN_PAGES.map((p) => p[0]).join(', ')}.`}
         items={pageList}
         onChange={(v) => { setPageList(v); setSaved(false); }}
         makeEmpty={() => ({ slug: '', title: '', intro: '', body: '' })}
@@ -360,7 +360,7 @@ export default function ContentEditor() {
           { key: 'slug', label: 'Slug (e.g. about-us)' },
           { key: 'title', label: 'Title' },
           { key: 'intro', label: 'Intro', width: 'full', textarea: true },
-          { key: 'body', label: 'Body (blank line = new paragraph)', width: 'full', textarea: true },
+          { key: 'body', label: "Body — blank line = paragraph, '## Heading' = section", width: 'full', textarea: true, rows: 14 },
         ]}
       />
 

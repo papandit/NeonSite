@@ -6,13 +6,13 @@ import FileUpload from './FileUpload';
 
 export const NL = String.fromCharCode(10); // newline - for the "one per line" fields
 
-export function Field({ label, value, onChange, textarea, placeholder }) {
+export function Field({ label, value, onChange, textarea, placeholder, rows = 3 }) {
   return (
     <label className="block">
       <span className="mb-1 block text-xs font-medium text-slate-500">{label}</span>
       {textarea ? (
         <textarea
-          rows={3}
+          rows={rows}
           value={value || ''}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
@@ -85,7 +85,7 @@ export function ListSection({ title, description, items, fields, onChange, makeE
                       onChange={(v) => setItem(i, f.key, v)}
                     />
                   ) : (
-                    <Field label={f.label} value={it[f.key]} textarea={f.textarea} onChange={(v) => setItem(i, f.key, v)} />
+                    <Field label={f.label} value={it[f.key]} textarea={f.textarea} rows={f.rows} onChange={(v) => setItem(i, f.key, v)} />
                   )}
                 </div>
               ))}

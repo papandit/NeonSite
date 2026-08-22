@@ -29,6 +29,11 @@ function maskedSettings(settings) {
     if (obj.integrations[grp]) obj.integrations[grp][key] = '';
   }
   obj.secretsSet = secretsSet;
+  // Merge the shipped defaults under whatever is stored, exactly as the public
+  // endpoint does. Without this the editor shows blanks for anything the admin
+  // has never saved — which for the info pages meant retyping a whole policy
+  // to change one line of it.
+  obj.content = mergeSiteContent(obj.content || {});
   return obj;
 }
 

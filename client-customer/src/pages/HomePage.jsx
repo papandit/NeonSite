@@ -199,7 +199,7 @@ export default function HomePage() {
             </button>
             <div
               ref={catScroll}
-              className="flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth px-2 pb-3 sm:px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              className="flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth px-2 pb-8 pt-6 sm:px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             >
               {categories.map((c) => {
                 const img = c.banner || catImage[String(c._id)];
@@ -213,7 +213,7 @@ export default function HomePage() {
                       {img ? (
                         <img src={img} alt={c.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-110" />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-indigo-100 via-white to-amber-100 font-display text-6xl text-indigo-500">
+                        <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-indigo-100 via-white to-gold-100 font-display text-6xl text-indigo-600">
                           {c.name?.charAt(0)}
                         </div>
                       )}

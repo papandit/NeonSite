@@ -257,7 +257,47 @@ export const DEFAULT_SITE_CONTENT = {
   // slug -> { title, intro, body }. `body` is plain text; blank lines separate
   // paragraphs. Empty by default — the customer InfoPage ships rich built-in
   // pages and only uses these when the admin fills one in.
-  pages: {},
+  // The footer's Quick Links pages. Kept here, not in the customer bundle,
+  // so the admin editor can load the live text and edit it — an editor that
+  // starts empty means retyping the whole policy to change one line.
+  // `body`: blank line = new paragraph, a line starting '## ' = a heading.
+  pages: {
+    "about-us": {
+      title: "About Us",
+      intro: "Daxon is a venture and brand under the mother company Dax Signs, founded in 2006. Daxon has over 20 years of experience in the manufacturing industry.",
+      body: "## Who we are\n\nWith a setup of 19 machines and 10,500 sq. ft of working space, we have built a strong reputation over the years for high-quality, customized and prefixed products of all kinds and sizes.\n\nDaxon is an e-commerce venture which intends to deliver creative and artistic home décor products. We offer high-quality, premium and affordable pieces of art in the form of neon signs, name plates and various other home decor products.\n\nOur professional and highly creative team designs, researches, explores and manufactures high-quality, affordable products to make your home and life more beautiful — bringing positive vibes, serenity and blissfulness to your doorstep.\n\n## Made in India\n\nAll our products are made in India by our own Indian craftsmen and artisans, with a great deal of love and passion. Your trust, love and support inspire us in creating these works of art at Daxon.\n\nWe look forward to making your online orders as easy as possible, and our team will ensure delivery right to your doorstep.\n\n## Our vision\n\nTo be a leading manufacturer of innovative and impactful artefacts that enhance our brand identity with exceptional design and quality.\n\n## Our mission\n\nTo deliver top-notch, tailor-made artefacts that exceed our clients’ expectations by combining cutting-edge technology, skilled craftsmanship and unparalleled customer service. We aim to empower businesses to stand out and leave a lasting impression with every product we create.\n\n## Clients served\n\nWe are proud to have served over 5,000 clients across a wide range of industries — from retail to corporate and hospitality — continuously building lasting partnerships through trust, quality and innovation.",
+    },
+    "about-product": {
+      title: "About Our Products",
+      intro: "Each NameCraft plate is a customizable, made-to-order product. You control every element — and we craft it to last.",
+      body: "## Materials\n\nWood (teak, oak, walnut, sheesham), brass, stainless steel, acrylic, LED-backlit acrylic and resin. Each material has its own character, finish and price.\n\n## What you can customize\n\nYour name and a subtitle, material, size (from compact to large), font, colour, background, border style, mount type (wall, stand or adhesive), and up to a couple of decorative icons.\n\nThe live editor shows a preview as you go; the final print file is regenerated at high resolution server-side for manufacturing.\n\n## Quality & care\n\nWeather-considered finishes for outdoor use, sturdy mounts, and hand-inspection before packing. Wipe with a soft, dry cloth to keep your plate looking its best.",
+    },
+    "privacy-policy": {
+      title: "Privacy Policy",
+      intro: "Your privacy matters. This policy explains what we collect, why, and the choices you have.",
+      body: "## Information we collect\n\nAccount details (name, email), order details (shipping address, phone), and your design choices. We collect only what is needed to create and deliver your order.\n\n## How we use it\n\nTo process and deliver orders, provide customer support, send order and status updates, and improve our products and service.\n\n## Payments\n\nPayments are processed securely by Razorpay. We do not see or store your full card, UPI or netbanking credentials on our servers.\n\n## Sharing\n\nWe share data only with service providers who help us operate (payment, shipping, email) and only as needed. We never sell your personal data.\n\n## Your rights\n\nYou may request access to, correction of, or deletion of your personal data by contacting support@namecraft.local.",
+    },
+    "refund-and-return-policy": {
+      title: "Refund and Return Policy",
+      intro: "Because every plate is personalised and made to order, our return policy is specific — please read it before ordering.",
+      body: "## Eligibility\n\nWe accept returns or replacements only for manufacturing defects or items damaged in transit. Personalised items cannot be returned for change of mind, spelling entered incorrectly, or colour perception on screen.\n\n## How to request\n\nContact us within 7 days of delivery at support@namecraft.local with your order number and clear photos of the issue.\n\n## Resolution\n\nApproved cases receive a free replacement or a full refund to the original payment method. Refunds are typically processed within 5–7 business days after approval.\n\n## Cancellations\n\nOrders can be cancelled before they enter the manufacturing stage. Once production begins, cancellation may not be possible as the item is unique to you.",
+    },
+    "shipping-and-delivery": {
+      title: "Shipping and Delivery",
+      intro: "Made-to-order, shipped with care and tracking across India.",
+      body: "## Processing time\n\nCustom plates are produced to order and usually ready to ship in 5–7 business days after your design is approved.\n\n## Shipping charges\n\nA flat shipping fee applies to most orders, and shipping is FREE on orders above ₹2000. The exact amount is shown at checkout.\n\n## Tracking & delivery\n\nEvery order ships with a tracking number. Delivery timelines vary by location, typically 2–6 days after dispatch.\n\n## Delays\n\nFestive seasons, remote pincodes or courier disruptions can occasionally add a day or two. We will keep you updated by email.",
+    },
+    "terms-of-service": {
+      title: "Terms of Service Agreement",
+      intro: "By using this website and placing an order, you agree to the following terms.",
+      body: "## Orders & approval\n\nThe design you approve at checkout is final for production. Please review your spelling, options and preview carefully before paying.\n\n## Pricing\n\nAll prices are in INR and computed server-side; the price shown at checkout is authoritative. We may update prices, options and availability at any time.\n\n## Intellectual property\n\nSite content, designs and branding belong to Daxon. You retain rights to the personal text you provide for your plate.\n\n## Liability\n\nWe are not liable for indirect or consequential losses. Our maximum liability for any order is limited to the amount paid for that order.\n\n## Governing law\n\nThese terms are governed by the laws of India, with jurisdiction in Gujarat.",
+    },
+    "contact-us": {
+      title: "Contact Us",
+      intro: "Questions about an order, a bulk enquiry, or a custom idea? We would love to help.",
+      body: "## Reach us\n\nEmail: support@namecraft.local\n\nPhone/WhatsApp: +91-00000-00000\n\nHours: Mon–Sat, 10:00–18:00 IST\n\n## Bulk & corporate\n\nPlanning name plates for an office, event or gifting? Email us with quantities and we will share custom pricing.\n\n## Response time\n\nWe usually reply within one business day.",
+    },
+  },
 };
 
 // Shallow-merge stored content over the defaults, deep-merging the singleton
@@ -300,6 +340,8 @@ export function mergeSiteContent(stored = {}) {
     promo: { ...d.promo, ...(s.promo || {}) },
     newsletter: { ...d.newsletter, ...(s.newsletter || {}) },
     footer: { ...d.footer, ...(s.footer || {}) },
-    pages: s.pages && typeof s.pages === 'object' ? s.pages : d.pages,
+    // Merged per slug, not wholesale: the editor sends only the pages it is
+    // holding, and a wholesale replace would drop every page it did not send.
+    pages: { ...d.pages, ...(s.pages && typeof s.pages === 'object' ? s.pages : {}) },
   };
 }

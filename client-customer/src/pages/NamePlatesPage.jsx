@@ -57,7 +57,7 @@ export default function NamePlatesPage() {
           <div
             ref={catScroll}
             onScroll={measure}
-            className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth py-3 sm:gap-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-1 pb-8 pt-6 sm:gap-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {[{ _id: '__all', name: 'All', slug: '' }, ...cats].map((c) => {
               const active = c.slug ? category === c.slug : !category;
@@ -73,7 +73,7 @@ export default function NamePlatesPage() {
                     {img ? (
                       <img src={img} alt={c.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-110" />
                     ) : (
-                      <span className={`flex h-full w-full items-center justify-center font-display text-4xl font-semibold sm:text-6xl ${active ? 'bg-linear-to-br from-indigo-500 to-orange-400 text-white' : 'bg-linear-to-br from-orange-50 via-white to-amber-50 text-indigo-500'}`}>
+                      <span className={`flex h-full w-full items-center justify-center font-display text-4xl font-semibold sm:text-6xl ${active ? 'bg-linear-to-br from-indigo-500 to-indigo-700 text-white' : 'bg-linear-to-br from-indigo-50 via-white to-gold-100 text-indigo-600'}`}>
                         {c.name === 'All' ? '✦' : c.name.charAt(0).toUpperCase()}
                       </span>
                     )}

@@ -102,7 +102,7 @@ export default function ProductAssurance({ highlights, shipping, category, relat
 
       {/* Story reel — gradient-ringed circles, scrolls sideways on small screens */}
       {reel.length > 0 && (
-        <div className="-mx-1 flex gap-4 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="-mx-1 flex gap-4 overflow-x-auto px-1 pb-2 pt-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {reel.map((h, i) => {
             const Wrapper = h.link ? Link : 'div';
             return (
