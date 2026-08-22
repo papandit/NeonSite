@@ -4,6 +4,7 @@ import { getCategories, getProducts } from '../services/catalog';
 import ProductGrid from '../components/ProductGrid';
 import Seo from '../components/Seo';
 import { useLiveCatalog } from '../hooks/useLiveCatalog';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 // Products arrive a batch at a time as you scroll, up to PER_PAGE. Past that
 // the list gets a real page break — endless scrolling makes the footer
@@ -119,6 +120,7 @@ export default function ProductsPage() {
         description="Browse and customize personalized name plates — wood, acrylic, brass and more."
         path="/products"
       />
+      <Breadcrumbs items={[{ label: 'Shop', to: '/products' }, ...(activeCategory ? [{ label: activeCategory.name }] : [])]} />
       <div className="mb-6">
         <h1 className="text-2xl font-bold">
           {activeCategory ? activeCategory.name : 'All products'}

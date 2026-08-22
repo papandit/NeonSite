@@ -1,24 +1,33 @@
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import Seo from '../components/Seo';
 import { useSiteSettings } from '../context/SiteSettings';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 // Full content for the footer Quick Links — each a proper, detailed page.
 const CONTENT = {
+  // Source: docs/DAXON - About Us.docx — the company's own copy.
   'about-us': {
     title: 'About Us',
     intro:
-      'Daxon is a made-to-order neon sign and name-plate studio. We blend old-world craftsmanship with a modern, live design experience so every piece that leaves our workshop is genuinely one of a kind.',
+      'Daxon is a venture and brand under the mother company Dax Signs, founded in 2006. Daxon has over 20 years of experience in the manufacturing industry.',
     sections: [
-      { heading: 'Our story', body: [
-        'What began as a small workshop crafting wooden door signs has grown into a full customization studio. We noticed customers wanted more than a name on a board — they wanted to see and shape the final piece before it was ever made.',
-        'So we built a live editor: choose your material, size, font, colour, background, border, mount and icons, and watch the price and preview update instantly. No surprises, no guesswork.',
+      { heading: 'Who we are', body: [
+        'With a setup of 19 machines and 10,500 sq. ft of working space, we have built a strong reputation over the years for high-quality, customized and prefixed products of all kinds and sizes.',
+        'Daxon is an e-commerce venture which intends to deliver creative and artistic home décor products. We offer high-quality, premium and affordable pieces of art in the form of neon signs, name plates and various other home decor products.',
+        'Our professional and highly creative team designs, researches, explores and manufactures high-quality, affordable products to make your home and life more beautiful — bringing positive vibes, serenity and blissfulness to your doorstep.',
       ] },
-      { heading: 'What we make', body: [
-        'Handcrafted name plates in wood, brass, stainless steel, acrylic, LED and resin — for homes, apartments, offices, cabins and gifting.',
-        'Every order is produced to your exact approved design and finished by hand before dispatch.',
+      { heading: 'Made in India', body: [
+        'All our products are made in India by our own Indian craftsmen and artisans, with a great deal of love and passion. Your trust, love and support inspire us in creating these works of art at Daxon.',
+        'We look forward to making your online orders as easy as possible, and our team will ensure delivery right to your doorstep.',
       ] },
-      { heading: 'Why customers choose us', body: [
-        'Live design preview, server-accurate pricing, a human design-review step before manufacturing, and pan-India delivery with tracking.',
+      { heading: 'Our vision', body: [
+        'To be a leading manufacturer of innovative and impactful artefacts that enhance our brand identity with exceptional design and quality.',
+      ] },
+      { heading: 'Our mission', body: [
+        'To deliver top-notch, tailor-made artefacts that exceed our clients’ expectations by combining cutting-edge technology, skilled craftsmanship and unparalleled customer service. We aim to empower businesses to stand out and leave a lasting impression with every product we create.',
+      ] },
+      { heading: 'Clients served', body: [
+        'We are proud to have served over 5,000 clients across a wide range of industries — from retail to corporate and hospitality — continuously building lasting partnerships through trust, quality and innovation.',
       ] },
     ],
   },
@@ -157,7 +166,6 @@ function fromAdminPage(slug, p) {
 
 export default function InfoPage() {
   const { slug } = useParams();
-  const navigate = useNavigate();
   const { settings } = useSiteSettings();
 
   // Admin override (Settings › Site content › Pages) wins; else the built-in
@@ -171,14 +179,7 @@ export default function InfoPage() {
     <div className="mx-auto max-w-3xl px-4 py-12">
       <Seo title={page.title} description={page.intro} path={`/p/${slug}`} />
 
-      {/* Back button */}
-      <button
-        onClick={() => navigate(-1)}
-        className="mb-6 inline-flex items-center gap-1.5 rounded-full border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700"
-      >
-        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-        Back
-      </button>
+      <Breadcrumbs items={[{ label: page.title }]} />
 
       <h1 className="font-display text-3xl font-medium text-gray-900 sm:text-4xl">{page.title}</h1>
       {page.intro && <p className="mt-4 text-lg leading-relaxed text-gray-600">{page.intro}</p>}

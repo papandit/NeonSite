@@ -7,6 +7,7 @@ import { apiErrorMessage } from '../services/api';
 import { formatPaise } from '../utils/money';
 import { toast } from '../lib/toast';
 import { useSiteSettings } from '../context/SiteSettings';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 // Everything the customer chose, per kind — text, detail rows, colour swatches, symbols.
 function itemDetails(design, fallback = {}) {
@@ -123,6 +124,7 @@ export default function CartPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
+      <Breadcrumbs items={[{ label: 'Cart' }]} />
       <div className="mb-6 flex flex-wrap items-baseline justify-between gap-3">
         <h1 className="text-2xl font-bold">
           Your cart

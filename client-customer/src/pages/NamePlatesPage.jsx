@@ -6,6 +6,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { getNpCategories, getNpTemplates } from '../services/nameplate';
 import { formatPaise } from '../utils/money';
 import Seo from '../components/Seo';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 export default function NamePlatesPage() {
   const [params, setParams] = useSearchParams();
@@ -44,6 +45,7 @@ export default function NamePlatesPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
       <Seo title="Custom Name Plates" description="Design your own personalized name plate — choose a template and customize every detail." path="/nameplates" />
+      <Breadcrumbs items={[{ label: 'Name Plates' }]} />
       <div className="text-center">
         <h1 className="font-display text-3xl font-medium sm:text-4xl">Custom Name Plates</h1>
         <p className="mt-2 text-gray-500">Pick a template and make it yours — live preview, crafted to order.</p>

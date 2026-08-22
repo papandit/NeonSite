@@ -131,7 +131,9 @@ export default function NameplateLivePreview() {
           <div className="relative w-full max-w-[430px]" style={{ animation: 'npPlateIn .8s cubic-bezier(.2,.8,.25,1) both' }}>
             <div
               className="relative overflow-hidden rounded-md px-4 pb-3 pt-4 shadow-[0_22px_50px_-18px_rgba(0,0,0,0.75),inset_0_1px_0_rgba(255,255,255,0.9)]"
-              style={{ background: 'linear-gradient(135deg, #d7ded9 0%, #f2f5f3 22%, #c8d2cd 48%, #eef2f0 70%, #ccd6d1 100%)' }}
+              // Sized against the plate, not the viewport, so a long surname
+              // shrinks to fit instead of running off a phone.
+              style={{ background: 'linear-gradient(135deg, #d7ded9 0%, #f2f5f3 22%, #c8d2cd 48%, #eef2f0 70%, #ccd6d1 100%)', containerType: 'inline-size' }}
             >
               {/* Brushed grain */}
               <div
@@ -163,10 +165,10 @@ export default function NameplateLivePreview() {
               />
 
               <div className="relative flex min-h-27 flex-col items-center justify-center gap-0.5 px-6 pb-1 pt-1.5">
-                <div className="min-h-4 font-mono text-xs uppercase tracking-[0.3em] text-[#2a2a2a]">{names}</div>
+                <div className="min-h-4 max-w-full break-words font-mono text-[10px] uppercase tracking-[0.24em] text-[#2a2a2a] sm:text-xs sm:tracking-[0.3em]">{names}</div>
                 <div
-                  className="min-h-12 text-center text-[44px] leading-tight text-[#141414] [text-shadow:0_1px_0_rgba(255,255,255,0.6)]"
-                  style={{ fontFamily: "'Yatra One', cursive" }}
+                  className="min-h-12 max-w-full break-words text-center leading-tight text-[#141414] [text-shadow:0_1px_0_rgba(255,255,255,0.6)]"
+                  style={{ fontFamily: "'Yatra One', cursive", fontSize: 'clamp(22px, 10.2cqw, 44px)' }}
                 >
                   {surname}
                 </div>

@@ -9,6 +9,7 @@ import {
   selectIsAuthenticated,
 } from '../store/authSlice';
 import PasswordInput from '../components/PasswordInput';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 export default function LoginPage() {
   const dispatch = useDispatch();
@@ -42,6 +43,7 @@ export default function LoginPage() {
 
   return (
     <div className="mx-auto max-w-md px-4 py-16">
+      <Breadcrumbs items={[{ label: 'Sign in' }]} />
       <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
         <h1 className="text-2xl font-bold">Welcome back</h1>
         <p className="mt-1 text-sm text-gray-600">Sign in to your NameCraft account.</p>

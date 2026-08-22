@@ -70,17 +70,17 @@ export function CompareTable({ compare }) {
         <table className="w-full border-collapse text-left">
           <thead>
             <tr className="bg-emerald-400 text-slate-900">
-              <th className="px-4 py-4 text-base font-bold sm:px-6">{compare.heading}</th>
-              <th className="w-24 px-3 py-4 text-center text-base font-bold sm:w-32">{compare.usLabel || 'Us'}</th>
-              <th className="w-24 px-3 py-4 text-center text-base font-bold sm:w-32">{compare.themLabel || 'Them'}</th>
+              <th className="px-3 py-4 text-sm font-bold sm:px-6 sm:text-base">{compare.heading}</th>
+              <th className="w-14 px-2 py-4 text-center text-sm font-bold sm:w-32 sm:px-3 sm:text-base">{compare.usLabel || 'Us'}</th>
+              <th className="w-14 px-2 py-4 text-center text-sm font-bold sm:w-32 sm:px-3 sm:text-base">{compare.themLabel || 'Them'}</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r, i) => (
               <tr key={i}>
                 <td className="border-t border-white/15 px-4 py-4 text-[15px] text-white sm:px-6">{r}</td>
-                <td className="border-l border-t border-white/15 px-3 py-4 text-center"><Tick /></td>
-                <td className="border-l border-t border-white/15 px-3 py-4 text-center"><Cross /></td>
+                <td className="border-l border-t border-white/15 px-2 py-4 text-center sm:px-3"><Tick /></td>
+                <td className="border-l border-t border-white/15 px-2 py-4 text-center sm:px-3"><Cross /></td>
               </tr>
             ))}
           </tbody>

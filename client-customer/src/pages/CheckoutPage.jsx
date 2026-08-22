@@ -9,6 +9,7 @@ import { useAddresses } from '../hooks/useAddresses';
 import { apiErrorMessage } from '../services/api';
 import { formatPaise } from '../utils/money';
 import { toast } from '../lib/toast';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 const PAY_KEY = 'nc_payment_method'; // remember the last-used method
 
@@ -103,6 +104,7 @@ export default function CheckoutPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
+      <Breadcrumbs items={[{ label: 'Cart', to: '/cart' }, { label: 'Checkout' }]} />
       <h1 className="mb-6 text-2xl font-bold">Checkout</h1>
 
       {error && <div className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout, selectUser } from '../store/authSlice';
 import Icon from '../components/Icon';
@@ -57,6 +57,12 @@ export default function AdminLayout() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem(COLLAPSE_KEY) === '1');
+  // Below lg the sidebar is a drawer, not a column: 256px of a 360px phone is
+  // most of the screen, and the collapse toggle is a stored preference rather
+  // than something that reacts to the viewport.
+  const [drawer, setDrawer] = useState(false);
+  const location = useLocation();
+  useEffect(() => { setDrawer(false); }, [location.pathname]);
 
   const toggle = () => {
     setCollapsed((c) => {
@@ -79,8 +85,20 @@ export default function AdminLayout() {
   return (
     <div className="flex h-screen overflow-hidden bg-slate-100 text-slate-900">
       {/* Sidebar — full viewport height; only its nav scrolls */}
+      {/* Backdrop — only exists while the drawer is open on small screens */}
+      {drawer && (
+        <button
+          type="button"
+          aria-label="Close menu"
+          onClick={() => setDrawer(false)}
+          className="fixed inset-0 z-40 bg-slate-900/50 lg:hidden"
+        />
+      )}
+
       <aside
-        className={`${collapsed ? 'w-16' : 'w-64'} shrink-0 bg-slate-900 text-white flex flex-col transition-[width] duration-200`}
+        className={`${collapsed ? 'lg:w-16' : 'lg:w-64'} fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col bg-slate-900 text-white transition-transform duration-200 lg:static lg:translate-x-0 lg:transition-[width] ${
+          drawer ? 'translate-x-0' : '-translate-x-full'
+        }`}
       >
         <div className="flex h-16 shrink-0 items-center gap-2 border-b border-slate-800 px-3">
           {/* Wordmark logo — sits on a light plate because the mark is near-black.
@@ -91,7 +109,7 @@ export default function AdminLayout() {
             <img src="/daxon-logo.svg" alt="Daxon" className="logo-on-dark h-8 w-auto min-w-0 flex-1 object-contain object-left" />
           )}
           <button
-            onClick={toggle}
+            onClick={() => (window.matchMedia('(min-width: 1024px)').matches ? toggle() : setDrawer(false))}
             title={collapsed ? 'Expand' : 'Collapse'}
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-300 hover:bg-slate-800 hover:text-white"
@@ -146,13 +164,21 @@ export default function AdminLayout() {
       </aside>
 
       {/* Content — scrolls independently of the sidebar */}
-      <div className="flex h-screen flex-1 flex-col overflow-hidden">
-        <header className="flex h-16 shrink-0 items-center border-b border-slate-200 bg-white px-6">
-          <h1 className="text-sm font-medium text-slate-500">
+      <div className="flex h-screen w-full min-w-0 flex-1 flex-col overflow-hidden">
+        <header className="flex h-16 shrink-0 items-center gap-3 border-b border-slate-200 bg-white px-4 sm:px-6">
+          <button
+            type="button"
+            onClick={() => setDrawer(true)}
+            aria-label="Open menu"
+            className="-ml-1 flex h-10 w-10 items-center justify-center rounded-full text-slate-600 transition hover:bg-slate-100 lg:hidden"
+          >
+            <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+          </button>
+          <h1 className="truncate text-sm font-medium text-slate-500">
             Signed in as <span className="text-slate-900">{user?.name}</span>
           </h1>
         </header>
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
           <Outlet />
         </main>
       </div>

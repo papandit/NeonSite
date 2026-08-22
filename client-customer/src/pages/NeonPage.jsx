@@ -18,6 +18,7 @@ import Seo from '../components/Seo';
 import NeonInfoSections from '../components/NeonInfoSections';
 import { useSiteSettings } from '../context/SiteSettings';
 import './neon.css';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 export const PENDING_NEON_KEY = 'nc_pending_neon';
 
@@ -229,6 +230,7 @@ export default function NeonPage() {
       <Seo title="Neon Sign Studio" description="Design your own LED neon sign — text, font, colour, size — with a live glowing preview and instant pricing." path="/neon" />
 
       <div className="mx-auto max-w-6xl px-4 pb-14 pt-10">
+        <Breadcrumbs dark items={[{ label: 'Neon Studio' }]} />
         <header className="mb-8 text-center">
           <h1 className="font-display text-4xl font-semibold" style={{ color: '#e4fff2', textShadow: '0 0 6px #00af99,0 0 16px #00af99,0 0 34px #00af99' }}>
             Neon Sign Studio

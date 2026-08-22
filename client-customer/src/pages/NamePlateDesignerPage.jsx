@@ -18,6 +18,7 @@ import { apiErrorMessage } from '../services/api';
 import Seo from '../components/Seo';
 import ProductAssurance from '../components/ProductAssurance';
 import { useSiteSettings } from '../context/SiteSettings';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 export const PENDING_NAMEPLATE_KEY = 'nc_pending_nameplate';
 const CANVAS_W = 560;
@@ -415,6 +416,7 @@ export default function NamePlateDesignerPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Seo title={`Design · ${template.name}`} description={`Customize the ${template.name} name plate.`} path={`/nameplates/${slug}`} />
+      <Breadcrumbs items={[{ label: 'Name Plates', to: '/nameplates' }, { label: template.name }]} />
       <h1 className="font-display text-2xl font-medium">{template.name}</h1>
       <p className="text-sm text-gray-500">Type your details, pick a font, colour and symbol — the design fits the frame automatically.</p>
 

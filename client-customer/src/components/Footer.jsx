@@ -19,29 +19,50 @@ const NAV_LINKS = [
   ['Login', '/login'],
 ];
 
-// key → { label, default href, inline SVG paths }. The href is overridden by the
-// admin's Settings › socials when set.
+// key -> { label, inline SVG paths }. Every href comes from the admin's
+// Settings > socials; there is no fallback URL on purpose. A generic
+// "https://instagram.com" is worse than no icon at all — it looks like a link
+// to our profile and lands you on a stranger's home page — so a channel with
+// no URL set simply does not render.
 const SOCIAL_DEFS = [
-  ['instagram', 'Instagram', 'https://instagram.com', (
+  ['instagram', 'Instagram', (
     <>
       <rect x="3" y="3" width="18" height="18" rx="5" />
       <circle cx="12" cy="12" r="4" />
       <circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none" />
     </>
   )],
-  ['youtube', 'YouTube', 'https://youtube.com', (
+  ['facebook', 'Facebook', (
+    <path d="M14 8.5h2V5.5h-2.2C11.7 5.5 11 6.9 11 8.4V10H9v3h2v6h3v-6h2.2l.4-3H14V8.8c0-.2.1-.3.4-.3z" fill="currentColor" stroke="none" />
+  )],
+  ['whatsapp', 'WhatsApp', (
+    <>
+      <path d="M20 11.7a8 8 0 0 1-11.9 7L4 20l1.4-4a8 8 0 1 1 14.6-4.3z" />
+      <path d="M9.2 9c.3-.7.6-.7.9-.7h.6c.2 0 .5 0 .7.5l.7 1.7c.1.3 0 .5-.1.7l-.4.5c-.1.2-.3.4-.1.7a6 6 0 0 0 2.8 2.4c.3.1.5.1.7-.1l.6-.7c.2-.2.4-.2.6-.1l1.6.8c.3.1.4.4.3.7-.2.7-1 1.4-1.8 1.4-1.6 0-4-1.2-5.5-3.2-1-1.3-1.6-2.6-1.6-3.6 0-.4 0-.7.2-1z" fill="currentColor" stroke="none" />
+    </>
+  )],
+  ['google', 'Google Business', (
+    <>
+      <path d="M12 21s6.5-5.6 6.5-10a6.5 6.5 0 1 0-13 0C5.5 15.4 12 21 12 21z" />
+      <circle cx="12" cy="11" r="2.5" />
+    </>
+  )],
+  ['website', 'Website', (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M3 12h18M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18z" />
+    </>
+  )],
+  ['youtube', 'YouTube', (
     <>
       <rect x="2.5" y="6" width="19" height="12" rx="4" />
       <path d="M10.5 9.2l4.2 2.8-4.2 2.8z" fill="currentColor" stroke="none" />
     </>
   )],
-  ['facebook', 'Facebook', 'https://facebook.com', (
-    <path d="M14 8.5h2V5.5h-2.2C11.7 5.5 11 6.9 11 8.4V10H9v3h2v6h3v-6h2.2l.4-3H14V8.8c0-.2.1-.3.4-.3z" fill="currentColor" stroke="none" />
-  )],
-  ['twitter', 'X', 'https://x.com', (
+  ['twitter', 'X', (
     <path d="M4 4l16 16M20 4L4 20" />
   )],
-  ['pinterest', 'Pinterest', 'https://pinterest.com', (
+  ['pinterest', 'Pinterest', (
     <>
       <circle cx="12" cy="12" r="9" />
       <path d="M9.5 20l2-8M11.5 12c0-2 4-2.5 4 .5 0 2-2 3.5-3.5 2.5" />
@@ -63,6 +84,14 @@ export default function Footer({ categories = [] }) {
   const about = settings.content?.footer?.about;
   const tagline = settings.content?.footer?.tagline;
   const socials = settings.socials || {};
+  // Only channels with a real URL. WhatsApp is derived from the support phone
+  // when no explicit link is set, since that is the number people message.
+  const waFromPhone = settings.supportPhone
+    ? `https://wa.me/${String(settings.supportPhone).replace(/[^0-9]/g, '')}`
+    : '';
+  const shownSocials = SOCIAL_DEFS
+    .map(([key, label, paths]) => [key, label, paths, socials[key] || (key === 'whatsapp' ? waFromPhone : '')])
+    .filter(([, , , href]) => href);
   const initial = storeName.charAt(0).toUpperCase();
 
   return (
@@ -88,31 +117,51 @@ export default function Footer({ categories = [] }) {
             </Link>
             <p className="mt-4 max-w-xs text-sm text-gray-400">{about}</p>
             {(settings.supportEmail || settings.supportPhone) && (
-              <div className="mt-4 space-y-1 text-sm text-gray-400">
+              <div className="mt-4 space-y-2 text-sm text-gray-400">
                 {settings.supportEmail && (
-                  <a href={`mailto:${settings.supportEmail}`} className="block transition hover:text-indigo-400">
-                    {settings.supportEmail}
+                  <a href={`mailto:${settings.supportEmail}`} className="flex items-center gap-2 transition hover:text-indigo-400">
+                    <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+                      <rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3.5 6.5l8.5 6 8.5-6" />
+                    </svg>
+                    <span className="break-all">{settings.supportEmail}</span>
                   </a>
                 )}
-                {settings.supportPhone && <div>{settings.supportPhone}</div>}
+                {settings.supportPhone && (
+                  // A phone number on a phone should dial; on WhatsApp it should
+                  // open the chat — so it is a link, not plain text.
+                  <a
+                    href={waFromPhone || `tel:${settings.supportPhone}`}
+                    target={waFromPhone ? '_blank' : undefined}
+                    rel={waFromPhone ? 'noreferrer' : undefined}
+                    className="flex items-center gap-2 transition hover:text-indigo-400"
+                  >
+                    <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+                      <path d="M5 4h3l1.5 4-2 1.5a12 12 0 0 0 5 5L14 12l4 1.5V17a2 2 0 0 1-2.2 2A14.5 14.5 0 0 1 3 6.2 2 2 0 0 1 5 4z" />
+                    </svg>
+                    {settings.supportPhone}
+                  </a>
+                )}
               </div>
             )}
-            <div className="mt-5 flex gap-3">
-              {SOCIAL_DEFS.map(([key, label, defaultHref, paths]) => (
-                <a
-                  key={key}
-                  href={socials[key] || defaultHref}
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label={label}
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-gray-300 transition hover:border-indigo-400 hover:text-indigo-400"
-                >
-                  <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                    {paths}
-                  </svg>
-                </a>
-              ))}
-            </div>
+            {shownSocials.length > 0 && (
+              <div className="mt-5 flex flex-wrap gap-3">
+                {shownSocials.map(([key, label, paths, href]) => (
+                  <a
+                    key={key}
+                    href={href}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={label}
+                    title={label}
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-gray-300 transition hover:border-indigo-400 hover:text-indigo-400"
+                  >
+                    <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                      {paths}
+                    </svg>
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Quick links */}

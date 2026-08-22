@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { logout, selectUser } from '../store/authSlice';
 import { resetCart } from '../store/cartSlice';
 import { toast } from '../lib/toast';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 const NAV = [
   ['/account/orders', 'Orders', '🧾'],
@@ -33,6 +34,7 @@ export default function AccountLayout() {
   return (
     <div className="flex-1">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+        <Breadcrumbs items={[{ label: 'My Account' }]} />
         {/* Modern light hero */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}

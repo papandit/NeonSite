@@ -30,7 +30,8 @@ export default function SettingsPage() {
           freeAboveRupees: paiseToRupees(s.shipping.freeAbovePaise),
           instagram: s.socials?.instagram || '', facebook: s.socials?.facebook || '',
           youtube: s.socials?.youtube || '', twitter: s.socials?.twitter || '',
-          pinterest: s.socials?.pinterest || '',
+          pinterest: s.socials?.pinterest || '', website: s.socials?.website || '',
+          google: s.socials?.google || '', whatsapp: s.socials?.whatsapp || '',
         });
       })
       .catch((e) => setError(apiErrorMessage(e)))
@@ -53,6 +54,7 @@ export default function SettingsPage() {
         socials: {
           instagram: v.instagram, facebook: v.facebook,
           youtube: v.youtube, twitter: v.twitter, pinterest: v.pinterest,
+          website: v.website, google: v.google, whatsapp: v.whatsapp,
         },
         shipping: {
           flatPaise: rupeesToPaise(v.flatRupees),
@@ -97,12 +99,20 @@ export default function SettingsPage() {
           </div>
           <FileUpload label="Logo" kind="image" folder="store" value={logoUrl} onChange={setLogoUrl} />
           {field('storeAddress', 'Store address')}
-          <div className="grid gap-4 sm:grid-cols-2">
-            {field('instagram', 'Instagram URL')}
-            {field('facebook', 'Facebook URL')}
-            {field('youtube', 'YouTube URL')}
-            {field('twitter', 'X (Twitter) URL')}
-            {field('pinterest', 'Pinterest URL')}
+          <div>
+            <p className="mb-2 text-xs text-slate-400">
+              Footer icons. Leave a channel blank and its icon disappears — there is no placeholder link.
+            </p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {field('instagram', 'Instagram URL')}
+              {field('facebook', 'Facebook URL')}
+              {field('whatsapp', 'WhatsApp link (blank = built from support phone)')}
+              {field('google', 'Google Business URL')}
+              {field('website', 'Website URL')}
+              {field('youtube', 'YouTube URL')}
+              {field('twitter', 'X (Twitter) URL')}
+              {field('pinterest', 'Pinterest URL')}
+            </div>
           </div>
         </section>
 

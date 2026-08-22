@@ -12,6 +12,7 @@ import Reviews from '../components/Reviews';
 import ProductAssurance from '../components/ProductAssurance';
 import Seo from '../components/Seo';
 import { useSiteSettings } from '../context/SiteSettings';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 // Split an admin multiline field into trimmed, non-empty lines.
 const toLines = (s) => (s || '').split('\n').map((x) => x.trim()).filter(Boolean);
@@ -112,20 +113,15 @@ export default function ProductDetailPage() {
         image={product.images?.[0]}
         path={`/products/${product.slug}`}
       />
-      {/* Breadcrumb */}
-      <nav className="mb-6 text-sm text-gray-500">
-        <Link to="/" className="hover:text-gray-900">Home</Link>
-        <span className="mx-2">/</span>
-        <Link to="/products" className="hover:text-gray-900">Products</Link>
-        {product.category?.name && (
-          <>
-            <span className="mx-2">/</span>
-            <Link to={`/products?category=${product.category.slug}`} className="hover:text-gray-900">{product.category.name}</Link>
-          </>
-        )}
-        <span className="mx-2">/</span>
-        <span className="text-gray-900">{product.name}</span>
-      </nav>
+      <Breadcrumbs
+        items={[
+          { label: 'Shop', to: '/products' },
+          ...(product.category?.name
+            ? [{ label: product.category.name, to: `/products?category=${product.category.slug}` }]
+            : []),
+          { label: product.name },
+        ]}
+      />
 
       {/* Intro: gallery + info */}
       <div className="grid gap-8 lg:grid-cols-2">

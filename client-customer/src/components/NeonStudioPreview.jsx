@@ -145,7 +145,9 @@ export default function NeonStudioPreview() {
           <div className="flex flex-col gap-3.5" style={{ animation: 'nsRise .7s .1s cubic-bezier(.2,.8,.25,1) both' }}>
             <div
               className="relative aspect-16/11 overflow-hidden rounded-2xl border border-[#1e2a25]"
-              style={{ background: 'linear-gradient(180deg, #2a1a17, #1a0f0e)' }}
+              // containerType lets the sign size itself against THIS box rather
+              // than the viewport, so a fixed 54px doesn't overflow a phone.
+              style={{ background: 'linear-gradient(180deg, #2a1a17, #1a0f0e)', containerType: 'inline-size' }}
             >
               {/* Brick wall behind the sign */}
               <div
@@ -170,10 +172,12 @@ export default function NeonStudioPreview() {
 
               <div className="absolute inset-0 grid place-items-center p-[8%]">
                 <div
-                  className="text-center leading-tight text-white"
+                  className="max-w-full break-words text-center leading-tight text-white"
                   style={{
                     fontFamily: FONTS[font].family,
-                    fontSize: sz.fontSize,
+                    // Caps at the design size on desktop and shrinks with the
+                    // stage below that; 600px is the stage width it was drawn at.
+                    fontSize: `clamp(15px, ${((sz.fontSize / 600) * 100).toFixed(2)}cqw, ${sz.fontSize}px)`,
                     opacity: on ? 1 : 0.22,
                     textShadow: glow,
                     transition: 'color .4s, text-shadow .4s, font-size .5s cubic-bezier(.2,.8,.25,1), opacity .3s',
