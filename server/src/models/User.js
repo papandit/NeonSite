@@ -28,7 +28,7 @@ const UserSchema = new Schema(
  * @param {string} plain
  */
 UserSchema.methods.setPassword = async function setPassword(plain) {
-  const salt = await bcrypt.genSalt(10);
+  const salt = await bcrypt.genSalt(12); // ~250ms per hash: slow for an attacker, invisible at login
   this.passwordHash = await bcrypt.hash(plain, salt);
 };
 
